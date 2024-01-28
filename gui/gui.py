@@ -55,7 +55,7 @@ def button_open_door_callback():
     button_exit.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
     button_back = ctk.CTkButton(master=frame_open_door, text=Translations.get_translation('back'),
-                                font=("Roboto", 32, "bold"), command=button_back_callback)
+                                font=("Roboto", 32, "bold"), command=lambda: button_back_callback(frame_open_door, frame_intro))
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
     button_sign_in = ctk.CTkButton(master=frame_open_door, text=Translations.get_translation('sign_in'),
@@ -82,7 +82,7 @@ def button_about_project_callback():
     button_exit.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
     button_back = ctk.CTkButton(master=frame_about, text=Translations.get_translation('back'),
-                                font=("Roboto", 32, "bold"), command=button_back_callback)
+                                font=("Roboto", 32, "bold"), command=lambda: button_back_callback(frame_about, frame_intro))
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
     label_thesis = ctk.CTkLabel(master=frame_about, text=Translations.get_translation('thesis'),
@@ -120,9 +120,12 @@ def segmented_button_language_callback(value):
     change_language(value)
 
 
-def button_back_callback():
-    frame_about.lower()
-    frame_intro.lift()
+def button_back_callback(frame_to_hide, frame_to_show):
+    for widget in frame_to_hide.winfo_children():
+        widget.destroy()
+
+    frame_to_hide.lower()
+    frame_to_show.lift()
 
 
 def button_password_callback(value):
@@ -131,6 +134,7 @@ def button_password_callback(value):
         pass
 
 
+# create SIGN IN FRAME widgets
 def button_sign_in_callback():
     frame_open_door.lower()
     frame_sign_in.lift()
@@ -138,6 +142,10 @@ def button_sign_in_callback():
     label_main_title = ctk.CTkLabel(master=frame_sign_in, text=Translations.get_translation('system_authentication'),
                                     font=("Roboto", 48, "bold"), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+
+    label_first_phase = ctk.CTkLabel(master=frame_sign_in, text=Translations.get_translation('first_phase'),
+                                    font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
+    label_first_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     label_authenticate_user = ctk.CTkLabel(master=frame_sign_in,
                                            text=Translations.get_translation(
@@ -147,15 +155,16 @@ def button_sign_in_callback():
     label_authenticate_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
     button_back = ctk.CTkButton(master=frame_sign_in, text=Translations.get_translation('back'),
-                                font=("Roboto", 32, "bold"), command=button_back_callback)
+                                font=("Roboto", 32, "bold"), command=lambda: button_back_callback(frame_sign_in, frame_open_door))
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
     button_authenticate = ctk.CTkButton(master=frame_sign_in, text=Translations.get_translation('authenticate'),
-                                font=("Roboto", 32, "bold"), command=lambda: button_authenticate_callback(button_authenticate, label_authenticate_user))
+                                font=("Roboto", 32, "bold"), command=lambda: button_authenticate_callback(label_first_phase, button_authenticate, label_authenticate_user))
     button_authenticate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
 
-def button_authenticate_callback(button_authenticate, label_authenticate_user):
+def button_authenticate_callback(label_first_phase, button_authenticate, label_authenticate_user):
+    label_first_phase.destroy()
     button_authenticate.destroy()
     label_authenticate_user.configure(text=Translations.get_translation('recording'))
     window.update()
@@ -168,7 +177,31 @@ def button_authenticate_callback(button_authenticate, label_authenticate_user):
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    # frame_authentication_phrase_callback()
+    frame_authentication_phrase_callback()
+
+
+# create AUTHENTICATION PHRASE FRAME widgets
+def frame_authentication_phrase_callback():
+    frame_sign_in.lower()
+    frame_authentication_phrase.lift()
+
+    label_main_title = ctk.CTkLabel(master=frame_authentication_phrase, text=Translations.get_translation('system_authentication'),
+                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+    label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+
+    label_second_phase = ctk.CTkLabel(master=frame_authentication_phrase, text=Translations.get_translation('second_phase'),
+                                     font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
+    label_second_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+
+    button_back = ctk.CTkButton(master=frame_authentication_phrase, text=Translations.get_translation('back'),
+                                font=("Roboto", 32, "bold"), command=lambda: button_back_callback(frame_authentication_phrase, frame_open_door))
+    button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+
+    button_authenticate = ctk.CTkButton(master=frame_authentication_phrase, text=Translations.get_translation('authenticate'),
+                                        font=("Roboto", 32, "bold"),
+                                        command=lambda: button_authenticate_callback)
+    button_authenticate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
 
 def button_sign_up_callback():
     pass
@@ -188,6 +221,10 @@ frame_open_door.lower()
 # create SIGN IN FRAME
 frame_sign_in = create_frame()
 frame_sign_in.lower()
+
+# create AUTHENTICATION PHRASE FRAME
+frame_authentication_phrase = create_frame()
+frame_authentication_phrase.lower()
 
 # create INTRO FRAME widgets
 label_main_title = ctk.CTkLabel(master=frame_intro, text=Translations.get_translation('system_authentication'),

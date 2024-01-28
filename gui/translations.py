@@ -21,10 +21,13 @@ class Translations:
             'sign_up': "Registrácia",
 
             'authenticate': "Autentifikovať",
+            'first_phase': "1. fáza autentifikácie",
             'come_closer': "• Pristúpte bližšie k mikrofónu zariadenia a povedzte svoje prihlasovacie meno.",
             'start_recording': "• Nahrávanie spustíte stlačením tlačidla Autentifikovať.",
             'recording': "PREBIEHA NAHRÁVANIE... ",
-            'recording_ended': "Nahrávanie skončilo."
+            'recording_ended': "Nahrávanie skončilo.",
+
+            'second_phase': "2. fáza autentifikácie"
         },
         'EN': {
             'system_authentication': "Voice Authentication System",
@@ -46,12 +49,14 @@ class Translations:
             'sign_in': "Sign in",
             'sign_up': "Sign up",
 
-            'interrupt': "Interrupt Authentication",
-            'come_closer': "• Move closer to the device's microphone and say your login name.",
-            'countdown_first_part': "• Recording will start in ",
-            'countdown_second_part': " sec. and will last 10 seconds.",
+            'authenticate': "Authenticate",
+            'first_phase': "1. Authentication Phase",
+            'come_closer': "• Come closer to the device's microphone and say your login name.",
+            'start_recording': "• You can start recording by pressing the Authenticate button.",
             'recording': "RECORDING...",
-            'recording_ended': "Recording ended."
+            'recording_ended': "Recording ended.",
+
+            'second_phase': "2. Authentication Phase",
         }
     }
 
