@@ -20,10 +20,9 @@ class Translations:
             'sign_in': "Prihlásenie",
             'sign_up': "Registrácia",
 
-            'interrupt': "Prerušiť autentifikáciu",
+            'authenticate': "Autentifikovať",
             'come_closer': "• Pristúpte bližšie k mikrofónu zariadenia a povedzte svoje prihlasovacie meno.",
-            'countdown_first_part': "• Nahrávanie začne o ",
-            'countdown_second_part': " sek. a bude trvať 10 sekúnd.",
+            'start_recording': "• Nahrávanie spustíte stlačením tlačidla Autentifikovať.",
             'recording': "PREBIEHA NAHRÁVANIE... ",
             'recording_ended': "Nahrávanie skončilo."
         },

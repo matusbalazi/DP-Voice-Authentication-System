@@ -132,8 +132,43 @@ def button_password_callback(value):
 
 
 def button_sign_in_callback():
-    pass
+    frame_open_door.lower()
+    frame_sign_in.lift()
 
+    label_main_title = ctk.CTkLabel(master=frame_sign_in, text=Translations.get_translation('system_authentication'),
+                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+    label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+
+    label_authenticate_user = ctk.CTkLabel(master=frame_sign_in,
+                                           text=Translations.get_translation(
+                                               'come_closer') + "\n\n" + Translations.get_translation(
+                                               'start_recording'),
+                                           font=("Roboto", 38), justify=ctk.LEFT)
+    label_authenticate_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
+
+    button_back = ctk.CTkButton(master=frame_sign_in, text=Translations.get_translation('back'),
+                                font=("Roboto", 32, "bold"), command=button_back_callback)
+    button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+
+    button_authenticate = ctk.CTkButton(master=frame_sign_in, text=Translations.get_translation('authenticate'),
+                                font=("Roboto", 32, "bold"), command=lambda: button_authenticate_callback(button_authenticate, label_authenticate_user))
+    button_authenticate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+
+def button_authenticate_callback(button_authenticate, label_authenticate_user):
+    button_authenticate.destroy()
+    label_authenticate_user.configure(text=Translations.get_translation('recording'))
+    window.update()
+
+    # Tento sleep potom vymazat
+    time.sleep(2)
+
+    label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
+    window.update()
+    # Tento sleep potom vymazat
+    time.sleep(2)
+
+    # frame_authentication_phrase_callback()
 
 def button_sign_up_callback():
     pass
@@ -149,6 +184,10 @@ frame_about.lower()
 # create OPEN DOOR FRAME
 frame_open_door = create_frame()
 frame_open_door.lower()
+
+# create SIGN IN FRAME
+frame_sign_in = create_frame()
+frame_sign_in.lower()
 
 # create INTRO FRAME widgets
 label_main_title = ctk.CTkLabel(master=frame_intro, text=Translations.get_translation('system_authentication'),
