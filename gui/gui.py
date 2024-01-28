@@ -40,8 +40,31 @@ def update_translations():
     button_exit.configure(text=Translations.get_translation('exit'))
 
 
+# create OPEN DOOR FRAME widgets
 def button_open_door_callback():
-    pass
+    frame_intro.lower()
+    frame_open_door.lift()
+
+    label_main_title = ctk.CTkLabel(master=frame_open_door, text=Translations.get_translation('system_authentication'),
+                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+    label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+
+    button_exit = ctk.CTkButton(master=frame_open_door, text=Translations.get_translation('exit'),
+                                font=("Roboto", 32, "bold"),
+                                command=button_exit_callback)
+    button_exit.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+    button_back = ctk.CTkButton(master=frame_open_door, text=Translations.get_translation('back'),
+                                font=("Roboto", 32, "bold"), command=button_back_callback)
+    button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+
+    button_sign_in = ctk.CTkButton(master=frame_open_door, text=Translations.get_translation('sign_in'),
+                                   font=("Roboto", 42, "bold"), command=button_sign_in_callback)
+    button_sign_in.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
+
+    button_sign_up = ctk.CTkButton(master=frame_open_door, text=Translations.get_translation('sign_up'),
+                                   font=("Roboto", 42, "bold"), command=button_sign_up_callback)
+    button_sign_up.grid(row=5, column=4, pady=10, padx=10, sticky="nsew")
 
 
 # create ABOUT FRAME widgets
@@ -107,6 +130,14 @@ def button_password_callback(value):
         #frame_authentication_phrase_callback()
         pass
 
+
+def button_sign_in_callback():
+    pass
+
+
+def button_sign_up_callback():
+    pass
+
 # create INTRO FRAME
 frame_intro = create_frame()
 frame_intro.lift()
@@ -114,6 +145,10 @@ frame_intro.lift()
 # create ABOUT FRAME
 frame_about = create_frame()
 frame_about.lower()
+
+# create OPEN DOOR FRAME
+frame_open_door = create_frame()
+frame_open_door.lower()
 
 # create INTRO FRAME widgets
 label_main_title = ctk.CTkLabel(master=frame_intro, text=Translations.get_translation('system_authentication'),
