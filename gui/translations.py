@@ -33,7 +33,11 @@ class Translations:
 
             'verification_success': "Overenie prebehlo úspešne!",
             'third_phase': "3. fáza autentifikácie",
-            'come_closer_3': "• Pristúpte bližšie k mikrofónu zariadenia a povedzte jedinečnú\n  frázu, ktorú ste si zvolili pri registrácii."
+            'come_closer_3': "• Pristúpte bližšie k mikrofónu zariadenia a povedzte jedinečnú\n  frázu, ktorú ste si zvolili pri registrácii.",
+
+            'authentication_success': "Dvere sa otvorili!",
+            'end_interaction': "Ukončiť interakciu",
+            'register_user': "Zaregistrovať nového\npoužívateľa"
         },
         'EN': {
             'system_authentication': "Voice Authentication System",
@@ -68,7 +72,11 @@ class Translations:
 
             'verification_success': "Verification successful!",
             'third_phase': "3rd Authentication Phase",
-            'come_closer_3': "• Come closer to the device's microphone and say the unique\n  phrase you chose during registration."
+            'come_closer_3': "• Come closer to the device's microphone and say the unique\n  phrase you chose during registration.",
+
+            'authentication_success': "Door opened!",
+            'end_interaction': "End the Interaction",
+            'register_user': "Register New User"
         }
     }
 
