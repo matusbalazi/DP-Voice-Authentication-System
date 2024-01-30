@@ -43,7 +43,10 @@ class Translations:
             'authentication_unsuccess_info': "• Z dôvodu neúspešného autentifikovania, prosím, zopakujte\n  proces autentifikácie v tejto fáze ešte raz.",
             'remaining_attempts': "• Počet zostávajúcich pokusov: ",
             'start_authentication_again': "• Opätovnú autentifikáciu spustíte stlačením tlačidla Znovu\n  autentifikovať.",
-            'authenticate_again': "Znovu autentifikovať"
+            'authenticate_again': "Znovu autentifikovať",
+
+            'registration_info': "• Pre zaregistrovanie nového používateľa je potrebné,\n  aby sa do systému autentifikoval už zaregistrovaný\n  používateľ.",
+            'continue_to_sign_in': "• Pokračujte na prihlásenie do systému stlačením\n  tlačidla Prihlásenie."
         },
         'EN': {
             'system_authentication': "Voice Authentication System",
@@ -62,8 +65,8 @@ class Translations:
             'year': "Year:\t2023/2024",
             'confirm': "Confirm",
 
-            'sign_in': "Sign in",
-            'sign_up': "Sign up",
+            'sign_in': "Sign In",
+            'sign_up': "Sign Up",
 
             'authenticate': "Authenticate",
             'first_phase': "1st Authentication Phase",
@@ -88,7 +91,10 @@ class Translations:
             'authentication_unsuccess_info': "• Due to failed authentication, please repeat the authentication\n  process at this phase one more time.",
             'remaining_attempts': "• Number of attempts remaining: ",
             'start_authentication_again': "• You can start re-authentication by pressing the Re-authenticate\n  button",
-            'authenticate_again': "Re-authenticate"
+            'authenticate_again': "Re-authenticate",
+
+            'registration_info': "• To register new user, it is necessary for an already\n  registered user  to authenticate to the system.",
+            'continue_to_sign_in': "• Continue to login to the system by  pressing the\n  Sign In button."
         }
     }
 
