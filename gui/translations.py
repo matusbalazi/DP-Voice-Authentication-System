@@ -37,7 +37,13 @@ class Translations:
 
             'authentication_success': "Dvere sa otvorili!",
             'end_interaction': "Ukončiť interakciu",
-            'register_user': "Zaregistrovať nového\npoužívateľa"
+            'register_user': "Zaregistrovať nového\npoužívateľa",
+
+            'authentication_unsuccess': "Autentifikovanie bolo neúspešné!",
+            'authentication_unsuccess_info': "• Z dôvodu neúspešného autentifikovania, prosím, zopakujte\n  proces autentifikácie v tejto fáze ešte raz.",
+            'remaining_attempts': "• Počet zostávajúcich pokusov: ",
+            'start_authentication_again': "• Opätovnú autentifikáciu spustíte stlačením tlačidla Znovu\n  autentifikovať.",
+            'authenticate_again': "Znovu autentifikovať"
         },
         'EN': {
             'system_authentication': "Voice Authentication System",
@@ -76,7 +82,13 @@ class Translations:
 
             'authentication_success': "Door opened!",
             'end_interaction': "End the Interaction",
-            'register_user': "Register New User"
+            'register_user': "Register New User",
+
+            'authentication_unsuccess': "Authentication failed!",
+            'authentication_unsuccess_info': "• Due to failed authentication, please repeat the authentication\n  process at this phase one more time.",
+            'remaining_attempts': "• Number of attempts remaining: ",
+            'start_authentication_again': "• You can start re-authentication by pressing the Re-authenticate\n  button",
+            'authenticate_again': "Re-authenticate"
         }
     }
 

@@ -4,6 +4,12 @@ from translations import Translations
 from authentication import credentials, hash_password
 import time
 
+LOGIN_SUCCESS = True
+VERIFICATION_SUCCESS = False
+AUTHENTICATION_SUCCESS = True
+
+remaining_attempts = 3
+
 ctk.set_ctk_parent_class(tk.Tk)
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("green")
@@ -211,7 +217,10 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    frame_authentication_phase_2_callback()
+    if (LOGIN_SUCCESS):
+        frame_authentication_phase_2_callback()
+    else:
+        frame_authentication_unsuccess_callback(1)
 
 
 # create AUTHENTICATION PHASE 2 FRAME widgets
@@ -286,7 +295,10 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    frame_authentication_phase_3_callback()
+    if (VERIFICATION_SUCCESS):
+        frame_authentication_phase_3_callback()
+    else:
+        frame_authentication_unsuccess_callback(2)
 
 
 # create AUTHENTICATION PHASE 3 FRAME widgets
@@ -362,10 +374,17 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    frame_authentication_success_callback()
+    if (AUTHENTICATION_SUCCESS):
+        frame_authentication_success_callback()
+    else:
+        frame_authentication_unsuccess_callback(3)
 
 
+# create AUTHENTICATION SUCCESS FRAME widgets
 def frame_authentication_success_callback():
+    global remaining_attempts
+    remaining_attempts = 3
+
     frame_authentication_phase_3.lower()
     frame_authentication_success.lift()
 
@@ -402,6 +421,66 @@ def button_end_interaction_callback():
     frame_authentication_success.lower()
     clear_frame(frame_authentication_success)
     frame_intro.lift()
+
+
+# create AUTHENTICATION UNSUCCESS FRAME widgets
+def frame_authentication_unsuccess_callback(phase):
+    global remaining_attempts
+    remaining_attempts -= 1
+
+    if (phase == 1):
+        frame_authentication_phase_1.lower()
+    elif (phase == 2):
+        frame_authentication_phase_2.lower()
+    elif (phase == 3):
+        frame_authentication_phase_3.lower()
+    else:
+        pass
+
+    if (remaining_attempts == 0):
+        remaining_attempts = 3
+        frame_intro.lift()
+    else:
+        frame_authentication_unsuccess.lift()
+
+    label_main_title = ctk.CTkLabel(master=frame_authentication_unsuccess,
+                                    text=Translations.get_translation('system_authentication'),
+                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+    label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+
+    label_authentication_unsuccess = ctk.CTkLabel(master=frame_authentication_unsuccess,
+                                                  text=Translations.get_translation('authentication_unsuccess'),
+                                                  font=("Roboto", 38, "bold"), text_color=("red"), justify=ctk.CENTER)
+    label_authentication_unsuccess.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+
+    label_authentication_unsuccess_info = ctk.CTkLabel(master=frame_authentication_unsuccess,
+                                                       text=Translations.get_translation(
+                                                           'authentication_unsuccess_info') + "\n\n" + Translations.get_translation(
+                                                           'remaining_attempts') + str(remaining_attempts) + "\n\n" + Translations.get_translation(
+                                                           'start_authentication_again'),
+                                                       font=("Roboto", 38), justify=ctk.LEFT)
+    label_authentication_unsuccess_info.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
+
+    button_authenticate_again = ctk.CTkButton(master=frame_authentication_unsuccess,
+                                              text=Translations.get_translation('authenticate_again'),
+                                              font=("Roboto", 38, "bold"),
+                                              command=lambda: button_authenticate_again_callback(phase),
+                                              width=150,
+                                              height=100)
+    button_authenticate_again.grid(row=7, column=4, pady=10, padx=10, sticky="nsew")
+
+
+def button_authenticate_again_callback(phase):
+    frame_authentication_unsuccess.lower()
+
+    if (phase == 1):
+        button_sign_in_callback()
+    elif (phase == 2):
+        frame_authentication_phase_2_callback()
+    elif (phase == 3):
+        frame_authentication_phase_3_callback()
+    else:
+        pass
 
 
 def button_register_user_callback():
@@ -444,6 +523,11 @@ authentication_frames.append(frame_authentication_phase_3)
 # create AUTHENTICATION SUCCESS FRAME
 frame_authentication_success = create_frame()
 frame_authentication_success.lower()
+
+# create AUTHENTICATION UNSUCCESS FRAME
+frame_authentication_unsuccess = create_frame()
+frame_authentication_unsuccess.lower()
+authentication_frames.append(frame_authentication_unsuccess)
 
 # create INTRO FRAME widgets
 label_main_title = ctk.CTkLabel(master=frame_intro, text=Translations.get_translation('system_authentication'),
