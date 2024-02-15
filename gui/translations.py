@@ -63,11 +63,13 @@ class Translations:
             'recording_number': "• Nasleduje nahrávka č.",
 
             'registration_third_phase': "3. fáza registrácie",
-            'register_come_closer_3': "• Pristúpte bližšie k mikrofónu zariadenia a zvoľte si jedinečnú\n  frázu, ktorú budete používať pri autentifikácii",
+            'register_come_closer_3': "• Pristúpte bližšie k mikrofónu zariadenia a zvoľte si jedinečnú\n  frázu, ktorú budete používať pri autentifikácii.",
 
             'confirmation_phrase': "• Zvolili ste si jedinečnú frázu: ",
 
-            'registration_success': "Registrácia prebehla úspešne!"
+            'registration_success': "Registrácia prebehla úspešne!",
+            'registration_unsuccess': "Registrácia bola neúspešná!",
+            'registration_unsuccess_info': "• Zvolené prihlasovacie meno už existuje."
         },
         'EN': {
             'system_authentication': "Voice Authentication System",
@@ -117,7 +119,28 @@ class Translations:
             'registration_info': "• To register new user, it is necessary for an already\n  registered user  to authenticate to the system.",
             'continue_to_sign_in': "• Continue to login to the system by  pressing the\n  Sign In button.",
 
-            'manage_users': "Manage users"
+            'manage_users': "Manage users",
+
+            'registration_first_phase': "1st Registration Phase",
+            'register_come_closer_1': "• Come closer to the device's microphone and choose your login\n  name to use for authentication.",
+            'register_start_recording': "• You can start recording by pressing the Registrate button.",
+            'registrate': "Registrate",
+
+            'confirmation_nickname': "• You have chosen a login name: ",
+            'repeat': "Repeat",
+
+            'registration_second_phase': "2nd Registration Phase",
+            'register_come_closer_2': "• Come closer to the device's microphone and say 10 randomly\n  generated phrases that will appear on the display one by one.",
+            'recording_number': "• The following recording no.",
+
+            'registration_third_phase': "3rd Registration Phase",
+            'register_come_closer_3': "• Come closer to the device's microphone and choose a unique\n  phrase to use for authentication",
+
+            'confirmation_phrase': "• You have chosen a unique phrase: ",
+
+            'registration_success': "Registration successful!",
+            'registration_unsuccess': "Registration failed!",
+            'registration_unsuccess_info': "• The chosen login name already exists."
         }
     }
 

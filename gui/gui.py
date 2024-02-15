@@ -148,6 +148,8 @@ def segmented_button_language_callback(value):
 
 
 def button_back_callback(frame_to_hide, frame_to_show):
+    global voiceprints_counter
+    voiceprints_counter = 0
     clear_frame(frame_to_hide)
     frame_to_hide.lower()
     frame_to_show.lift()
