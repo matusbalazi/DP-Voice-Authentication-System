@@ -5,8 +5,9 @@ from authentication import credentials, hash_password
 import time
 
 LOGIN_SUCCESS = True
-VERIFICATION_SUCCESS = False
+VERIFICATION_SUCCESS = True
 AUTHENTICATION_SUCCESS = True
+IS_ADMIN = False
 
 remaining_attempts = 3
 
@@ -41,8 +42,8 @@ def clear_frame(frame):
         widget.destroy()
 
 
-def clear_authentication_frames():
-    for frame in authentication_frames:
+def clear_frames(frames):
+    for frame in frames:
         for widget in frame.winfo_children():
             widget.destroy()
 
@@ -63,7 +64,7 @@ def update_translations():
 def button_open_door_callback():
     frame_intro.lower()
     frame_open_door.lift()
-    clear_authentication_frames()
+    clear_frames(authentication_frames)
 
     label_main_title = ctk.CTkLabel(master=frame_open_door, text=Translations.get_translation('system_authentication'),
                                     font=("Roboto", 48, "bold"), justify=ctk.CENTER)
@@ -164,7 +165,7 @@ def button_password_callback(value):
 def button_sign_in_callback():
     frame_open_door.lower()
     frame_authentication_phase_1.lift()
-    clear_authentication_frames()
+    clear_frames(authentication_frames)
 
     label_main_title = ctk.CTkLabel(master=frame_authentication_phase_1,
                                     text=Translations.get_translation('system_authentication'),
@@ -228,7 +229,7 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
 def frame_authentication_phase_2_callback():
     frame_authentication_phase_1.lower()
     frame_authentication_phase_2.lift()
-    clear_authentication_frames()
+    clear_frames(authentication_frames)
 
     label_main_title = ctk.CTkLabel(master=frame_authentication_phase_2,
                                     text=Translations.get_translation('system_authentication'),
@@ -306,7 +307,7 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
 def frame_authentication_phase_3_callback():
     frame_authentication_phase_2.lower()
     frame_authentication_phase_3.lift()
-    clear_authentication_frames()
+    clear_frames(authentication_frames)
 
     label_main_title = ctk.CTkLabel(master=frame_authentication_phase_3,
                                     text=Translations.get_translation('system_authentication'),
@@ -417,6 +418,10 @@ def frame_authentication_success_callback():
                                          font=("Roboto", 48, "bold"), command=button_register_user_callback)
     button_register_user.grid(row=5, column=4, pady=10, padx=10, sticky="nsew")
 
+    if (IS_ADMIN):
+        button_manage_users = ctk.CTkButton(master=frame_authentication_success, text=Translations.get_translation('manage_users'), font=("Roboto", 48, "bold"), command=button_manage_users_callback)
+        button_manage_users.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
+
 
 def button_end_interaction_callback():
     frame_authentication_success.lower()
@@ -489,7 +494,7 @@ def button_authenticate_again_callback(phase):
 def button_sign_up_callback():
     frame_open_door.lower()
     frame_registraction.lift()
-    clear_authentication_frames()
+    clear_frames(authentication_frames)
 
     label_main_title = ctk.CTkLabel(master=frame_registraction,
                                     text=Translations.get_translation('system_authentication'),
@@ -508,11 +513,98 @@ def button_sign_up_callback():
     button_sign_in_again.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
 
 
+# create REGISTER NEW USER FRAME widgets
 def button_register_user_callback():
+    frame_authentication_success.lower()
+    frame_register_new_user.lift()
+    clear_frames(registration_frames)
+
+    label_main_title = ctk.CTkLabel(master=frame_register_new_user,
+                                    text=Translations.get_translation('system_authentication'),
+                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+    label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+
+    label_first_phase = ctk.CTkLabel(master=frame_register_new_user,
+                                     text=Translations.get_translation('registration_first_phase'),
+                                     font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
+    label_first_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+
+    label_register_user = ctk.CTkLabel(master=frame_register_new_user,
+                                           text=Translations.get_translation(
+                                               'register_come_closer_1') + "\n\n" + Translations.get_translation(
+                                               'register_start_recording'),
+                                           font=("Roboto", 38), justify=ctk.LEFT)
+    label_register_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
+
+    button_back = ctk.CTkButton(master=frame_register_new_user, text=Translations.get_translation('back'),
+                                font=("Roboto", 38, "bold"),
+                                command=lambda: button_back_callback(frame_register_new_user, frame_authentication_success),
+                                width=275,
+                                height=70)
+    button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+
+    button_registrate = ctk.CTkButton(master=frame_register_new_user,
+                                        text=Translations.get_translation('registrate'),
+                                        font=("Roboto", 38, "bold"),
+                                        command=lambda: button_registrate_phase_1_callback(label_first_phase,
+                                                                                             label_register_user,
+                                                                                             button_back,
+                                                                                             button_registrate),
+                                        width=275,
+                                        height=70)
+    button_registrate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+
+def button_registrate_phase_1_callback(label_first_phase, label_register_user, button_back, button_registrate):
+    label_first_phase.destroy()
+    button_back.destroy()
+    button_registrate.destroy()
+    label_register_user.configure(text=Translations.get_translation('recording'))
+    window.update()
+
+    # Tento sleep potom vymazat
+    time.sleep(2)
+
+    label_register_user.configure(text=Translations.get_translation('recording_ended'))
+    window.update()
+
+    # Tento sleep potom vymazat
+    time.sleep(2)
+
+    label_register_user.configure(text=Translations.get_translation('confirmation') + "XXXXX")
+
+    button_repeat = ctk.CTkButton(master=frame_register_new_user, text=Translations.get_translation('repeat'),
+                                font=("Roboto", 38, "bold"),
+                                command=button_repeat_callback,
+                                width=275,
+                                height=70)
+    button_repeat.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+
+    button_confirm = ctk.CTkButton(master=frame_register_new_user,
+                                      text=Translations.get_translation('confirm'),
+                                      font=("Roboto", 38, "bold"),
+                                      command=button_confirm_callback,
+                                      width=275,
+                                      height=70)
+    button_confirm.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+    window.update()
+
+
+def button_repeat_callback():
+    button_register_user_callback()
+
+
+def button_confirm_callback():
+    pass
+
+
+def button_manage_users_callback():
     pass
 
 
 authentication_frames = []
+registration_frames = []
 
 # create INTRO FRAME
 frame_intro = create_frame()
@@ -554,6 +646,11 @@ authentication_frames.append(frame_authentication_unsuccess)
 frame_registraction = create_frame()
 frame_registraction.lower()
 authentication_frames.append(frame_registraction)
+
+# create REGISTER NEW USER FRAME
+frame_register_new_user = create_frame()
+frame_register_new_user.lower()
+registration_frames.append(frame_register_new_user)
 
 # create INTRO FRAME widgets
 label_main_title = ctk.CTkLabel(master=frame_intro, text=Translations.get_translation('system_authentication'),

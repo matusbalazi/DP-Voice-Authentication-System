@@ -46,7 +46,18 @@ class Translations:
             'authenticate_again': "Znovu autentifikovať",
 
             'registration_info': "• Pre zaregistrovanie nového používateľa je potrebné,\n  aby sa do systému autentifikoval už zaregistrovaný\n  používateľ.",
-            'continue_to_sign_in': "• Pokračujte na prihlásenie do systému stlačením\n  tlačidla Prihlásenie."
+            'continue_to_sign_in': "• Pokračujte na prihlásenie do systému stlačením\n  tlačidla Prihlásenie.",
+
+            'manage_users': "Správa používateľov",
+
+            'registration_first_phase': "1. fáza registrácie",
+            'register_come_closer_1': "• Pristúpte bližšie k mikrofónu zariadenia a zvoľte si svoje prihlasovacie\n  meno, ktoré budete používať pri autentifikácii.",
+            'register_start_recording': "• Nahrávanie spustíte stlačením tlačidla Registrovať.",
+            'registrate': "Registrovať",
+
+            'confirmation': "• Zvolili ste si prihlasovacie meno: ",
+            'repeat': "Opakovať"
+
         },
         'EN': {
             'system_authentication': "Voice Authentication System",
@@ -94,7 +105,9 @@ class Translations:
             'authenticate_again': "Re-authenticate",
 
             'registration_info': "• To register new user, it is necessary for an already\n  registered user  to authenticate to the system.",
-            'continue_to_sign_in': "• Continue to login to the system by  pressing the\n  Sign In button."
+            'continue_to_sign_in': "• Continue to login to the system by  pressing the\n  Sign In button.",
+
+            'manage_users': "Manage users"
         }
     }
 
