@@ -56,8 +56,11 @@ class Translations:
             'registrate': "Registrovať",
 
             'confirmation': "• Zvolili ste si prihlasovacie meno: ",
-            'repeat': "Opakovať"
+            'repeat': "Opakovať",
 
+            'registration_second_phase': "2. fáza registrácie",
+            'register_come_closer_2': "• Pristúpte bližšie k mikrofónu zariadenia a povedzte 10 náhodne\n  vygenerovaných fráz ktoré sa postupne zobrazia na displeji.",
+            'recording_number': "• Nasleduje nahrávka č."
         },
         'EN': {
             'system_authentication': "Voice Authentication System",

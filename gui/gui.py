@@ -8,8 +8,10 @@ LOGIN_SUCCESS = True
 VERIFICATION_SUCCESS = True
 AUTHENTICATION_SUCCESS = True
 IS_ADMIN = False
+NUMBER_OF_VOICEPRINTS = 10
 
 remaining_attempts = 3
+voiceprints_counter = 0
 
 ctk.set_ctk_parent_class(tk.Tk)
 ctk.set_appearance_mode("dark")
@@ -547,9 +549,7 @@ def button_register_user_callback():
                                         text=Translations.get_translation('registrate'),
                                         font=("Roboto", 38, "bold"),
                                         command=lambda: button_registrate_phase_1_callback(label_first_phase,
-                                                                                             label_register_user,
-                                                                                             button_back,
-                                                                                             button_registrate),
+                                                                                             label_register_user, button_back, button_registrate),
                                         width=275,
                                         height=70)
     button_registrate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
@@ -557,9 +557,9 @@ def button_register_user_callback():
 
 def button_registrate_phase_1_callback(label_first_phase, label_register_user, button_back, button_registrate):
     label_first_phase.destroy()
+    label_register_user.configure(text=Translations.get_translation('recording'))
     button_back.destroy()
     button_registrate.destroy()
-    label_register_user.configure(text=Translations.get_translation('recording'))
     window.update()
 
     # Tento sleep potom vymazat
@@ -595,9 +595,80 @@ def button_repeat_callback():
     button_register_user_callback()
 
 
+# create REGISTER NEW VOICEPRINTS FRAME widgets
 def button_confirm_callback():
-    pass
+    global voiceprints_counter
+    frame_register_new_user.lower()
+    frame_register_new_voiceprints.lift()
+    clear_frames(registration_frames)
 
+    label_main_title = ctk.CTkLabel(master=frame_register_new_voiceprints,
+                                    text=Translations.get_translation('system_authentication'),
+                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+    label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+
+    label_second_phase = ctk.CTkLabel(master=frame_register_new_voiceprints,
+                                      text=Translations.get_translation('registration_second_phase'),
+                                      font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
+    label_second_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+
+    label_register_user = ctk.CTkLabel(master=frame_register_new_voiceprints,
+                                       text=Translations.get_translation(
+                                           'register_come_closer_2') + "\n\n" + Translations.get_translation(
+                                           'register_start_recording') + "\n\n" + Translations.get_translation('recording_number') + str(voiceprints_counter + 1),
+                                       font=("Roboto", 38), justify=ctk.LEFT)
+    label_register_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
+
+    button_back = ctk.CTkButton(master=frame_register_new_voiceprints, text=Translations.get_translation('back'),
+                                font=("Roboto", 38, "bold"),
+                                command=lambda: button_back_callback(frame_register_new_voiceprints,
+                                                                     frame_authentication_success),
+                                width=275,
+                                height=70)
+    button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+
+    button_registrate = ctk.CTkButton(master=frame_register_new_voiceprints,
+                                      text=Translations.get_translation('registrate'),
+                                      font=("Roboto", 38, "bold"),
+                                      command=lambda: button_registrate_phase_2_callback(label_second_phase,
+                                                                                         label_register_user, button_back, button_registrate),
+                                      width=275,
+                                      height=70)
+    button_registrate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+
+def button_registrate_phase_2_callback(label_second_phase, label_register_user, button_back, button_registrate):
+    label_second_phase.destroy()
+    label_register_user.configure(text=Translations.get_translation('recording'))
+    button_back.destroy()
+    button_registrate.destroy()
+    window.update()
+
+    global voiceprints_counter
+    voiceprints_counter += 1
+
+    if (voiceprints_counter < NUMBER_OF_VOICEPRINTS):
+        # Tento sleep potom vymazat
+        time.sleep(2)
+
+        label_register_user.configure(text=Translations.get_translation('recording_ended'))
+        window.update()
+
+        # Tento sleep potom vymazat
+        time.sleep(2)
+        window.update()
+
+        button_confirm_callback()
+    else:
+        voiceprints_counter = 0
+        frame_registrate_new_unique_phrase_callback()
+
+
+# create REGISTER NEW UNIQUE PHRASE FRAME widgets
+def frame_registrate_new_unique_phrase_callback():
+    frame_register_new_voiceprints.lower()
+    frame_registrate_new_unique_phrase.lift()
+    clear_frames(registration_frames)
 
 def button_manage_users_callback():
     pass
@@ -651,6 +722,16 @@ authentication_frames.append(frame_registraction)
 frame_register_new_user = create_frame()
 frame_register_new_user.lower()
 registration_frames.append(frame_register_new_user)
+
+# create REGISTER NEW VOICEPRINTS FRAME
+frame_register_new_voiceprints = create_frame()
+frame_register_new_voiceprints.lower()
+registration_frames.append(frame_register_new_voiceprints)
+
+# create REGISTER NEW UNIQUE PHRASE FRAME
+frame_registrate_new_unique_phrase = create_frame()
+frame_registrate_new_unique_phrase.lower()
+registration_frames.append(frame_registrate_new_unique_phrase)
 
 # create INTRO FRAME widgets
 label_main_title = ctk.CTkLabel(master=frame_intro, text=Translations.get_translation('system_authentication'),
