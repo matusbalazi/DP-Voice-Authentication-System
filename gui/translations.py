@@ -55,12 +55,19 @@ class Translations:
             'register_start_recording': "• Nahrávanie spustíte stlačením tlačidla Registrovať.",
             'registrate': "Registrovať",
 
-            'confirmation': "• Zvolili ste si prihlasovacie meno: ",
+            'confirmation_nickname': "• Zvolili ste si prihlasovacie meno: ",
             'repeat': "Opakovať",
 
             'registration_second_phase': "2. fáza registrácie",
             'register_come_closer_2': "• Pristúpte bližšie k mikrofónu zariadenia a povedzte 10 náhodne\n  vygenerovaných fráz ktoré sa postupne zobrazia na displeji.",
-            'recording_number': "• Nasleduje nahrávka č."
+            'recording_number': "• Nasleduje nahrávka č.",
+
+            'registration_third_phase': "3. fáza registrácie",
+            'register_come_closer_3': "• Pristúpte bližšie k mikrofónu zariadenia a zvoľte si jedinečnú\n  frázu, ktorú budete používať pri autentifikácii",
+
+            'confirmation_phrase': "• Zvolili ste si jedinečnú frázu: ",
+
+            'registration_success': "Registrácia prebehla úspešne!"
         },
         'EN': {
             'system_authentication': "Voice Authentication System",

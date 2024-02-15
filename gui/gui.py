@@ -8,7 +8,7 @@ LOGIN_SUCCESS = True
 VERIFICATION_SUCCESS = True
 AUTHENTICATION_SUCCESS = True
 IS_ADMIN = False
-NUMBER_OF_VOICEPRINTS = 10
+NUMBER_OF_VOICEPRINTS = 2
 
 remaining_attempts = 3
 voiceprints_counter = 0
@@ -421,7 +421,9 @@ def frame_authentication_success_callback():
     button_register_user.grid(row=5, column=4, pady=10, padx=10, sticky="nsew")
 
     if (IS_ADMIN):
-        button_manage_users = ctk.CTkButton(master=frame_authentication_success, text=Translations.get_translation('manage_users'), font=("Roboto", 48, "bold"), command=button_manage_users_callback)
+        button_manage_users = ctk.CTkButton(master=frame_authentication_success,
+                                            text=Translations.get_translation('manage_users'),
+                                            font=("Roboto", 48, "bold"), command=button_manage_users_callback)
         button_manage_users.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
 
 
@@ -532,26 +534,29 @@ def button_register_user_callback():
     label_first_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     label_register_user = ctk.CTkLabel(master=frame_register_new_user,
-                                           text=Translations.get_translation(
-                                               'register_come_closer_1') + "\n\n" + Translations.get_translation(
-                                               'register_start_recording'),
-                                           font=("Roboto", 38), justify=ctk.LEFT)
+                                       text=Translations.get_translation(
+                                           'register_come_closer_1') + "\n\n" + Translations.get_translation(
+                                           'register_start_recording'),
+                                       font=("Roboto", 38), justify=ctk.LEFT)
     label_register_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
     button_back = ctk.CTkButton(master=frame_register_new_user, text=Translations.get_translation('back'),
                                 font=("Roboto", 38, "bold"),
-                                command=lambda: button_back_callback(frame_register_new_user, frame_authentication_success),
+                                command=lambda: button_back_callback(frame_register_new_user,
+                                                                     frame_authentication_success),
                                 width=275,
                                 height=70)
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
     button_registrate = ctk.CTkButton(master=frame_register_new_user,
-                                        text=Translations.get_translation('registrate'),
-                                        font=("Roboto", 38, "bold"),
-                                        command=lambda: button_registrate_phase_1_callback(label_first_phase,
-                                                                                             label_register_user, button_back, button_registrate),
-                                        width=275,
-                                        height=70)
+                                      text=Translations.get_translation('registrate'),
+                                      font=("Roboto", 38, "bold"),
+                                      command=lambda: button_registrate_phase_1_callback(label_first_phase,
+                                                                                         label_register_user,
+                                                                                         button_back,
+                                                                                         button_registrate),
+                                      width=275,
+                                      height=70)
     button_registrate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
 
@@ -571,70 +576,78 @@ def button_registrate_phase_1_callback(label_first_phase, label_register_user, b
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    label_register_user.configure(text=Translations.get_translation('confirmation') + "XXXXX")
+    label_register_user.configure(text=Translations.get_translation('confirmation_nickname') + "XXXXX")
 
     button_repeat = ctk.CTkButton(master=frame_register_new_user, text=Translations.get_translation('repeat'),
-                                font=("Roboto", 38, "bold"),
-                                command=button_repeat_callback,
-                                width=275,
-                                height=70)
+                                  font=("Roboto", 38, "bold"),
+                                  command=button_repeat_phase_1_callback,
+                                  width=275,
+                                  height=70)
     button_repeat.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
     button_confirm = ctk.CTkButton(master=frame_register_new_user,
-                                      text=Translations.get_translation('confirm'),
-                                      font=("Roboto", 38, "bold"),
-                                      command=button_confirm_callback,
-                                      width=275,
-                                      height=70)
+                                   text=Translations.get_translation('confirm'),
+                                   font=("Roboto", 38, "bold"),
+                                   command=button_confirm_phase_1_callback,
+                                   width=275,
+                                   height=70)
     button_confirm.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
     window.update()
 
 
-def button_repeat_callback():
+def button_repeat_phase_1_callback():
     button_register_user_callback()
 
 
 # create REGISTER NEW VOICEPRINTS FRAME widgets
-def button_confirm_callback():
+def button_confirm_phase_1_callback():
     global voiceprints_counter
     frame_register_new_user.lower()
     frame_register_new_voiceprints.lift()
     clear_frames(registration_frames)
 
-    label_main_title = ctk.CTkLabel(master=frame_register_new_voiceprints,
-                                    text=Translations.get_translation('system_authentication'),
-                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
-    label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+    if (voiceprints_counter < NUMBER_OF_VOICEPRINTS):
+        label_main_title = ctk.CTkLabel(master=frame_register_new_voiceprints,
+                                        text=Translations.get_translation('system_authentication'),
+                                        font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+        label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
-    label_second_phase = ctk.CTkLabel(master=frame_register_new_voiceprints,
-                                      text=Translations.get_translation('registration_second_phase'),
-                                      font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
-    label_second_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+        label_second_phase = ctk.CTkLabel(master=frame_register_new_voiceprints,
+                                          text=Translations.get_translation('registration_second_phase'),
+                                          font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
+        label_second_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
-    label_register_user = ctk.CTkLabel(master=frame_register_new_voiceprints,
-                                       text=Translations.get_translation(
-                                           'register_come_closer_2') + "\n\n" + Translations.get_translation(
-                                           'register_start_recording') + "\n\n" + Translations.get_translation('recording_number') + str(voiceprints_counter + 1),
-                                       font=("Roboto", 38), justify=ctk.LEFT)
-    label_register_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
+        label_register_user = ctk.CTkLabel(master=frame_register_new_voiceprints,
+                                           text=Translations.get_translation(
+                                               'register_come_closer_2') + "\n\n" + Translations.get_translation(
+                                               'register_start_recording') + "\n\n" + Translations.get_translation(
+                                               'recording_number') + str(voiceprints_counter + 1) + ".",
+                                           font=("Roboto", 38), justify=ctk.LEFT)
+        label_register_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
-    button_back = ctk.CTkButton(master=frame_register_new_voiceprints, text=Translations.get_translation('back'),
-                                font=("Roboto", 38, "bold"),
-                                command=lambda: button_back_callback(frame_register_new_voiceprints,
-                                                                     frame_authentication_success),
-                                width=275,
-                                height=70)
-    button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+        button_back = ctk.CTkButton(master=frame_register_new_voiceprints, text=Translations.get_translation('back'),
+                                    font=("Roboto", 38, "bold"),
+                                    command=lambda: button_back_callback(frame_register_new_voiceprints,
+                                                                         frame_authentication_success),
+                                    width=275,
+                                    height=70)
+        button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
-    button_registrate = ctk.CTkButton(master=frame_register_new_voiceprints,
-                                      text=Translations.get_translation('registrate'),
-                                      font=("Roboto", 38, "bold"),
-                                      command=lambda: button_registrate_phase_2_callback(label_second_phase,
-                                                                                         label_register_user, button_back, button_registrate),
-                                      width=275,
-                                      height=70)
-    button_registrate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+        button_registrate = ctk.CTkButton(master=frame_register_new_voiceprints,
+                                          text=Translations.get_translation('registrate'),
+                                          font=("Roboto", 38, "bold"),
+                                          command=lambda: button_registrate_phase_2_callback(label_second_phase,
+                                                                                             label_register_user,
+                                                                                             button_back,
+                                                                                             button_registrate),
+                                          width=275,
+                                          height=70)
+        button_registrate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+    else:
+        voiceprints_counter = 0
+        frame_registrate_new_unique_phrase_callback()
+
 
 
 def button_registrate_phase_2_callback(label_second_phase, label_register_user, button_back, button_registrate):
@@ -647,21 +660,17 @@ def button_registrate_phase_2_callback(label_second_phase, label_register_user, 
     global voiceprints_counter
     voiceprints_counter += 1
 
-    if (voiceprints_counter < NUMBER_OF_VOICEPRINTS):
-        # Tento sleep potom vymazat
-        time.sleep(2)
+    # Tento sleep potom vymazat
+    time.sleep(2)
 
-        label_register_user.configure(text=Translations.get_translation('recording_ended'))
-        window.update()
+    label_register_user.configure(text=Translations.get_translation('recording_ended'))
+    window.update()
 
-        # Tento sleep potom vymazat
-        time.sleep(2)
-        window.update()
+    # Tento sleep potom vymazat
+    time.sleep(2)
+    window.update()
 
-        button_confirm_callback()
-    else:
-        voiceprints_counter = 0
-        frame_registrate_new_unique_phrase_callback()
+    button_confirm_phase_1_callback()
 
 
 # create REGISTER NEW UNIQUE PHRASE FRAME widgets
@@ -669,6 +678,107 @@ def frame_registrate_new_unique_phrase_callback():
     frame_register_new_voiceprints.lower()
     frame_registrate_new_unique_phrase.lift()
     clear_frames(registration_frames)
+
+    label_main_title = ctk.CTkLabel(master=frame_registrate_new_unique_phrase,
+                                    text=Translations.get_translation('system_authentication'),
+                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+    label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+
+    label_third_phase = ctk.CTkLabel(master=frame_registrate_new_unique_phrase,
+                                     text=Translations.get_translation('registration_third_phase'),
+                                     font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
+    label_third_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+
+    label_register_user = ctk.CTkLabel(master=frame_registrate_new_unique_phrase,
+                                       text=Translations.get_translation(
+                                           'register_come_closer_3') + "\n\n" + Translations.get_translation(
+                                           'register_start_recording'),
+                                       font=("Roboto", 38), justify=ctk.LEFT)
+    label_register_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
+
+    button_back = ctk.CTkButton(master=frame_registrate_new_unique_phrase, text=Translations.get_translation('back'),
+                                font=("Roboto", 38, "bold"),
+                                command=lambda: button_back_callback(frame_registrate_new_unique_phrase,
+                                                                     frame_authentication_success),
+                                width=275,
+                                height=70)
+    button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+
+    button_registrate = ctk.CTkButton(master=frame_registrate_new_unique_phrase,
+                                      text=Translations.get_translation('registrate'),
+                                      font=("Roboto", 38, "bold"),
+                                      command=lambda: button_registrate_phase_3_callback(label_third_phase,
+                                                                                         label_register_user,
+                                                                                         button_back,
+                                                                                         button_registrate),
+                                      width=275,
+                                      height=70)
+    button_registrate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+
+def button_registrate_phase_3_callback(label_third_phase, label_register_user, button_back, button_registrate):
+    label_third_phase.destroy()
+    label_register_user.configure(text=Translations.get_translation('recording'))
+    button_back.destroy()
+    button_registrate.destroy()
+    window.update()
+
+    # Tento sleep potom vymazat
+    time.sleep(2)
+
+    label_register_user.configure(text=Translations.get_translation('recording_ended'))
+    window.update()
+
+    # Tento sleep potom vymazat
+    time.sleep(2)
+
+    label_register_user.configure(text=Translations.get_translation('confirmation_phrase') + "XXXXX YYYYY")
+
+    button_repeat = ctk.CTkButton(master=frame_registrate_new_unique_phrase,
+                                  text=Translations.get_translation('repeat'),
+                                  font=("Roboto", 38, "bold"),
+                                  command=button_repeat_phase_3_callback,
+                                  width=275,
+                                  height=70)
+    button_repeat.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+
+    button_confirm = ctk.CTkButton(master=frame_registrate_new_unique_phrase,
+                                   text=Translations.get_translation('confirm'),
+                                   font=("Roboto", 38, "bold"),
+                                   command=lambda: button_confirm_phase_3_callback(label_register_user, button_repeat,
+                                                                                   button_confirm),
+                                   width=275,
+                                   height=70)
+    button_confirm.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+    window.update()
+
+
+def button_repeat_phase_3_callback():
+    frame_registrate_new_unique_phrase_callback()
+
+
+def button_confirm_phase_3_callback(label_register_user, button_repeat, button_confirm):
+    label_register_user.destroy()
+    button_repeat.destroy()
+    button_confirm.destroy()
+
+    label_registration_success = ctk.CTkLabel(master=frame_registrate_new_unique_phrase,
+                                              text=Translations.get_translation('registration_success'),
+                                              font=("Roboto", 38, "bold"), text_color=("light green"),
+                                              justify=ctk.CENTER)
+    label_registration_success.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+    window.update()
+
+    # Tento sleep potom vymazat
+    time.sleep(2)
+
+    frame_registrate_new_unique_phrase.lower()
+    clear_frame(frame_registrate_new_unique_phrase)
+    frame_intro.lift()
+
+    window.update()
+
 
 def button_manage_users_callback():
     pass
