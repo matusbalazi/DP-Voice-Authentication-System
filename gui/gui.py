@@ -7,8 +7,11 @@ import time
 LOGIN_SUCCESS = True
 VERIFICATION_SUCCESS = True
 AUTHENTICATION_SUCCESS = True
-IS_ADMIN = False
+IS_ADMIN = True
 NUMBER_OF_VOICEPRINTS = 2
+
+users = ["user_1", "user_2", "user_3", "user_4", "user_5", "user_6", "user_7", "user_8", "user_9", "user_10", "user_11", "user_12", "user_13", "user_14", "user_15", "user_16", "user_17", "user_18", "user_19", "user_20"]
+user_to_delete = ""
 
 remaining_attempts = 3
 voiceprints_counter = 0
@@ -391,6 +394,7 @@ def frame_authentication_success_callback():
     global remaining_attempts
     remaining_attempts = 3
 
+    clear_frame(frame_authentication_success)
     frame_authentication_phase_3.lower()
     frame_authentication_success.lift()
 
@@ -782,9 +786,47 @@ def button_confirm_phase_3_callback(label_register_user, button_repeat, button_c
     window.update()
 
 
+# create MANAGE USERS FRAME widgets
 def button_manage_users_callback():
-    pass
+    clear_frame(frame_manage_users)
+    frame_authentication_success.lower()
+    frame_manage_users.lift()
 
+    label_main_title = ctk.CTkLabel(master=frame_manage_users,
+                                    text=Translations.get_translation('system_authentication'),
+                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+    label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+
+    combobox_users = ctk.CTkComboBox(master=frame_manage_users, values=users, font=("Roboto", 38, "bold"), dropdown_font=("Roboto", 38, "bold"), justify=ctk.CENTER, hover=True, command=combobox_users_callback)
+    combobox_users.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+
+    button_back = ctk.CTkButton(master=frame_manage_users, text=Translations.get_translation('back'),
+                                font=("Roboto", 38, "bold"),
+                                command=lambda: button_back_callback(frame_manage_users,
+                                                                     frame_authentication_success),
+                                width=275,
+                                height=70)
+    button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+
+    button_delete_user = ctk.CTkButton(master=frame_manage_users,
+                                        text=Translations.get_translation('delete'),
+                                        font=("Roboto", 38, "bold"),
+                                        command=button_delete_user_callback,
+                                        width=275,
+                                        height=70)
+    button_delete_user.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+
+def combobox_users_callback(value):
+    global user_to_delete
+    user_to_delete = value
+
+def button_delete_user_callback():
+    global user_to_delete
+    if user_to_delete in users:
+        users.remove(user_to_delete)
+        user_to_delete = ""
+        button_manage_users_callback()
 
 authentication_frames = []
 registration_frames = []
@@ -844,6 +886,10 @@ registration_frames.append(frame_register_new_voiceprints)
 frame_registrate_new_unique_phrase = create_frame()
 frame_registrate_new_unique_phrase.lower()
 registration_frames.append(frame_registrate_new_unique_phrase)
+
+# create MANAGE USERS FRAME
+frame_manage_users = create_frame()
+frame_manage_users.lower()
 
 # create INTRO FRAME widgets
 label_main_title = ctk.CTkLabel(master=frame_intro, text=Translations.get_translation('system_authentication'),

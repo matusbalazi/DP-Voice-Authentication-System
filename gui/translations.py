@@ -69,7 +69,9 @@ class Translations:
 
             'registration_success': "Registrácia prebehla úspešne!",
             'registration_unsuccess': "Registrácia bola neúspešná!",
-            'registration_unsuccess_info': "• Zvolené prihlasovacie meno už existuje."
+            'registration_unsuccess_info': "• Zvolené prihlasovacie meno už existuje.",
+
+            'delete': "Vymazať"
         },
         'EN': {
             'system_authentication': "Voice Authentication System",
@@ -140,7 +142,9 @@ class Translations:
 
             'registration_success': "Registration successful!",
             'registration_unsuccess': "Registration failed!",
-            'registration_unsuccess_info': "• The chosen login name already exists."
+            'registration_unsuccess_info': "• The chosen login name already exists.",
+
+            'delete': "Delete"
         }
     }
 
