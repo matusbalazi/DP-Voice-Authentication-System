@@ -3,12 +3,14 @@ import tkinter as tk
 from translations import Translations
 from authentication import credentials, hash_password
 import time
+import random
 
 LOGIN_SUCCESS = True
 VERIFICATION_SUCCESS = True
 AUTHENTICATION_SUCCESS = True
 IS_ADMIN = True
 NUMBER_OF_VOICEPRINTS = 2
+VERIFICATION_WORDS = ["kvet", "počítač", "rieka", "stolička", "jablko", "škola", "letisko", "nástenka", "pláž", "okno", "hora", "kľúč", "rukavica", "káva", "slúchadlo", "vlak"]
 
 users = ["user_1", "user_2", "user_3", "user_4", "user_5", "user_6", "user_7", "user_8", "user_9", "user_10", "user_11", "user_12", "user_13", "user_14", "user_15", "user_16", "user_17", "user_18", "user_19", "user_20"]
 user_to_delete = ""
@@ -29,6 +31,11 @@ window.geometry("%dx%d+0+0" % (width, height))
 window.attributes("-fullscreen", True)
 window.grid_rowconfigure(0, weight=1)
 window.grid_columnconfigure(0, weight=1)
+
+
+def generate_random_word() -> str:
+    random_verification_word = random.choice(VERIFICATION_WORDS)
+    return random_verification_word
 
 
 def create_frame():
@@ -292,6 +299,11 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
     label_second_phase.destroy()
     button_back.destroy()
     button_authenticate.destroy()
+    label_random_word = ctk.CTkLabel(master=frame_authentication_phase_2,
+                                      text=generate_random_word(),
+                                      font=("Roboto", 48, "bold"), text_color=("light green"), justify=ctk.CENTER)
+    label_random_word.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+
     label_authenticate_user.configure(text=Translations.get_translation('recording'))
     window.update()
 
