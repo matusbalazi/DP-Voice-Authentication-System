@@ -2,17 +2,13 @@ import customtkinter as ctk
 import tkinter as tk
 from translations import Translations
 from authentication import credentials, hash_password
+import general.constants as const
+from speech_and_voice import voice_recorder as vr
+from speech_and_voice import speech_recognizer as sr
 import time
 import random
 
-LOGIN_SUCCESS = True
-VERIFICATION_SUCCESS = True
-AUTHENTICATION_SUCCESS = True
-IS_ADMIN = True
-NUMBER_OF_VOICEPRINTS = 2
-VERIFICATION_WORDS = ["kvet", "počítač", "rieka", "stolička", "jablko", "škola", "letisko", "nástenka", "pláž", "okno", "hora", "kľúč", "rukavica", "káva", "slúchadlo", "vlak"]
-
-users = ["user_1", "user_2", "user_3", "user_4", "user_5", "user_6", "user_7", "user_8", "user_9", "user_10", "user_11", "user_12", "user_13", "user_14", "user_15", "user_16", "user_17", "user_18", "user_19", "user_20"]
+users = ["ema", "user_1", "user_2", "user_3", "user_4", "user_5", "user_6", "user_7", "user_8", "user_9", "user_10", "user_11", "user_12", "user_13", "user_14", "user_15", "user_16", "user_17", "user_18", "user_19", "user_20"]
 user_to_delete = ""
 
 remaining_attempts = 3
@@ -34,7 +30,7 @@ window.grid_columnconfigure(0, weight=1)
 
 
 def generate_random_word() -> str:
-    random_verification_word = random.choice(VERIFICATION_WORDS)
+    random_verification_word = random.choice(const.VERIFICATION_WORDS[Translations.get_language()])
     return random_verification_word
 
 
@@ -224,8 +220,13 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
     label_authenticate_user.configure(text=Translations.get_translation('recording'))
     window.update()
 
+    vr.record_and_save_audio(const.RECORDED_AUDIO)
+    speaker_nickname = sr.recognize_speech(const.RECORDED_AUDIO, Translations.get_language().lower())
+    #print(speaker_nickname)
+    login_success = sr.verify_speaker_nickname(speaker_nickname)
+
     # Tento sleep potom vymazat
-    time.sleep(2)
+    #time.sleep(2)
 
     label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
     window.update()
@@ -233,7 +234,8 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    if (LOGIN_SUCCESS):
+    if (login_success):
+    #if (const.LOGIN_SUCCESS):
         frame_authentication_phase_2_callback()
     else:
         frame_authentication_unsuccess_callback(1)
@@ -299,8 +301,11 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
     label_second_phase.destroy()
     button_back.destroy()
     button_authenticate.destroy()
+
+    random_word = generate_random_word()
+
     label_random_word = ctk.CTkLabel(master=frame_authentication_phase_2,
-                                      text=generate_random_word(),
+                                      text=random_word.upper(),
                                       font=("Roboto", 48, "bold"), text_color=("light green"), justify=ctk.CENTER)
     label_random_word.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
@@ -308,7 +313,12 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
     window.update()
 
     # Tento sleep potom vymazat
-    time.sleep(2)
+    #time.sleep(2)
+
+    vr.record_and_save_audio(const.RECORDED_AUDIO)
+    spoken_verification_word = sr.recognize_speech(const.RECORDED_AUDIO, Translations.get_language().lower())
+    #print(spoken_verification_word)
+    verification_success = sr.verify_verification_word(spoken_verification_word, random_word)
 
     label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
     window.update()
@@ -316,7 +326,8 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    if (VERIFICATION_SUCCESS):
+    if (verification_success):
+    #if (const.VERIFICATION_SUCCESS):
         frame_authentication_phase_3_callback()
     else:
         frame_authentication_unsuccess_callback(2)
@@ -395,7 +406,7 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    if (AUTHENTICATION_SUCCESS):
+    if (const.AUTHENTICATION_SUCCESS):
         frame_authentication_success_callback()
     else:
         frame_authentication_unsuccess_callback(3)
@@ -438,7 +449,7 @@ def frame_authentication_success_callback():
                                          font=("Roboto", 48, "bold"), command=button_register_user_callback)
     button_register_user.grid(row=5, column=4, pady=10, padx=10, sticky="nsew")
 
-    if (IS_ADMIN):
+    if (const.IS_ADMIN):
         button_manage_users = ctk.CTkButton(master=frame_authentication_success,
                                             text=Translations.get_translation('manage_users'),
                                             font=("Roboto", 48, "bold"), command=button_manage_users_callback)
@@ -625,7 +636,7 @@ def button_confirm_phase_1_callback():
     frame_register_new_voiceprints.lift()
     clear_frames(registration_frames)
 
-    if (voiceprints_counter < NUMBER_OF_VOICEPRINTS):
+    if (voiceprints_counter < const.NUMBER_OF_VOICEPRINTS):
         label_main_title = ctk.CTkLabel(master=frame_register_new_voiceprints,
                                         text=Translations.get_translation('system_authentication'),
                                         font=("Roboto", 48, "bold"), justify=ctk.CENTER)

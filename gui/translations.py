@@ -157,3 +157,7 @@ class Translations:
     @classmethod
     def set_language(cls, language):
         cls.current_language = language
+
+    @classmethod
+    def get_language(cls):
+        return cls.current_language
