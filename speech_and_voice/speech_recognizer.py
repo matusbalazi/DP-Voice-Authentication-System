@@ -2,6 +2,7 @@ import random
 import speech_recognition as sr
 import general.constants as const
 import logging
+from authentication import hash_password
 
 
 def recognize_speech(audio_file, current_language) -> str:
@@ -23,8 +24,8 @@ def recognize_speech(audio_file, current_language) -> str:
             return ""
 
 
-def verify_speaker_nickname(recognized_speaker_nickname) -> bool:
-    if recognized_speaker_nickname.lower() in const.SPEAKERS:
+def verify_speaker_nickname(speakers, recognized_speaker_nickname) -> bool:
+    if recognized_speaker_nickname.lower() in speakers:
         logging.info("Speaker verified!")
         return True
     else:
@@ -39,5 +40,12 @@ def verify_verification_word(recognized_verification_word, random_verification_w
     else:
         logging.info("Verification word not verified!")
         return False
+
+
+def verify_unique_phrase(speakers, logged_user, recognized_unique_phrase) -> bool:
+    unique_phrase = list(speakers[logged_user])[0]
+    unique_salt = list(speakers[logged_user])[1]
+    return hash_password.check_password(recognized_unique_phrase, unique_phrase, unique_salt)
+
 
 

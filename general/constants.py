@@ -5,10 +5,17 @@ IS_ADMIN = True
 NUMBER_OF_VOICEPRINTS = 2
 
 
-SPEAKERS = ["martin", "ema", "baláži", "jakubec"]
+SPEAKERS = ["martin", "ema", "baláži"]
 #VERIFICATION_WORDS = ["kvet", "počítač", "rieka", "stolička", "jablko", "škola", "letisko", "nástenka", "pláž", "okno",
 #                      "hora", "kľúč", "rukavica", "káva", "slúchadlo", "vlak"]
 RECORDED_AUDIO = "recorded_audio.wav"
+
+USERS = {
+       "martin": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9"),
+       "ema": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9"),
+       "baláži": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9"),
+       "vista": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9")
+}
 
 VERIFICATION_WORDS = {
     "SK": ("jablko",

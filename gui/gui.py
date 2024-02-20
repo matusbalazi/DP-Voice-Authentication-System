@@ -8,7 +8,7 @@ from speech_and_voice import speech_recognizer as sr
 import time
 import random
 
-users = ["ema", "user_1", "user_2", "user_3", "user_4", "user_5", "user_6", "user_7", "user_8", "user_9", "user_10", "user_11", "user_12", "user_13", "user_14", "user_15", "user_16", "user_17", "user_18", "user_19", "user_20"]
+users = const.USERS
 user_to_delete = ""
 
 remaining_attempts = 3
@@ -223,7 +223,7 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
     vr.record_and_save_audio(const.RECORDED_AUDIO)
     speaker_nickname = sr.recognize_speech(const.RECORDED_AUDIO, Translations.get_language().lower())
     #print(speaker_nickname)
-    login_success = sr.verify_speaker_nickname(speaker_nickname)
+    login_success = sr.verify_speaker_nickname(users.keys(), speaker_nickname)
 
     # Tento sleep potom vymazat
     #time.sleep(2)
@@ -397,8 +397,13 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
     label_authenticate_user.configure(text=Translations.get_translation('recording'))
     window.update()
 
+    vr.record_and_save_audio(const.RECORDED_AUDIO)
+    unique_phrase = sr.recognize_speech(const.RECORDED_AUDIO, Translations.get_language().lower())
+    #print(unique_phrase)
+    authentication_success = sr.verify_unique_phrase(users, "martin", unique_phrase)
+
     # Tento sleep potom vymazat
-    time.sleep(2)
+    #time.sleep(2)
 
     label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
     window.update()
@@ -406,7 +411,8 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    if (const.AUTHENTICATION_SUCCESS):
+    if (authentication_success):
+    #if (const.AUTHENTICATION_SUCCESS):
         frame_authentication_success_callback()
     else:
         frame_authentication_unsuccess_callback(3)
@@ -820,7 +826,7 @@ def button_manage_users_callback():
                                     font=("Roboto", 48, "bold"), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
-    combobox_users = ctk.CTkComboBox(master=frame_manage_users, values=users, font=("Roboto", 38, "bold"), dropdown_font=("Roboto", 38, "bold"), justify=ctk.CENTER, hover=True, command=combobox_users_callback)
+    combobox_users = ctk.CTkComboBox(master=frame_manage_users, values=list(users.keys()), font=("Roboto", 38, "bold"), dropdown_font=("Roboto", 38, "bold"), justify=ctk.CENTER, hover=True, command=combobox_users_callback)
     combobox_users.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     button_back = ctk.CTkButton(master=frame_manage_users, text=Translations.get_translation('back'),
@@ -846,8 +852,8 @@ def combobox_users_callback(value):
 
 def button_delete_user_callback():
     global user_to_delete
-    if user_to_delete in users:
-        users.remove(user_to_delete)
+    if user_to_delete in users.keys():
+        users.pop(user_to_delete)
         user_to_delete = ""
         button_manage_users_callback()
 
