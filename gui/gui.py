@@ -1,15 +1,21 @@
-import customtkinter as ctk
-import tkinter as tk
-from translations import Translations
-from authentication import credentials, hash_password
-import general.constants as const
-from speech_and_voice import voice_recorder as vr
-from speech_and_voice import speech_recognizer as sr
 import time
 import random
+import customtkinter as ctk
+import tkinter as tk
+
+from translations import Translations
+from authentication import credentials, string_hasher
+from general import constants as const
+from general import log_file_builder as log
+from speech_and_voice import voice_recorder as vr
+from speech_and_voice import speech_recognizer as sr
+
 
 users = const.USERS
 user_to_delete = ""
+currently_logged_user = ""
+new_user_nickname = ""
+new_user_unique_phrase = ""
 
 remaining_attempts = 3
 voiceprints_counter = 0
@@ -162,13 +168,18 @@ def button_back_callback(frame_to_hide, frame_to_show):
 
 
 def button_password_callback(value):
-    correct_password = hash_password.check_password(value, credentials.password, credentials.sol)
-    if (correct_password):
+    correct_password = string_hasher.check_string(value, credentials.password, credentials.sol)
+    if correct_password:
         button_open_door_callback()
         frame_open_door.lower()
         button_sign_in_callback()
         frame_authentication_phase_1.lower()
         frame_authentication_phase_3_callback()
+        msg_success = "Entered password was correct."
+        log.log_info(msg_success)
+    else:
+        msg_warning = "Entered password was incorrect."
+        log.log_warning(msg_warning)
 
 
 # create AUTHENTICATION PHASE 1 FRAME widgets -> after click on SIGN IN button
@@ -214,19 +225,23 @@ def button_sign_in_callback():
 
 
 def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_user, button_back, button_authenticate):
+    global currently_logged_user
+
     label_first_phase.destroy()
     button_back.destroy()
     button_authenticate.destroy()
     label_authenticate_user.configure(text=Translations.get_translation('recording'))
     window.update()
 
-    vr.record_and_save_audio(const.RECORDED_AUDIO)
-    speaker_nickname = sr.recognize_speech(const.RECORDED_AUDIO, Translations.get_language().lower())
-    #print(speaker_nickname)
+    vr.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+    speaker_nickname = sr.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
     login_success = sr.verify_speaker_nickname(users.keys(), speaker_nickname)
 
+    msg_info = f"Recognized speaker nickname: {speaker_nickname}"
+    log.log_info(msg_info)
+
     # Tento sleep potom vymazat
-    #time.sleep(2)
+    # time.sleep(2)
 
     label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
     window.update()
@@ -234,10 +249,14 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    if (login_success):
-    #if (const.LOGIN_SUCCESS):
+    if login_success:
+        currently_logged_user = speaker_nickname
+        msg_success = f"User {speaker_nickname} signed in successfully."
+        log.log_info(msg_success)
         frame_authentication_phase_2_callback()
     else:
+        msg_warning = f"User {speaker_nickname} failed to sign in."
+        log.log_warning(msg_warning)
         frame_authentication_unsuccess_callback(1)
 
 
@@ -305,20 +324,22 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
     random_word = generate_random_word()
 
     label_random_word = ctk.CTkLabel(master=frame_authentication_phase_2,
-                                      text=random_word.upper(),
-                                      font=("Roboto", 48, "bold"), text_color=("light green"), justify=ctk.CENTER)
+                                     text=random_word.upper(),
+                                     font=("Roboto", 48, "bold"), text_color=("light green"), justify=ctk.CENTER)
     label_random_word.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     label_authenticate_user.configure(text=Translations.get_translation('recording'))
     window.update()
 
     # Tento sleep potom vymazat
-    #time.sleep(2)
+    # time.sleep(2)
 
-    vr.record_and_save_audio(const.RECORDED_AUDIO)
-    spoken_verification_word = sr.recognize_speech(const.RECORDED_AUDIO, Translations.get_language().lower())
-    #print(spoken_verification_word)
+    vr.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+    spoken_verification_word = sr.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
     verification_success = sr.verify_verification_word(spoken_verification_word, random_word)
+
+    msg_info = f"Recognized verification word: {spoken_verification_word}"
+    log.log_info(msg_info)
 
     label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
     window.update()
@@ -326,10 +347,13 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    if (verification_success):
-    #if (const.VERIFICATION_SUCCESS):
+    if verification_success:
+        msg_success = f"Verification word {random_word} matched with spoken word {spoken_verification_word}."
+        log.log_info(msg_success)
         frame_authentication_phase_3_callback()
     else:
+        msg_warning = f"Verification word {random_word} didn't match with spoken word {spoken_verification_word}."
+        log.log_warning(msg_warning)
         frame_authentication_unsuccess_callback(2)
 
 
@@ -391,19 +415,20 @@ def frame_authentication_phase_3_callback():
 
 
 def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_user, button_back, button_authenticate):
+    global currently_logged_user
+
     label_third_phase.destroy()
     button_back.destroy()
     button_authenticate.destroy()
     label_authenticate_user.configure(text=Translations.get_translation('recording'))
     window.update()
 
-    vr.record_and_save_audio(const.RECORDED_AUDIO)
-    unique_phrase = sr.recognize_speech(const.RECORDED_AUDIO, Translations.get_language().lower())
-    #print(unique_phrase)
+    vr.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+    unique_phrase = sr.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
     authentication_success = sr.verify_unique_phrase(users, "martin", unique_phrase)
 
     # Tento sleep potom vymazat
-    #time.sleep(2)
+    # time.sleep(2)
 
     label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
     window.update()
@@ -411,10 +436,13 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    if (authentication_success):
-    #if (const.AUTHENTICATION_SUCCESS):
+    if authentication_success:
+        msg_success = f"Authentication with unique phrase was successful. User {currently_logged_user} opened the door."
+        log.log_info(msg_success)
         frame_authentication_success_callback()
     else:
+        msg_warning = f"Authentication with unique phrase wasn't successful. User {currently_logged_user} couldn't open the door."
+        log.log_warning(msg_warning)
         frame_authentication_unsuccess_callback(3)
 
 
@@ -455,7 +483,7 @@ def frame_authentication_success_callback():
                                          font=("Roboto", 48, "bold"), command=button_register_user_callback)
     button_register_user.grid(row=5, column=4, pady=10, padx=10, sticky="nsew")
 
-    if (const.IS_ADMIN):
+    if const.IS_ADMIN:
         button_manage_users = ctk.CTkButton(master=frame_authentication_success,
                                             text=Translations.get_translation('manage_users'),
                                             font=("Roboto", 48, "bold"), command=button_manage_users_callback)
@@ -473,16 +501,19 @@ def frame_authentication_unsuccess_callback(phase):
     global remaining_attempts
     remaining_attempts -= 1
 
-    if (phase == 1):
+    msg_warning = f"Error during authentication process. Remaining attempts: {remaining_attempts}"
+    log.log_warning(msg_warning)
+
+    if phase == 1:
         frame_authentication_phase_1.lower()
-    elif (phase == 2):
+    elif phase == 2:
         frame_authentication_phase_2.lower()
-    elif (phase == 3):
+    elif phase == 3:
         frame_authentication_phase_3.lower()
     else:
         pass
 
-    if (remaining_attempts == 0):
+    if remaining_attempts == 0:
         remaining_attempts = 3
         frame_intro.lift()
     else:
@@ -596,6 +627,8 @@ def button_register_user_callback():
 
 
 def button_registrate_phase_1_callback(label_first_phase, label_register_user, button_back, button_registrate):
+    global new_user_nickname
+
     label_first_phase.destroy()
     label_register_user.configure(text=Translations.get_translation('recording'))
     button_back.destroy()
@@ -612,6 +645,9 @@ def button_registrate_phase_1_callback(label_first_phase, label_register_user, b
     time.sleep(2)
 
     label_register_user.configure(text=Translations.get_translation('confirmation_nickname') + "XXXXX")
+
+    msg_info = f"New user nickname {new_user_nickname} registrated successfully."
+    log.log_info(msg_info)
 
     button_repeat = ctk.CTkButton(master=frame_register_new_user, text=Translations.get_translation('repeat'),
                                   font=("Roboto", 38, "bold"),
@@ -684,7 +720,6 @@ def button_confirm_phase_1_callback():
         frame_registrate_new_unique_phrase_callback()
 
 
-
 def button_registrate_phase_2_callback(label_second_phase, label_register_user, button_back, button_registrate):
     label_second_phase.destroy()
     label_register_user.configure(text=Translations.get_translation('recording'))
@@ -704,6 +739,9 @@ def button_registrate_phase_2_callback(label_second_phase, label_register_user, 
     # Tento sleep potom vymazat
     time.sleep(2)
     window.update()
+
+    msg_info = f"Voiceprint {voiceprints_counter} recorded successfully."
+    log.log_info(msg_info)
 
     button_confirm_phase_1_callback()
 
@@ -752,6 +790,8 @@ def frame_registrate_new_unique_phrase_callback():
 
 
 def button_registrate_phase_3_callback(label_third_phase, label_register_user, button_back, button_registrate):
+    global new_user_unique_phrase
+
     label_third_phase.destroy()
     label_register_user.configure(text=Translations.get_translation('recording'))
     button_back.destroy()
@@ -768,6 +808,9 @@ def button_registrate_phase_3_callback(label_third_phase, label_register_user, b
     time.sleep(2)
 
     label_register_user.configure(text=Translations.get_translation('confirmation_phrase') + "XXXXX YYYYY")
+
+    msg_info = f"New unique phrase {new_user_unique_phrase} registrated successfully."
+    log.log_info(msg_info)
 
     button_repeat = ctk.CTkButton(master=frame_registrate_new_unique_phrase,
                                   text=Translations.get_translation('repeat'),
@@ -826,7 +869,9 @@ def button_manage_users_callback():
                                     font=("Roboto", 48, "bold"), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
-    combobox_users = ctk.CTkComboBox(master=frame_manage_users, values=list(users.keys()), font=("Roboto", 38, "bold"), dropdown_font=("Roboto", 38, "bold"), justify=ctk.CENTER, hover=True, command=combobox_users_callback)
+    combobox_users = ctk.CTkComboBox(master=frame_manage_users, values=list(users.keys()), font=("Roboto", 38, "bold"),
+                                     dropdown_font=("Roboto", 38, "bold"), justify=ctk.CENTER, hover=True,
+                                     command=combobox_users_callback)
     combobox_users.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     button_back = ctk.CTkButton(master=frame_manage_users, text=Translations.get_translation('back'),
@@ -838,11 +883,11 @@ def button_manage_users_callback():
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
     button_delete_user = ctk.CTkButton(master=frame_manage_users,
-                                        text=Translations.get_translation('delete'),
-                                        font=("Roboto", 38, "bold"),
-                                        command=button_delete_user_callback,
-                                        width=275,
-                                        height=70)
+                                       text=Translations.get_translation('delete'),
+                                       font=("Roboto", 38, "bold"),
+                                       command=button_delete_user_callback,
+                                       width=275,
+                                       height=70)
     button_delete_user.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
 
@@ -850,12 +895,16 @@ def combobox_users_callback(value):
     global user_to_delete
     user_to_delete = value
 
+
 def button_delete_user_callback():
     global user_to_delete
     if user_to_delete in users.keys():
+        msg_info = f"User {user_to_delete} deleted successfully."
+        log.log_info(msg_info)
         users.pop(user_to_delete)
         user_to_delete = ""
         button_manage_users_callback()
+
 
 authentication_frames = []
 registration_frames = []

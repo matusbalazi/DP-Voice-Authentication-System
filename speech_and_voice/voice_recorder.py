@@ -1,6 +1,6 @@
+from general import log_file_builder as log
 import sounddevice as sd
 import wavio
-import logging
 
 
 def record_and_save_audio(file_path, duration=5, sample_rate=44100, volume=1.5) -> bool:
@@ -12,8 +12,11 @@ def record_and_save_audio(file_path, duration=5, sample_rate=44100, volume=1.5) 
 
         wavio.write(file_path, audio_data, sample_rate, sampwidth=3)
 
+        msg_info = f"Audio {file_path} recorded and saved successfully."
+        log.log_info(msg_info)
         return True
 
     except Exception as e:
-        logging.exception(f"An error occurred: {str(e)}")
+        msg_error = f"Recording or saving audio {file_path} failed. An error occurred: {str(e)}"
+        log.log_error(msg_error)
         return False

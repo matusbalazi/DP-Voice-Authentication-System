@@ -1,8 +1,6 @@
-import random
 import speech_recognition as sr
-import general.constants as const
-import logging
-from authentication import hash_password
+from general import log_file_builder as log
+from authentication import string_hasher
 
 
 def recognize_speech(audio_file, current_language) -> str:
@@ -15,37 +13,47 @@ def recognize_speech(audio_file, current_language) -> str:
 
         try:
             recognized_speech = recognizer.recognize_google(audio_data, language=current_language)
+            msg_info = f"Recognized speech: {str(recognized_speech)}"
+            log.log_info(msg_info)
             return str(recognized_speech)
         except sr.UnknownValueError:
-            logging.error("Could not understand audio.")
+            msg_error = "Could not understand audio."
+            log.log_error(msg_error)
             return ""
         except sr.RequestError as e:
-            logging.error(f"Could not request results from Google Speech Recognition service; {e}")
+            msg_error = f"Could not request results from Google Speech Recognition service; {str(e)}"
+            log.log_error(msg_error)
             return ""
 
 
 def verify_speaker_nickname(speakers, recognized_speaker_nickname) -> bool:
     if recognized_speaker_nickname.lower() in speakers:
-        logging.info("Speaker verified!")
+        log.log_info("Speaker verified!")
         return True
     else:
-        logging.info("Speaker not verified!")
+        log.log_warning("Speaker not verified!")
         return False
 
 
 def verify_verification_word(recognized_verification_word, random_verification_word) -> bool:
     if recognized_verification_word.lower() == random_verification_word.lower():
-        logging.info("Verification word verified!")
+        log.log_info("Verification word verified!")
         return True
     else:
-        logging.info("Verification word not verified!")
+        log.log_warning("Verification word not verified!")
         return False
 
 
 def verify_unique_phrase(speakers, logged_user, recognized_unique_phrase) -> bool:
     unique_phrase = list(speakers[logged_user])[0]
     unique_salt = list(speakers[logged_user])[1]
-    return hash_password.check_password(recognized_unique_phrase, unique_phrase, unique_salt)
+
+    if string_hasher.check_string(recognized_unique_phrase, unique_phrase, unique_salt):
+        log.log_info("Unique phrase verified!")
+        return True
+    else:
+        log.log_warning("Unique phrase not verified!")
+        return False
 
 
 
