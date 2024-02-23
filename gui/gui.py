@@ -9,9 +9,9 @@ from general import constants as const
 from general import log_file_builder as log
 from speech_and_voice import voice_recorder as vr
 from speech_and_voice import speech_recognizer as sr
+from database import json_file_builder as json
 
 
-users = const.USERS
 user_to_delete = ""
 currently_logged_user = ""
 new_user_nickname = ""
@@ -60,6 +60,16 @@ def clear_frames(frames):
     for frame in frames:
         for widget in frame.winfo_children():
             widget.destroy()
+
+
+def clear_global_variables():
+    global user_to_delete, currently_logged_user, new_user_nickname, new_user_unique_phrase, remaining_attempts, voiceprints_counter
+    user_to_delete = ""
+    currently_logged_user = ""
+    new_user_nickname = ""
+    new_user_unique_phrase = ""
+    remaining_attempts = 3
+    voiceprints_counter = 0
 
 
 def change_language(language):
@@ -250,7 +260,7 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
     time.sleep(2)
 
     if login_success:
-        currently_logged_user = speaker_nickname
+        currently_logged_user = speaker_nickname.lower()
         msg_success = f"User {speaker_nickname} signed in successfully."
         log.log_info(msg_success)
         frame_authentication_phase_2_callback()
@@ -425,7 +435,7 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
 
     vr.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
     unique_phrase = sr.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
-    authentication_success = sr.verify_unique_phrase(users, "martin", unique_phrase)
+    authentication_success = sr.verify_unique_phrase(users, currently_logged_user, unique_phrase)
 
     # Tento sleep potom vymazat
     # time.sleep(2)
@@ -493,6 +503,7 @@ def frame_authentication_success_callback():
 def button_end_interaction_callback():
     frame_authentication_success.lower()
     clear_frame(frame_authentication_success)
+    clear_global_variables()
     frame_intro.lift()
 
 
@@ -635,8 +646,15 @@ def button_registrate_phase_1_callback(label_first_phase, label_register_user, b
     button_registrate.destroy()
     window.update()
 
+    vr.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+    new_user_nickname = sr.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
+    new_user_nickname = new_user_nickname.lower()
+
+    msg_info = f"Recognized new user nickname: {new_user_nickname}"
+    log.log_info(msg_info)
+
     # Tento sleep potom vymazat
-    time.sleep(2)
+    #time.sleep(2)
 
     label_register_user.configure(text=Translations.get_translation('recording_ended'))
     window.update()
@@ -644,10 +662,7 @@ def button_registrate_phase_1_callback(label_first_phase, label_register_user, b
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    label_register_user.configure(text=Translations.get_translation('confirmation_nickname') + "XXXXX")
-
-    msg_info = f"New user nickname {new_user_nickname} registrated successfully."
-    log.log_info(msg_info)
+    label_register_user.configure(text=Translations.get_translation('confirmation_nickname') + new_user_nickname)
 
     button_repeat = ctk.CTkButton(master=frame_register_new_user, text=Translations.get_translation('repeat'),
                                   font=("Roboto", 38, "bold"),
@@ -673,6 +688,10 @@ def button_repeat_phase_1_callback():
 
 # create REGISTER NEW VOICEPRINTS FRAME widgets
 def button_confirm_phase_1_callback():
+    global new_user_nickname
+    msg_info = f"New user nickname {new_user_nickname} registrated successfully."
+    log.log_info(msg_info)
+
     global voiceprints_counter
     frame_register_new_user.lower()
     frame_register_new_voiceprints.lift()
@@ -798,8 +817,15 @@ def button_registrate_phase_3_callback(label_third_phase, label_register_user, b
     button_registrate.destroy()
     window.update()
 
+    vr.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+    new_user_unique_phrase = sr.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
+    #new_user_unique_phrase = new_user_unique_phrase.lower()
+
+    msg_info = f"Recognized new user unique phrase: {string_hasher.encode_string(new_user_unique_phrase)}"
+    log.log_info(msg_info)
+
     # Tento sleep potom vymazat
-    time.sleep(2)
+    #time.sleep(2)
 
     label_register_user.configure(text=Translations.get_translation('recording_ended'))
     window.update()
@@ -807,10 +833,7 @@ def button_registrate_phase_3_callback(label_third_phase, label_register_user, b
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    label_register_user.configure(text=Translations.get_translation('confirmation_phrase') + "XXXXX YYYYY")
-
-    msg_info = f"New unique phrase {new_user_unique_phrase} registrated successfully."
-    log.log_info(msg_info)
+    label_register_user.configure(text=Translations.get_translation('confirmation_phrase') + new_user_unique_phrase)
 
     button_repeat = ctk.CTkButton(master=frame_registrate_new_unique_phrase,
                                   text=Translations.get_translation('repeat'),
@@ -837,6 +860,10 @@ def button_repeat_phase_3_callback():
 
 
 def button_confirm_phase_3_callback(label_register_user, button_repeat, button_confirm):
+    global new_user_nickname, new_user_unique_phrase, users
+    msg_info = f"New unique phrase {string_hasher.encode_string(new_user_unique_phrase)} registrated successfully."
+    log.log_info(msg_info)
+
     label_register_user.destroy()
     button_repeat.destroy()
     button_confirm.destroy()
@@ -851,8 +878,20 @@ def button_confirm_phase_3_callback(label_register_user, button_repeat, button_c
     # Tento sleep potom vymazat
     time.sleep(2)
 
+    if json.add_user_to_json_file(users, new_user_nickname, string_hasher.encode_string(new_user_unique_phrase), const.USERS_FILENAME):
+        msg_info = f"New user {new_user_nickname} registered successfully."
+        log.log_info(msg_info)
+    else:
+        msg_warning = f"New user {new_user_nickname} couldn't be registered."
+        log.log_warning(msg_warning)
+
+    users = json.load_json_file(const.USERS_FILENAME)
+    new_user_nickname = ""
+    new_user_unique_phrase = ""
+
     frame_registrate_new_unique_phrase.lower()
     clear_frame(frame_registrate_new_unique_phrase)
+    clear_global_variables()
     frame_intro.lift()
 
     window.update()
@@ -897,11 +936,17 @@ def combobox_users_callback(value):
 
 
 def button_delete_user_callback():
-    global user_to_delete
+    global user_to_delete, users
+
     if user_to_delete in users.keys():
-        msg_info = f"User {user_to_delete} deleted successfully."
-        log.log_info(msg_info)
-        users.pop(user_to_delete)
+        if json.remove_user_from_json_file(users, user_to_delete, const.USERS_FILENAME):
+            msg_info = f"User {user_to_delete} deleted successfully."
+            log.log_info(msg_info)
+        else:
+            msg_warning = f"User {user_to_delete} not found in registered users."
+            log.log_warning(msg_warning)
+
+        users = json.load_json_file(const.USERS_FILENAME)
         user_to_delete = ""
         button_manage_users_callback()
 
@@ -991,6 +1036,7 @@ segmented_button_language = ctk.CTkSegmentedButton(master=frame_intro, values=["
                                                    command=segmented_button_language_callback, width=150, height=50)
 segmented_button_language.grid(row=6, column=7, pady=10, padx=10, sticky="nsew")
 
+users = json.load_json_file(const.USERS_FILENAME)
 
 def disable_minimize(event):
     window.overrideredirect(True)

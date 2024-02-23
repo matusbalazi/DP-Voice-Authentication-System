@@ -13,8 +13,6 @@ def recognize_speech(audio_file, current_language) -> str:
 
         try:
             recognized_speech = recognizer.recognize_google(audio_data, language=current_language)
-            msg_info = f"Recognized speech: {str(recognized_speech)}"
-            log.log_info(msg_info)
             return str(recognized_speech)
         except sr.UnknownValueError:
             msg_error = "Could not understand audio."
@@ -45,10 +43,21 @@ def verify_verification_word(recognized_verification_word, random_verification_w
 
 
 def verify_unique_phrase(speakers, logged_user, recognized_unique_phrase) -> bool:
-    unique_phrase = list(speakers[logged_user])[0]
-    unique_salt = list(speakers[logged_user])[1]
+    success = False
 
-    if string_hasher.check_string(recognized_unique_phrase, unique_phrase, unique_salt):
+    if logged_user != "":
+        unique_phrase = list(speakers[logged_user])[0]
+        unique_salt = list(speakers[logged_user])[1]
+        success = string_hasher.check_string(recognized_unique_phrase, unique_phrase, unique_salt)
+    else:
+        for values in speakers.values():
+            phrase = list(values)[0]
+            salt = list(values)[1]
+            success = string_hasher.check_string(recognized_unique_phrase, phrase, salt)
+            if success:
+                break
+
+    if success:
         log.log_info("Unique phrase verified!")
         return True
     else:
