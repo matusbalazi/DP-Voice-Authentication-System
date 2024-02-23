@@ -17,6 +17,7 @@ def encode_string(string, salt=None):
     log.log_info(msg_info)
     return encoded_string, salt.hex()
 
+
 def check_string(input_string, encoded_string, salt) -> bool:
     sha256 = hashlib.sha256()
     sha256.update(bytes.fromhex(salt))

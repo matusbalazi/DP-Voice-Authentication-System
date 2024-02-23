@@ -2,6 +2,7 @@ import json
 import os
 from general import log_file_builder as log
 
+
 def load_json_file(filename):
     try:
         with open(filename, "r") as file:

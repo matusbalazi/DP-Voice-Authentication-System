@@ -7,7 +7,7 @@ def recognize_speech(audio_file, current_language) -> str:
     recognizer = sr.Recognizer()
 
     with sr.AudioFile(audio_file) as source:
-        #recognizer.adjust_for_ambient_noise(source, duration=1)
+        # recognizer.adjust_for_ambient_noise(source, duration=1)
 
         audio_data = recognizer.record(source)
 
@@ -63,6 +63,3 @@ def verify_unique_phrase(speakers, logged_user, recognized_unique_phrase) -> boo
     else:
         log.log_warning("Unique phrase not verified!")
         return False
-
-
-

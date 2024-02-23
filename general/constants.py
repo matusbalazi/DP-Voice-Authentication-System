@@ -9,10 +9,10 @@ USERS_FILENAME = "users.json"
 LOGS_FILENAME = "app_logs.txt"
 
 USERS = {
-       "martin": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9"),
-       "ema": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9"),
-       "baláži": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9"),
-       "vista": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9")
+    "martin": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9"),
+    "ema": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9"),
+    "baláži": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9"),
+    "vista": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9")
 }
 
 VERIFICATION_WORDS = {
@@ -81,7 +81,6 @@ VERIFICATION_WORDS = {
            "throwing the ball",)
 }
 
-
-#VERIFICATION_WORDS = ["kvet", "počítač", "rieka", "stolička", "jablko", "škola", "letisko", "nástenka", "pláž", "okno",
+# VERIFICATION_WORDS = ["kvet", "počítač", "rieka", "stolička", "jablko", "škola", "letisko", "nástenka", "pláž", "okno",
 #                      "hora", "kľúč", "rukavica", "káva", "slúchadlo", "vlak"]
 # SPEAKERS = ["martin", "ema", "baláži"]

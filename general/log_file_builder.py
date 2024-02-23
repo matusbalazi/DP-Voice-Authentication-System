@@ -1,6 +1,7 @@
 from datetime import datetime
 from general import constants as const
 
+
 def log_message(message, level, filename=const.LOGS_FILENAME):
     timestamp = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
     with open(filename, "a") as log_file:

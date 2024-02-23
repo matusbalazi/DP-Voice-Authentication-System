@@ -11,7 +11,6 @@ from speech_and_voice import voice_recorder as vr
 from speech_and_voice import speech_recognizer as sr
 from database import json_file_builder as json
 
-
 user_to_delete = ""
 currently_logged_user = ""
 new_user_nickname = ""
@@ -654,7 +653,7 @@ def button_registrate_phase_1_callback(label_first_phase, label_register_user, b
     log.log_info(msg_info)
 
     # Tento sleep potom vymazat
-    #time.sleep(2)
+    # time.sleep(2)
 
     label_register_user.configure(text=Translations.get_translation('recording_ended'))
     window.update()
@@ -819,13 +818,13 @@ def button_registrate_phase_3_callback(label_third_phase, label_register_user, b
 
     vr.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
     new_user_unique_phrase = sr.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
-    #new_user_unique_phrase = new_user_unique_phrase.lower()
+    # new_user_unique_phrase = new_user_unique_phrase.lower()
 
     msg_info = f"Recognized new user unique phrase: {string_hasher.encode_string(new_user_unique_phrase)}"
     log.log_info(msg_info)
 
     # Tento sleep potom vymazat
-    #time.sleep(2)
+    # time.sleep(2)
 
     label_register_user.configure(text=Translations.get_translation('recording_ended'))
     window.update()
@@ -878,7 +877,8 @@ def button_confirm_phase_3_callback(label_register_user, button_repeat, button_c
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    if json.add_user_to_json_file(users, new_user_nickname, string_hasher.encode_string(new_user_unique_phrase), const.USERS_FILENAME):
+    if json.add_user_to_json_file(users, new_user_nickname, string_hasher.encode_string(new_user_unique_phrase),
+                                  const.USERS_FILENAME):
         msg_info = f"New user {new_user_nickname} registered successfully."
         log.log_info(msg_info)
     else:
@@ -1037,6 +1037,7 @@ segmented_button_language = ctk.CTkSegmentedButton(master=frame_intro, values=["
 segmented_button_language.grid(row=6, column=7, pady=10, padx=10, sticky="nsew")
 
 users = json.load_json_file(const.USERS_FILENAME)
+
 
 def disable_minimize(event):
     window.overrideredirect(True)
