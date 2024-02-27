@@ -1,5 +1,4 @@
 import time
-import random
 import customtkinter as ctk
 import tkinter as tk
 
@@ -10,6 +9,7 @@ from general import log_file_builder as log
 from speech_and_voice import voice_recorder as vr
 from speech_and_voice import speech_recognizer as sr
 from database import json_file_builder as json
+from database import connection_controller as conn
 
 user_to_delete = ""
 currently_logged_user = ""
@@ -32,11 +32,6 @@ window.geometry("%dx%d+0+0" % (width, height))
 window.attributes("-fullscreen", True)
 window.grid_rowconfigure(0, weight=1)
 window.grid_columnconfigure(0, weight=1)
-
-
-def generate_random_word() -> str:
-    random_verification_word = random.choice(const.VERIFICATION_WORDS[Translations.get_language()])
-    return random_verification_word
 
 
 def create_frame():
@@ -330,7 +325,7 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
     button_back.destroy()
     button_authenticate.destroy()
 
-    random_word = generate_random_word()
+    random_word = sr.generate_random_word(const.VERIFICATION_WORDS[Translations.get_language()])
 
     label_random_word = ctk.CTkLabel(master=frame_authentication_phase_2,
                                      text=random_word.upper(),
@@ -434,6 +429,7 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
 
     vr.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
     unique_phrase = sr.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
+    unique_phrase = unique_phrase.lower()
     authentication_success = sr.verify_unique_phrase(users, currently_logged_user, unique_phrase)
 
     # Tento sleep potom vymazat
@@ -446,6 +442,9 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
     time.sleep(2)
 
     if authentication_success:
+        if currently_logged_user == "":
+            currently_logged_user = sr.find_user_nickname(users, unique_phrase)
+
         msg_success = f"Authentication with unique phrase was successful. User {currently_logged_user} opened the door."
         log.log_info(msg_success)
         frame_authentication_success_callback()
@@ -818,7 +817,7 @@ def button_registrate_phase_3_callback(label_third_phase, label_register_user, b
 
     vr.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
     new_user_unique_phrase = sr.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
-    # new_user_unique_phrase = new_user_unique_phrase.lower()
+    new_user_unique_phrase = new_user_unique_phrase.lower()
 
     msg_info = f"Recognized new user unique phrase: {string_hasher.encode_string(new_user_unique_phrase)}"
     log.log_info(msg_info)
@@ -903,12 +902,15 @@ def button_manage_users_callback():
     frame_authentication_success.lower()
     frame_manage_users.lift()
 
+    users_to_show = users
+    del users_to_show[currently_logged_user]
+
     label_main_title = ctk.CTkLabel(master=frame_manage_users,
                                     text=Translations.get_translation('system_authentication'),
                                     font=("Roboto", 48, "bold"), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
-    combobox_users = ctk.CTkComboBox(master=frame_manage_users, values=list(users.keys()), font=("Roboto", 38, "bold"),
+    combobox_users = ctk.CTkComboBox(master=frame_manage_users, values=list(users_to_show.keys()), font=("Roboto", 38, "bold"),
                                      dropdown_font=("Roboto", 38, "bold"), justify=ctk.CENTER, hover=True,
                                      command=combobox_users_callback)
     combobox_users.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
@@ -940,7 +942,7 @@ def button_delete_user_callback():
 
     if user_to_delete in users.keys():
         if json.remove_user_from_json_file(users, user_to_delete, const.USERS_FILENAME):
-            msg_info = f"User {user_to_delete} deleted successfully."
+            msg_info = f"User {user_to_delete} deleted successfully from the app database."
             log.log_info(msg_info)
         else:
             msg_warning = f"User {user_to_delete} not found in registered users."
@@ -1036,6 +1038,7 @@ segmented_button_language = ctk.CTkSegmentedButton(master=frame_intro, values=["
                                                    command=segmented_button_language_callback, width=150, height=50)
 segmented_button_language.grid(row=6, column=7, pady=10, padx=10, sticky="nsew")
 
+is_internet_connection = conn.check_internet_connection()
 users = json.load_json_file(const.USERS_FILENAME)
 
 

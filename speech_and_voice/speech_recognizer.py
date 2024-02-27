@@ -1,3 +1,4 @@
+import random
 import speech_recognition as sr
 from general import log_file_builder as log
 from authentication import string_hasher
@@ -63,3 +64,19 @@ def verify_unique_phrase(speakers, logged_user, recognized_unique_phrase) -> boo
     else:
         log.log_warning("Unique phrase not verified!")
         return False
+
+
+def generate_random_word(set_of_words) -> str:
+    random_verification_word = random.choice(set_of_words)
+    return random_verification_word
+
+
+def find_user_nickname(users, recognized_unique_phrase) -> str:
+    user_nickname = ""
+
+    for key, value in users.items():
+        if string_hasher.check_string(recognized_unique_phrase, value[0], value[1]):
+            user_nickname = key
+            break
+
+    return user_nickname
