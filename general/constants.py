@@ -7,6 +7,8 @@ NUMBER_OF_VOICEPRINTS = 2
 RECORDED_AUDIO_FILENAME = "recorded_audio.wav"
 USERS_FILENAME = "users.json"
 LOGS_FILENAME = "app_logs.txt"
+SPEAKER_RECORDINGS_DIR = "../speech_and_voice/speaker_recognition/speaker_recordings/"
+SPEAKER_VOICEPRINTS_DIR = "../speech_and_voice/speaker_recognition/speaker_voiceprints/"
 
 VERIFICATION_WORDS = {
     "SK": ("jablko",

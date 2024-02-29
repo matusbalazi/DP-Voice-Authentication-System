@@ -5,9 +5,7 @@ import pandas as pd
 import numpy as np
 import torchaudio
 import torchaudio.transforms
-from speechbrain.pretrained import EncoderClassifier
 from general import log_file_builder as log
-import voice_recorder as vr
 
 
 def open_and_resample_audio_signal(filename, resample_rate=16000):
@@ -41,34 +39,26 @@ def create_voiceprints(classifier, input_dir, output_dir, num_recordings=10):
         log.log_error(msg_error)
         return
 
-    input_sub_dirs = os.listdir(input_dir)
     file_ext = "*.wav"
-    for sub_dir in input_sub_dirs:
-        speaker_dir = os.path.join(output_dir, sub_dir)
-        try:
-            os.mkdir(speaker_dir)
-        except OSError as e:
-            msg_error = f"Error creating directory '{speaker_dir}': {e}"
-            log.log_error(msg_error)
+    count = 0
+    for filename in glob.glob(os.path.join(input_dir, file_ext)):
+        speaker_audio_signal = open_and_resample_audio_signal(filename)
 
-        count = 0
-        for filename in glob.glob(os.path.join(input_dir, sub_dir, file_ext)):
-            speaker_audio_signal = open_and_resample_audio_signal(filename)
+        if speaker_audio_signal is not None:
+            msg_info = f"Creating voiceprint from audio file {filename}."
+            log.log_info(msg_info)
+            voiceprint = classifier.encode_batch(speaker_audio_signal)
+            output_voiceprint_file = os.path.join(output_dir, os.path.splitext(os.path.basename(filename))[0] + ".pt")
+            try:
+                torch.save(voiceprint, output_voiceprint_file)
+                count += 1
+            except Exception as e:
+                msg_error = f"Error saving voiceprint for {filename} to {output_voiceprint_file}: {e}"
+                log.log_error(msg_error)
 
-            if speaker_audio_signal is not None:
-                msg_info = f"Creating voiceprint from audio file {filename}."
-                log.log_info(msg_info)
-                voiceprint = classifier.encode_batch(speaker_audio_signal)
-                output_voiceprint_file = os.path.join(output_dir, sub_dir, os.path.splitext(os.path.basename(filename))[0] + ".pt")
-                try:
-                    torch.save(voiceprint, output_voiceprint_file)
-                    count += 1
-                except Exception as e:
-                    msg_error = f"Error saving voiceprint for {filename} to {output_voiceprint_file}: {e}"
-                    log.log_error(msg_error)
+        if count == num_recordings:
+            break
 
-            if count == num_recordings:
-                break
 
 
 def verify_speaker(classifier, input_dir, speaker_audio_path, threshold=0.6):
@@ -116,19 +106,19 @@ def verify_speaker(classifier, input_dir, speaker_audio_path, threshold=0.6):
         return success
 
 
-input_dir = "speaker_recognition/speaker_recordings/"
-output_dir = "speaker_recognition/speaker_voiceprints/"
+#input_dir = "speaker_recognition/speaker_recordings/"
+#output_dir = "speaker_recognition/speaker_voiceprints/"
 
 #for i in range(3):
 #    print("Recording " + str(i+1))
 #    file_path = input_dir + "Matus/Matus" "_" + str(i+1) + ".wav"
 #    vr.record_and_save_audio(file_path)
 
-classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb", savedir=r"pretrained_models/spkrec-ecapa-voxceleb", run_opts={"device":"cpu"})
+#classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb", savedir=r"pretrained_models/spkrec-ecapa-voxceleb", run_opts={"device":"cpu"})
 #create_voiceprints(classifier, input_dir, output_dir)
 
 #print("Recording")
 #audio_file = vr.record_and_save_audio("Matus.wav")
 
-result = verify_speaker(classifier, output_dir, "Matus.wav")
-print(result)
+#result = verify_speaker(classifier, output_dir, "Matus.wav")
+#print(result)
