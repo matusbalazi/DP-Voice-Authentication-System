@@ -56,6 +56,9 @@ class Translations:
             'registrate': "Registrovať",
 
             'confirmation_nickname': "• Zvolili ste si prihlasovacie meno: ",
+            'nickname_exists_1': "• Zvolené prihlasovacie meno ",
+            'nickname_exists_2': " už je zaregistrované.",
+            'nickname_exists_3': "• Opakujte, prosím, proces s iným prihlasovacím menom.",
             'repeat': "Opakovať",
 
             'registration_second_phase': "2. fáza registrácie",
@@ -129,6 +132,9 @@ class Translations:
             'registrate': "Registrate",
 
             'confirmation_nickname': "• You have chosen a login name: ",
+            'nickname_exists_1': "• Chosen login name ",
+            'nickname_exists_2': " is already registered.",
+            'nickname_exists_3': "• Please repeat the process with a different login name.",
             'repeat': "Repeat",
 
             'registration_second_phase': "2nd Registration Phase",

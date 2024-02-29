@@ -61,11 +61,13 @@ def create_voiceprints(classifier, input_dir, output_dir, num_recordings=10):
 
 
 
-def verify_speaker(classifier, input_dir, speaker_audio_path, threshold=0.6):
+def verify_all_speakers(classifier, input_dir, speaker_audio_path, threshold=0.6):
+    speaker_nickname = ""
+
     if not os.path.isdir(input_dir):
         msg_error = f"Error: Input directory {input_dir} not found."
         log.log_error(msg_error)
-        return
+        return speaker_nickname
 
     device = torch.device("cpu")
     speaker_audio_signal = open_and_resample_audio_signal(speaker_audio_path)
@@ -91,19 +93,50 @@ def verify_speaker(classifier, input_dir, speaker_audio_path, threshold=0.6):
         if (df["score"] == 0).all():
             msg_warning = "Speaker is not an eligible person."
             log.log_warning(msg_warning)
-            success = False
+            speaker_nickname = ""
         else:
             target = df.loc[df.score == df.score.max()]
             target = target["speaker"].values[0]
             msg_info = f"This is authorized speaker {target}."
             log.log_info(msg_info)
-            success = True
+            speaker_nickname = target
 
-        #max_score = df["score"].max()
-        #row_with_max_score = df[df["score"] == max_score]
-        #SPK_with_max_score = row_with_max_score["speaker"].values[0]
+        return speaker_nickname
 
+
+def verify_speaker(classifier, input_dir, speaker_audio_path, threshold=0.6):
+    success = False
+
+    if not os.path.isdir(input_dir):
+        msg_error = f"Error: Input directory {input_dir} not found."
+        log.log_error(msg_error)
         return success
+
+    device = torch.device("cpu")
+    speaker_audio_signal = open_and_resample_audio_signal(speaker_audio_path)
+
+    if speaker_audio_signal is not None:
+        voiceprint_test = classifier.encode_batch(speaker_audio_signal)
+        cos = torch.nn.CosineSimilarity(dim=2, eps=1e-6)
+
+        score = 0
+        file_ext = "*.pt"
+        for filename in glob.glob(os.path.join(input_dir, file_ext)):
+            enrolled_voiceprint = torch.load(filename, map_location=device)
+            result = cos(enrolled_voiceprint, voiceprint_test)
+
+            if result[0].cpu().detach().numpy() > threshold:
+                score += 1
+
+        if score == 0:
+            msg_warning = "Speaker is not an eligible person."
+            log.log_warning(msg_warning)
+        else:
+            success = True
+            msg_info = f"This is an authorized speaker with a score of {score}."
+            log.log_info(msg_info)
+
+    return success
 
 
 #input_dir = "speaker_recognition/speaker_recordings/"

@@ -242,9 +242,11 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
     label_authenticate_user.configure(text=Translations.get_translation('recording'))
     window.update()
 
+    # SPEECH RECOGNITION
     recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
     speaker_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
-    login_success = s_recognizer.verify_speaker_nickname(users.keys(), speaker_nickname)
+    speaker_nickname = speaker_nickname.lower()
+    speaker_exists = s_recognizer.verify_speaker_nickname(users.keys(), speaker_nickname)
 
     msg_info = f"Recognized speaker nickname: {speaker_nickname}"
     log.log_info(msg_info)
@@ -258,13 +260,22 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    if login_success:
+    if speaker_exists:
         currently_logged_user = speaker_nickname.lower()
-        msg_success = f"User {speaker_nickname} signed in successfully."
-        log.log_info(msg_success)
-        frame_authentication_phase_2_callback()
+
+        speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + speaker_nickname + "/"
+        login_success = v_recognizer.verify_speaker(classifier, speaker_dir, const.RECORDED_AUDIO_FILENAME)
+
+        if login_success:
+            msg_success = f"User {speaker_nickname} signed in successfully."
+            log.log_info(msg_success)
+            frame_authentication_phase_2_callback()
+        else:
+            msg_warning = f"User {speaker_nickname} failed to sign in. Voice characteristics doesn't match."
+            log.log_warning(msg_warning)
+            frame_authentication_unsuccess_callback(1)
     else:
-        msg_warning = f"User {speaker_nickname} failed to sign in."
+        msg_warning = f"Speaker {speaker_nickname} does not exist. "
         log.log_warning(msg_warning)
         frame_authentication_unsuccess_callback(1)
 
@@ -344,8 +355,9 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
     # time.sleep(2)
 
     recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
-    spoken_verification_word = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
-    verification_success = s_recognizer.verify_verification_word(spoken_verification_word, random_word)
+    spoken_verification_word = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                             Translations.get_language().lower())
+    spoken_verification_word_matches = s_recognizer.verify_verification_word(spoken_verification_word, random_word)
 
     msg_info = f"Recognized verification word: {spoken_verification_word}"
     log.log_info(msg_info)
@@ -356,10 +368,18 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    if verification_success:
-        msg_success = f"Verification word {random_word} matched with spoken word {spoken_verification_word}."
-        log.log_info(msg_success)
-        frame_authentication_phase_3_callback()
+    if spoken_verification_word_matches:
+        speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
+        verification_success = v_recognizer.verify_speaker(classifier, speaker_dir, const.RECORDED_AUDIO_FILENAME)
+
+        if verification_success:
+            msg_success = f"Verification word {random_word} matched with spoken word {spoken_verification_word}. Speaker is registered user."
+            log.log_info(msg_success)
+            frame_authentication_phase_3_callback()
+        else:
+            msg_warning = f"Speaker's voice characteristics don't match."
+            log.log_warning(msg_warning)
+            frame_authentication_unsuccess_callback(2)
     else:
         msg_warning = f"Verification word {random_word} didn't match with spoken word {spoken_verification_word}."
         log.log_warning(msg_warning)
@@ -435,7 +455,7 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
     recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
     unique_phrase = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
     unique_phrase = unique_phrase.lower()
-    authentication_success = s_recognizer.verify_unique_phrase(users, currently_logged_user, unique_phrase)
+    unique_phrase_matches = s_recognizer.verify_unique_phrase(users, currently_logged_user, unique_phrase)
 
     # Tento sleep potom vymazat
     # time.sleep(2)
@@ -446,13 +466,23 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
     # Tento sleep potom vymazat
     time.sleep(2)
 
-    if authentication_success:
+    if unique_phrase_matches:
         if currently_logged_user == "":
-            currently_logged_user = s_recognizer.find_user_nickname(users, unique_phrase)
+            currently_logged_user = v_recognizer.verify_all_speakers(classifier, const.SPEAKER_VOICEPRINTS_DIR, const.RECORDED_AUDIO_FILENAME)
 
-        msg_success = f"Authentication with unique phrase was successful. User {currently_logged_user} opened the door."
-        log.log_info(msg_success)
-        frame_authentication_success_callback()
+        speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
+        authentication_success = v_recognizer.verify_speaker(classifier, speaker_dir,
+                                                                 const.RECORDED_AUDIO_FILENAME)
+
+        if authentication_success:
+            msg_success = f"Authentication with unique phrase was successful. User {currently_logged_user} opened the door."
+            log.log_info(msg_success)
+            os.remove(const.RECORDED_AUDIO_FILENAME)
+            frame_authentication_success_callback()
+        else:
+            msg_warning = f"Speaker's voice characteristics don't match. Door can't be opened."
+            log.log_warning(msg_warning)
+            frame_authentication_unsuccess_callback(3)
     else:
         msg_warning = f"Authentication with unique phrase wasn't successful. User {currently_logged_user} couldn't open the door."
         log.log_warning(msg_warning)
@@ -651,7 +681,8 @@ def button_registrate_phase_1_callback(label_first_phase, label_register_user, b
 
     # SPEECH recognition
     recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
-    new_user_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
+    new_user_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                      Translations.get_language().lower())
     new_user_nickname = new_user_nickname.lower()
 
     msg_info = f"Recognized new user nickname: {new_user_nickname}"
@@ -680,8 +711,15 @@ def button_registrate_phase_1_callback(label_first_phase, label_register_user, b
                                    font=("Roboto", 38, "bold"),
                                    command=button_confirm_phase_1_callback,
                                    width=275,
-                                   height=70)
+                                   height=70, state="normal")
     button_confirm.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+    if new_user_nickname in users:
+        button_confirm.configure(state="disabled")
+        label_register_user.configure(
+            text=Translations.get_translation('nickname_exists_1') + new_user_nickname + Translations.get_translation(
+                'nickname_exists_2') + "\n\n" + Translations.get_translation('nickname_exists_3'),
+            font=("Roboto", 38, "bold"), text_color="red")
 
     window.update()
 
@@ -772,7 +810,7 @@ def button_registrate_phase_2_callback(label_second_phase, label_register_user, 
     recordings_counter += 1
 
     # Tento sleep potom vymazat
-    #time.sleep(2)
+    # time.sleep(2)
 
     label_register_user.configure(text=Translations.get_translation('recording_ended'))
     window.update()
@@ -840,7 +878,8 @@ def button_registrate_phase_3_callback(label_third_phase, label_register_user, b
     window.update()
 
     recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
-    new_user_unique_phrase = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
+    new_user_unique_phrase = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                           Translations.get_language().lower())
     new_user_unique_phrase = new_user_unique_phrase.lower()
 
     msg_info = f"Recognized new user unique phrase: {string_hasher.encode_string(new_user_unique_phrase)}"
@@ -914,6 +953,7 @@ def button_confirm_phase_3_callback(label_register_user, button_repeat, button_c
         msg_info = f"New user {new_user_nickname} registered successfully."
         log.log_info(msg_info)
         manager.remove_dir_with_files(new_user_dir)
+        os.remove(const.RECORDED_AUDIO_FILENAME)
     else:
         msg_warning = f"New user {new_user_nickname} couldn't be registered."
         log.log_warning(msg_warning)
@@ -944,7 +984,8 @@ def button_manage_users_callback():
                                     font=("Roboto", 48, "bold"), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
-    combobox_users = ctk.CTkComboBox(master=frame_manage_users, values=list(users_to_show.keys()), font=("Roboto", 38, "bold"),
+    combobox_users = ctk.CTkComboBox(master=frame_manage_users, values=list(users_to_show.keys()),
+                                     font=("Roboto", 38, "bold"),
                                      dropdown_font=("Roboto", 38, "bold"), justify=ctk.CENTER, hover=True,
                                      command=combobox_users_callback)
     combobox_users.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
@@ -1076,7 +1117,10 @@ segmented_button_language.grid(row=6, column=7, pady=10, padx=10, sticky="nsew")
 
 is_internet_connection = conn.check_internet_connection()
 users = json.load_json_file(const.USERS_FILENAME)
-classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb", savedir=r"pretrained_models/spkrec-ecapa-voxceleb", run_opts={"device":"cpu"})
+classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb",
+                                            savedir=r"pretrained_models/spkrec-ecapa-voxceleb",
+                                            run_opts={"device": "cpu"})
+
 
 def disable_minimize(event):
     window.overrideredirect(True)
