@@ -60,7 +60,6 @@ def create_voiceprints(classifier, input_dir, output_dir, num_recordings=10):
             break
 
 
-
 def verify_all_speakers(classifier, input_dir, speaker_audio_path, threshold=0.6):
     speaker_nickname = ""
 
@@ -138,20 +137,19 @@ def verify_speaker(classifier, input_dir, speaker_audio_path, threshold=0.6):
 
     return success
 
+# input_dir = "speaker_recognition/speaker_recordings/"
+# output_dir = "speaker_recognition/speaker_voiceprints/"
 
-#input_dir = "speaker_recognition/speaker_recordings/"
-#output_dir = "speaker_recognition/speaker_voiceprints/"
-
-#for i in range(3):
+# for i in range(3):
 #    print("Recording " + str(i+1))
 #    file_path = input_dir + "Matus/Matus" "_" + str(i+1) + ".wav"
 #    vr.record_and_save_audio(file_path)
 
-#classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb", savedir=r"pretrained_models/spkrec-ecapa-voxceleb", run_opts={"device":"cpu"})
-#create_voiceprints(classifier, input_dir, output_dir)
+# classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb", savedir=r"pretrained_models/spkrec-ecapa-voxceleb", run_opts={"device":"cpu"})
+# create_voiceprints(classifier, input_dir, output_dir)
 
-#print("Recording")
-#audio_file = vr.record_and_save_audio("Matus.wav")
+# print("Recording")
+# audio_file = vr.record_and_save_audio("Matus.wav")
 
-#result = verify_speaker(classifier, output_dir, "Matus.wav")
-#print(result)
+# result = verify_speaker(classifier, output_dir, "Matus.wav")
+# print(result)

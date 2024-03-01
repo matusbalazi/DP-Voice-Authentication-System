@@ -3,6 +3,7 @@ VERIFICATION_SUCCESS = True
 AUTHENTICATION_SUCCESS = True
 IS_ADMIN = True
 NUMBER_OF_VOICEPRINTS = 2
+IS_INTERNET_CONN = False
 
 RECORDED_AUDIO_FILENAME = "../recorded_audio.wav"
 USERS_FILENAME = "../users.json"
@@ -84,4 +85,4 @@ VERIFICATION_WORDS = {
 #    "ema": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9"),
 #    "baláži": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9"),
 #    "vista": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9")
-#}
+# }

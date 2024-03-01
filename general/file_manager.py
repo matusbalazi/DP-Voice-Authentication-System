@@ -51,4 +51,3 @@ def remove_dir_with_files(dir):
         msg_error = f"Removing the directory {dir} failed. An error occurred: {str(e)}"
         log.log_error(msg_error)
         return False
-

@@ -55,5 +55,3 @@ def remove_user_from_json_file(users, user_key, filename):
         log.log_error(msg_error)
 
     return success
-
-

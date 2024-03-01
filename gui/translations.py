@@ -74,7 +74,10 @@ class Translations:
             'registration_unsuccess': "Registrácia bola neúspešná!",
             'registration_unsuccess_info': "• Zvolené prihlasovacie meno už existuje.",
 
-            'delete': "Vymazať"
+            'delete': "Vymazať",
+
+            'internet': "Bez internetového pripojenia",
+            'logged_user': "Aktuálne prihlásený používateľ: "
         },
         'EN': {
             'system_authentication': "Voice Authentication System",
@@ -150,7 +153,10 @@ class Translations:
             'registration_unsuccess': "Registration failed!",
             'registration_unsuccess_info': "• The chosen login name already exists.",
 
-            'delete': "Delete"
+            'delete': "Delete",
+
+            'internet': "Without Internet Connection",
+            'logged_user': "Currently logged user: "
         }
     }
 
