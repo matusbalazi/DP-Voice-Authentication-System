@@ -81,7 +81,9 @@ class Translations:
 
             'limited_mode': "• Aplikácia pracuje v obmedzenom režime.",
             'password_to_continue': "• Pre pokračovanie zadajte heslo.",
-            'waiting_for_connection': "ČAKANIE NA INTERNETOVÉ PRIPOJENIE..."
+            'waiting_for_connection': "ČAKANIE NA INTERNETOVÉ PRIPOJENIE...",
+            'nickname_to_continue': "• Zadajte prihlasovacie meno do textového poľa\n  s použitím klávesnice.",
+            'phrase_to_continue': "• Zadajte unikátnu frázu do textového poľa\n  s použitím klávesnice."
         },
         'EN': {
             'system_authentication': "Voice Authentication System",
@@ -164,7 +166,9 @@ class Translations:
 
             'limited_mode': "• Application works in limited mode.",
             'password_to_continue': "• Enter the password to continue.",
-            'waiting_for_connection': "WAITING FOR INTERNET CONNECTION..."
+            'waiting_for_connection': "WAITING FOR INTERNET CONNECTION...",
+            'nickname_to_continue': "• Enter a login name to the text field\n  using the keyboard.",
+            'phrase_to_continue': "• Enter a unique phrase to the text field\n  using the keyboard."
         }
     }
 

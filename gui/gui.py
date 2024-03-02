@@ -174,6 +174,7 @@ def button_back_callback(frame_to_hide, frame_to_show):
     clear_frame(frame_to_hide)
     frame_to_hide.lower()
     frame_to_show.lift()
+    window.update()
 
 
 def button_password_callback(value):
@@ -250,15 +251,15 @@ def frame_not_internet_connection_callback():
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
     label_not_connection = ctk.CTkLabel(master=frame_not_internet_connection,
-                                     text=Translations.get_translation('internet'),
-                                     font=("Roboto", 38, "bold"), text_color="red", justify=ctk.CENTER)
+                                        text=Translations.get_translation('internet'),
+                                        font=("Roboto", 38, "bold"), text_color="red", justify=ctk.CENTER)
     label_not_connection.grid(row=3, column=4, sticky="nsew")
 
     label_limited_mode = ctk.CTkLabel(master=frame_not_internet_connection,
-                                           text=Translations.get_translation(
-                                               'limited_mode') + "\n\n" + Translations.get_translation(
-                                               'password_to_continue'),
-                                           font=("Roboto", 38), justify=ctk.LEFT)
+                                      text=Translations.get_translation(
+                                          'limited_mode') + "\n\n" + Translations.get_translation(
+                                          'password_to_continue'),
+                                      font=("Roboto", 38), justify=ctk.LEFT)
     label_limited_mode.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
     button_exit = ctk.CTkButton(master=frame_not_internet_connection, text=Translations.get_translation('exit'),
@@ -268,10 +269,12 @@ def frame_not_internet_connection_callback():
 
     button_back = ctk.CTkButton(master=frame_not_internet_connection, text=Translations.get_translation('back'),
                                 font=("Roboto", 38, "bold"),
-                                command=lambda: button_back_callback(frame_not_internet_connection, frame_open_door), width=150, height=60)
+                                command=lambda: button_back_callback(frame_not_internet_connection, frame_open_door),
+                                width=150, height=60)
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
-    entry_password = ctk.CTkEntry(master=frame_not_internet_connection, font=("Roboto", 38, "bold"), placeholder_text="", show="*",
+    entry_password = ctk.CTkEntry(master=frame_not_internet_connection, font=("Roboto", 38, "bold"),
+                                  placeholder_text="", show="*",
                                   justify=ctk.CENTER, width=150, height=60)
     entry_password.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
 
@@ -306,7 +309,8 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
 
         # SPEECH RECOGNITION
         recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
-        speaker_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
+        speaker_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                         Translations.get_language().lower())
         speaker_nickname = speaker_nickname.lower()
         speaker_exists = s_recognizer.verify_speaker_nickname(users.keys(), speaker_nickname)
 
@@ -569,8 +573,10 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
 
 # create AUTHENTICATION SUCCESS FRAME widgets
 def frame_authentication_success_callback():
-    global remaining_attempts
+    global remaining_attempts, is_internet_connection
     remaining_attempts = 3
+
+    is_internet_connection = conn.check_internet_connection()
 
     clear_frame(frame_authentication_success)
     frame_authentication_phase_3.lower()
@@ -608,11 +614,14 @@ def frame_authentication_success_callback():
                                          font=("Roboto", 48, "bold"), command=button_register_user_callback)
     button_register_user.grid(row=5, column=4, pady=10, padx=10, sticky="nsew")
 
-    if const.IS_ADMIN and conn.check_internet_connection():
-        button_manage_users = ctk.CTkButton(master=frame_authentication_success,
-                                            text=Translations.get_translation('manage_users'),
-                                            font=("Roboto", 48, "bold"), command=button_manage_users_callback)
+    button_manage_users = ctk.CTkButton(master=frame_authentication_success,
+                                        text=Translations.get_translation('manage_users'),
+                                        font=("Roboto", 48, "bold"), command=button_manage_users_callback)
+
+    if const.IS_ADMIN and is_internet_connection:
         button_manage_users.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
+    else:
+        button_manage_users.destroy()
 
 
 def button_end_interaction_callback():
@@ -689,22 +698,22 @@ def button_authenticate_again_callback(phase):
 # create REGISTRATION FRAME widgets
 def button_sign_up_callback():
     frame_open_door.lower()
-    frame_registraction.lift()
+    frame_registration.lift()
     clear_frames(authentication_frames)
 
-    label_main_title = ctk.CTkLabel(master=frame_registraction,
+    label_main_title = ctk.CTkLabel(master=frame_registration,
                                     text=Translations.get_translation('system_authentication'),
                                     font=("Roboto", 48, "bold"), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
-    label_registration = ctk.CTkLabel(master=frame_registraction,
+    label_registration = ctk.CTkLabel(master=frame_registration,
                                       text=Translations.get_translation(
                                           'registration_info') + "\n\n" + Translations.get_translation(
                                           'continue_to_sign_in'),
                                       font=("Roboto", 38), justify=ctk.LEFT)
     label_registration.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
-    button_sign_in_again = ctk.CTkButton(master=frame_registraction, text=Translations.get_translation('sign_in'),
+    button_sign_in_again = ctk.CTkButton(master=frame_registration, text=Translations.get_translation('sign_in'),
                                          font=("Roboto", 48, "bold"), command=button_sign_in_callback)
     button_sign_in_again.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
 
@@ -753,53 +762,128 @@ def button_register_user_callback():
 
 
 def button_registrate_phase_1_callback(label_first_phase, label_register_user, button_back, button_registrate):
-    global new_user_nickname
+    global new_user_nickname, is_internet_connection
+    is_internet_connection = conn.check_internet_connection()
 
-    label_first_phase.destroy()
-    label_register_user.configure(text=Translations.get_translation('recording'))
-    button_back.destroy()
-    button_registrate.destroy()
-    window.update()
+    if is_internet_connection:
+        label_first_phase.destroy()
+        label_register_user.configure(text=Translations.get_translation('recording'))
+        button_back.destroy()
+        button_registrate.destroy()
+        window.update()
 
-    # SPEECH recognition
-    recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
-    new_user_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
-                                                      Translations.get_language().lower())
-    new_user_nickname = new_user_nickname.lower()
+        # SPEECH recognition
+        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+        new_user_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                          Translations.get_language().lower())
+        new_user_nickname = new_user_nickname.lower()
 
-    msg_info = f"Recognized new user nickname: {new_user_nickname}"
-    log.log_info(msg_info)
+        msg_info = f"Recognized new user nickname: {new_user_nickname}"
+        log.log_info(msg_info)
 
-    label_register_user.configure(text=Translations.get_translation('recording_ended'))
-    window.update()
+        label_register_user.configure(text=Translations.get_translation('recording_ended'))
+        window.update()
 
-    time.sleep(1.5)
+        time.sleep(1.5)
 
-    label_register_user.configure(text=Translations.get_translation('confirmation_nickname') + new_user_nickname)
+        label_register_user.configure(text=Translations.get_translation('confirmation_nickname') + new_user_nickname)
 
-    button_repeat = ctk.CTkButton(master=frame_register_new_user, text=Translations.get_translation('repeat'),
-                                  font=("Roboto", 38, "bold"),
-                                  command=button_repeat_phase_1_callback,
-                                  width=275,
-                                  height=70)
-    button_repeat.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+        button_repeat = ctk.CTkButton(master=frame_register_new_user, text=Translations.get_translation('repeat'),
+                                      font=("Roboto", 38, "bold"),
+                                      command=button_repeat_phase_1_callback,
+                                      width=275,
+                                      height=70)
+        button_repeat.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
-    button_confirm = ctk.CTkButton(master=frame_register_new_user,
+        button_confirm = ctk.CTkButton(master=frame_register_new_user,
+                                       text=Translations.get_translation('confirm'),
+                                       font=("Roboto", 38, "bold"),
+                                       command=button_confirm_phase_1_callback,
+                                       width=275,
+                                       height=70, state="normal")
+        button_confirm.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+        if new_user_nickname in users:
+            button_confirm.configure(state="disabled")
+            label_register_user.configure(
+                text=Translations.get_translation(
+                    'nickname_exists_1') + new_user_nickname + Translations.get_translation(
+                    'nickname_exists_2') + "\n\n" + Translations.get_translation('nickname_exists_3'),
+                font=("Roboto", 38, "bold"), text_color="red")
+
+        window.update()
+    else:
+        frame_register_not_internet_callback("nickname", None, None, None)
+
+
+def frame_register_not_internet_callback(phase, label_register_user, button_repeat, button_confirm):
+    frame_register_not_internet.lift()
+
+    label_main_title = ctk.CTkLabel(master=frame_register_not_internet,
+                                    text=Translations.get_translation('system_authentication'),
+                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+    label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+
+    label_not_connection = ctk.CTkLabel(master=frame_register_not_internet,
+                                        text=Translations.get_translation('internet'),
+                                        font=("Roboto", 38, "bold"), text_color="red", justify=ctk.CENTER)
+    label_not_connection.grid(row=3, column=4, sticky="nsew")
+
+    label_register_user = ctk.CTkLabel(master=frame_register_not_internet,
+                                       text=Translations.get_translation(
+                                           'nickname_exists_1') + new_user_nickname + Translations.get_translation(
+                                           'nickname_exists_2') + "\n\n" + Translations.get_translation(
+                                           'nickname_exists_3'),
+                                       font=("Roboto", 32, "bold"), text_color="red", justify=ctk.LEFT)
+
+    entry_register = ctk.CTkEntry(master=frame_register_not_internet, font=("Roboto", 38, "bold"),
+                                  placeholder_text="",
+                                  justify=ctk.CENTER, width=150, height=60)
+    entry_register.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
+
+    button_confirm = ctk.CTkButton(master=frame_register_not_internet,
                                    text=Translations.get_translation('confirm'),
                                    font=("Roboto", 38, "bold"),
-                                   command=button_confirm_phase_1_callback,
-                                   width=275,
-                                   height=70, state="normal")
-    button_confirm.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+                                   command=lambda: button_confirm_register_callback(entry_register.get(), phase,
+                                                                                    label_register_user, button_repeat,
+                                                                                    button_confirm), width=150,
+                                   height=60)
+    button_confirm.grid(row=7, column=4, pady=10, padx=10, sticky="nsew")
 
-    if new_user_nickname in users:
-        button_confirm.configure(state="disabled")
-        label_register_user.configure(
-            text=Translations.get_translation('nickname_exists_1') + new_user_nickname + Translations.get_translation(
-                'nickname_exists_2') + "\n\n" + Translations.get_translation('nickname_exists_3'),
-            font=("Roboto", 38, "bold"), text_color="red")
+    if phase == "nickname":
+        label_limited_mode = ctk.CTkLabel(master=frame_register_not_internet,
+                                          text=Translations.get_translation(
+                                              'limited_mode') + "\n\n" + Translations.get_translation(
+                                              'nickname_to_continue'),
+                                          font=("Roboto", 38), justify=ctk.LEFT)
+        label_limited_mode.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
-    window.update()
+        if new_user_nickname in users:
+            label_register_user.grid(row=5, column=4, pady=10, padx=10, sticky="nsew")
+        else:
+            label_register_user.destroy()
+
+    elif phase == "unique_phrase":
+        label_limited_mode = ctk.CTkLabel(master=frame_register_not_internet,
+                                          text=Translations.get_translation(
+                                              'limited_mode') + "\n\n" + Translations.get_translation(
+                                              'phrase_to_continue'),
+                                          font=("Roboto", 38), justify=ctk.LEFT)
+        label_limited_mode.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
+
+
+def button_confirm_register_callback(value, phase, label_register_user, button_repeat, button_confirm):
+    global new_user_nickname, new_user_unique_phrase
+
+    if phase == "nickname":
+        new_user_nickname = value.lower()
+        if new_user_nickname in users:
+            frame_register_not_internet_callback(phase, label_register_user, button_repeat, button_confirm)
+        else:
+            button_confirm_phase_1_callback()
+    elif phase == "unique_phrase":
+        new_user_unique_phrase = value.lower()
+        button_confirm_phase_3_callback(label_register_user, button_repeat, button_confirm)
 
 
 def button_repeat_phase_1_callback():
@@ -810,22 +894,29 @@ def button_repeat_phase_1_callback():
 def button_confirm_phase_1_callback():
     global new_user_nickname, voiceprints_counter, recordings_counter
 
+    number_of_voiceprints = const.NUMBER_OF_VOICEPRINTS
+
+    if not is_internet_connection:
+        number_of_voiceprints = number_of_voiceprints + 2
+
     if voiceprints_counter == 0:
         msg_info = f"New user nickname {new_user_nickname} registrated successfully."
         log.log_info(msg_info)
 
         # VOICE RECOGNITION
         new_user_dir = const.SPEAKER_RECORDINGS_DIR + new_user_nickname + "/"
-        new_user_file = new_user_nickname + "_" + str(recordings_counter) + ".wav"
         os.mkdir(new_user_dir)
-        manager.move_and_rename_audio(const.RECORDED_AUDIO_FILENAME, new_user_file, new_user_dir)
-        recordings_counter += 1
+        if is_internet_connection:
+            new_user_file = new_user_nickname + "_" + str(recordings_counter) + ".wav"
+            manager.move_and_rename_audio(const.RECORDED_AUDIO_FILENAME, new_user_file, new_user_dir)
+            recordings_counter += 1
 
     frame_register_new_user.lower()
+    frame_register_not_internet.lower()
     frame_register_new_voiceprints.lift()
     clear_frames(registration_frames)
 
-    if voiceprints_counter < const.NUMBER_OF_VOICEPRINTS:
+    if voiceprints_counter < number_of_voiceprints:
         label_main_title = ctk.CTkLabel(master=frame_register_new_voiceprints,
                                         text=Translations.get_translation('system_authentication'),
                                         font=("Roboto", 48, "bold"), justify=ctk.CENTER)
@@ -943,28 +1034,7 @@ def frame_registrate_new_unique_phrase_callback():
 
 
 def button_registrate_phase_3_callback(label_third_phase, label_register_user, button_back, button_registrate):
-    global new_user_unique_phrase
-
-    label_third_phase.destroy()
-    label_register_user.configure(text=Translations.get_translation('recording'))
-    button_back.destroy()
-    button_registrate.destroy()
-    window.update()
-
-    recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
-    new_user_unique_phrase = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
-                                                           Translations.get_language().lower())
-    new_user_unique_phrase = new_user_unique_phrase.lower()
-
-    msg_info = f"Recognized new user unique phrase: {string_hasher.encode_string(new_user_unique_phrase)}"
-    log.log_info(msg_info)
-
-    label_register_user.configure(text=Translations.get_translation('recording_ended'))
-    window.update()
-
-    time.sleep(1.5)
-
-    label_register_user.configure(text=Translations.get_translation('confirmation_phrase') + new_user_unique_phrase)
+    global new_user_unique_phrase, is_internet_connection
 
     button_repeat = ctk.CTkButton(master=frame_registrate_new_unique_phrase,
                                   text=Translations.get_translation('repeat'),
@@ -972,7 +1042,6 @@ def button_registrate_phase_3_callback(label_third_phase, label_register_user, b
                                   command=button_repeat_phase_3_callback,
                                   width=275,
                                   height=70)
-    button_repeat.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
     button_confirm = ctk.CTkButton(master=frame_registrate_new_unique_phrase,
                                    text=Translations.get_translation('confirm'),
@@ -981,9 +1050,39 @@ def button_registrate_phase_3_callback(label_third_phase, label_register_user, b
                                                                                    button_confirm),
                                    width=275,
                                    height=70)
-    button_confirm.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
-    window.update()
+    is_internet_connection = conn.check_internet_connection()
+
+    if is_internet_connection:
+        label_third_phase.destroy()
+        label_register_user.configure(text=Translations.get_translation('recording'))
+        button_back.destroy()
+        button_registrate.destroy()
+        window.update()
+
+        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+        new_user_unique_phrase = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                               Translations.get_language().lower())
+        new_user_unique_phrase = new_user_unique_phrase.lower()
+
+        msg_info = f"Recognized new user unique phrase: {string_hasher.encode_string(new_user_unique_phrase)}"
+        log.log_info(msg_info)
+
+        label_register_user.configure(text=Translations.get_translation('recording_ended'))
+        window.update()
+
+        time.sleep(1.5)
+
+        label_register_user.configure(text=Translations.get_translation('confirmation_phrase') + new_user_unique_phrase)
+
+        button_repeat.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+
+        button_confirm.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+        window.update()
+    else:
+        frame_register_not_internet_callback("unique_phrase", label_register_user, button_repeat,
+                                             button_confirm)
 
 
 def button_repeat_phase_3_callback():
@@ -991,19 +1090,26 @@ def button_repeat_phase_3_callback():
 
 
 def button_confirm_phase_3_callback(label_register_user, button_repeat, button_confirm):
-    global new_user_nickname, new_user_unique_phrase, users, recordings_counter
-    msg_info = f"New unique phrase {string_hasher.encode_string(new_user_unique_phrase)} registrated successfully."
+    global new_user_nickname, new_user_unique_phrase, users, recordings_counter, is_internet_connection
+    msg_info = f"New unique phrase {string_hasher.encode_string(new_user_unique_phrase)} registered successfully."
     log.log_info(msg_info)
 
-    # VOICE RECOGNITION
     new_user_dir = const.SPEAKER_RECORDINGS_DIR + new_user_nickname + "/"
-    new_user_file = new_user_nickname + "_" + str(recordings_counter) + ".wav"
-    manager.move_and_rename_audio(const.RECORDED_AUDIO_FILENAME, new_user_file, new_user_dir)
+
+    if is_internet_connection:
+        # VOICE RECOGNITION
+        new_user_file = new_user_nickname + "_" + str(recordings_counter) + ".wav"
+        manager.move_and_rename_audio(const.RECORDED_AUDIO_FILENAME, new_user_file, new_user_dir)
+
     recordings_counter = 0
 
+    frame_register_not_internet.lower()
+    clear_frame(frame_register_not_internet)
+    clear_frame(frame_registrate_new_unique_phrase)
     label_register_user.destroy()
     button_repeat.destroy()
     button_confirm.destroy()
+    window.update()
 
     label_registration_success = ctk.CTkLabel(master=frame_registrate_new_unique_phrase,
                                               text=Translations.get_translation('registration_success'),
@@ -1042,39 +1148,54 @@ def button_confirm_phase_3_callback(label_register_user, button_repeat, button_c
 
 # create MANAGE USERS FRAME widgets
 def button_manage_users_callback():
+    global is_internet_connection
+
+    is_internet_connection = conn.check_internet_connection()
+
     clear_frame(frame_manage_users)
     frame_authentication_success.lower()
     frame_manage_users.lift()
 
-    users_to_show = users.copy()
-    del users_to_show[currently_logged_user]
+    if is_internet_connection:
+        users_to_show = users.copy()
+        del users_to_show[currently_logged_user]
 
-    label_main_title = ctk.CTkLabel(master=frame_manage_users,
-                                    text=Translations.get_translation('system_authentication'),
-                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
-    label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+        label_main_title = ctk.CTkLabel(master=frame_manage_users,
+                                        text=Translations.get_translation('system_authentication'),
+                                        font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+        label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
-    combobox_users = ctk.CTkComboBox(master=frame_manage_users, values=list(users_to_show.keys()),
-                                     font=("Roboto", 38, "bold"),
-                                     dropdown_font=("Roboto", 38, "bold"), justify=ctk.CENTER, hover=True,
-                                     command=combobox_users_callback)
-    combobox_users.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+        combobox_users = ctk.CTkComboBox(master=frame_manage_users, values=list(users_to_show.keys()),
+                                         font=("Roboto", 38, "bold"),
+                                         dropdown_font=("Roboto", 38, "bold"), justify=ctk.CENTER, hover=True,
+                                         command=combobox_users_callback)
+        combobox_users.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
-    button_back = ctk.CTkButton(master=frame_manage_users, text=Translations.get_translation('back'),
-                                font=("Roboto", 38, "bold"),
-                                command=lambda: button_back_callback(frame_manage_users,
-                                                                     frame_authentication_success),
-                                width=275,
-                                height=70)
-    button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+        button_back = ctk.CTkButton(master=frame_manage_users, text=Translations.get_translation('back'),
+                                    font=("Roboto", 38, "bold"),
+                                    command=lambda: button_back_callback(frame_manage_users,
+                                                                         frame_authentication_success),
+                                    width=275,
+                                    height=70)
+        button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
-    button_delete_user = ctk.CTkButton(master=frame_manage_users,
-                                       text=Translations.get_translation('delete'),
-                                       font=("Roboto", 38, "bold"),
-                                       command=button_delete_user_callback,
-                                       width=275,
-                                       height=70)
-    button_delete_user.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+        button_delete_user = ctk.CTkButton(master=frame_manage_users,
+                                           text=Translations.get_translation('delete'),
+                                           font=("Roboto", 38, "bold"),
+                                           command=button_delete_user_callback,
+                                           width=275,
+                                           height=70)
+        button_delete_user.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+    else:
+        label_not_connection = ctk.CTkLabel(master=frame_manage_users,
+                                            text=Translations.get_translation('internet'),
+                                            font=("Roboto", 38, "bold"), text_color="red", justify=ctk.CENTER)
+        label_not_connection.grid(row=3, column=4, sticky="nsew")
+        window.update()
+
+        time.sleep(1.5)
+
+        button_back_callback(frame_manage_users, frame_authentication_success)
 
 
 def combobox_users_callback(value):
@@ -1085,19 +1206,23 @@ def combobox_users_callback(value):
 def button_delete_user_callback():
     global user_to_delete, users
 
-    if user_to_delete in users.keys():
-        if json.remove_user_from_json_file(users, user_to_delete, const.USERS_FILENAME):
-            manager.remove_dir_with_files(const.SPEAKER_RECORDINGS_DIR + user_to_delete + "/")
-            manager.remove_dir_with_files(const.SPEAKER_VOICEPRINTS_DIR + user_to_delete + "/")
-            msg_info = f"User {user_to_delete} deleted successfully from the app database."
-            log.log_info(msg_info)
-        else:
-            msg_warning = f"User {user_to_delete} not found in registered users."
-            log.log_warning(msg_warning)
+    if conn.check_internet_connection():
+        if user_to_delete in users.keys():
+            if json.remove_user_from_json_file(users, user_to_delete, const.USERS_FILENAME):
+                manager.remove_dir_with_files(const.SPEAKER_RECORDINGS_DIR + user_to_delete + "/")
+                manager.remove_dir_with_files(const.SPEAKER_VOICEPRINTS_DIR + user_to_delete + "/")
+                msg_info = f"User {user_to_delete} deleted successfully from the app database."
+                log.log_info(msg_info)
+            else:
+                msg_warning = f"User {user_to_delete} not found in registered users."
+                log.log_warning(msg_warning)
+    else:
+        msg_warning = f"User {user_to_delete} can't be deleted. Internet connection not available."
+        log.log_warning(msg_warning)
 
-        users = json.load_json_file(const.USERS_FILENAME)
-        user_to_delete = ""
-        button_manage_users_callback()
+    users = json.load_json_file(const.USERS_FILENAME)
+    user_to_delete = ""
+    button_manage_users_callback()
 
 
 authentication_frames = []
@@ -1140,9 +1265,9 @@ frame_authentication_unsuccess.lower()
 authentication_frames.append(frame_authentication_unsuccess)
 
 # create REGISTRATION FRAME
-frame_registraction = create_frame()
-frame_registraction.lower()
-authentication_frames.append(frame_registraction)
+frame_registration = create_frame()
+frame_registration.lower()
+authentication_frames.append(frame_registration)
 
 # create REGISTER NEW USER FRAME
 frame_register_new_user = create_frame()
@@ -1166,6 +1291,12 @@ frame_manage_users.lower()
 # create NOT INTERNET CONNECTION FRAME
 frame_not_internet_connection = create_frame()
 frame_not_internet_connection.lower()
+authentication_frames.append(frame_not_internet_connection)
+
+# create NOT INTERNET NICKNAME FRAME
+frame_register_not_internet = create_frame()
+frame_register_not_internet.lower()
+registration_frames.append(frame_register_not_internet)
 
 # create INTRO FRAME widgets
 label_main_title = ctk.CTkLabel(master=frame_intro, text=Translations.get_translation('system_authentication'),
