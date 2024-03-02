@@ -179,10 +179,11 @@ def button_back_callback(frame_to_hide, frame_to_show):
 def button_password_callback(value):
     correct_password = string_hasher.check_string(value, credentials.password, credentials.sol)
     if correct_password:
-        button_open_door_callback()
-        frame_open_door.lower()
-        button_sign_in_callback()
-        frame_authentication_phase_1.lower()
+        if conn.check_internet_connection():
+            frame_about.lower()
+        else:
+            frame_not_internet_connection.lower()
+
         frame_authentication_phase_3_callback()
         msg_success = "Entered password was correct."
         log.log_info(msg_success)
@@ -194,45 +195,91 @@ def button_password_callback(value):
 # create AUTHENTICATION PHASE 1 FRAME widgets -> after click on SIGN IN button
 def button_sign_in_callback():
     frame_open_door.lower()
-    frame_authentication_phase_1.lift()
+
+    if conn.check_internet_connection():
+        frame_authentication_phase_1.lift()
+        clear_frames(authentication_frames)
+
+        label_main_title = ctk.CTkLabel(master=frame_authentication_phase_1,
+                                        text=Translations.get_translation('system_authentication'),
+                                        font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+        label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+
+        label_first_phase = ctk.CTkLabel(master=frame_authentication_phase_1,
+                                         text=Translations.get_translation('first_phase'),
+                                         font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
+        label_first_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+
+        label_authenticate_user = ctk.CTkLabel(master=frame_authentication_phase_1,
+                                               text=Translations.get_translation(
+                                                   'come_closer_1') + "\n\n" + Translations.get_translation(
+                                                   'start_recording'),
+                                               font=("Roboto", 38), justify=ctk.LEFT)
+        label_authenticate_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
+
+        button_back = ctk.CTkButton(master=frame_authentication_phase_1, text=Translations.get_translation('back'),
+                                    font=("Roboto", 38, "bold"),
+                                    command=lambda: button_back_callback(frame_authentication_phase_1, frame_open_door),
+                                    width=275,
+                                    height=70)
+        button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+
+        button_authenticate = ctk.CTkButton(master=frame_authentication_phase_1,
+                                            text=Translations.get_translation('authenticate'),
+                                            font=("Roboto", 38, "bold"),
+                                            command=lambda: button_authenticate_phase_1_callback(label_first_phase,
+                                                                                                 label_authenticate_user,
+                                                                                                 button_back,
+                                                                                                 button_authenticate),
+                                            width=275,
+                                            height=70)
+        button_authenticate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+        window.update()
+    else:
+        frame_not_internet_connection_callback()
+
+
+def frame_not_internet_connection_callback():
+    frame_not_internet_connection.lift()
     clear_frames(authentication_frames)
 
-    label_main_title = ctk.CTkLabel(master=frame_authentication_phase_1,
+    label_main_title = ctk.CTkLabel(master=frame_not_internet_connection,
                                     text=Translations.get_translation('system_authentication'),
                                     font=("Roboto", 48, "bold"), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
-    label_first_phase = ctk.CTkLabel(master=frame_authentication_phase_1,
-                                     text=Translations.get_translation('first_phase'),
-                                     font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
-    label_first_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+    label_not_connection = ctk.CTkLabel(master=frame_not_internet_connection,
+                                     text=Translations.get_translation('internet'),
+                                     font=("Roboto", 38, "bold"), text_color="red", justify=ctk.CENTER)
+    label_not_connection.grid(row=3, column=4, sticky="nsew")
 
-    label_authenticate_user = ctk.CTkLabel(master=frame_authentication_phase_1,
+    label_limited_mode = ctk.CTkLabel(master=frame_not_internet_connection,
                                            text=Translations.get_translation(
-                                               'come_closer_1') + "\n\n" + Translations.get_translation(
-                                               'start_recording'),
+                                               'limited_mode') + "\n\n" + Translations.get_translation(
+                                               'password_to_continue'),
                                            font=("Roboto", 38), justify=ctk.LEFT)
-    label_authenticate_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
+    label_limited_mode.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
-    button_back = ctk.CTkButton(master=frame_authentication_phase_1, text=Translations.get_translation('back'),
+    button_exit = ctk.CTkButton(master=frame_not_internet_connection, text=Translations.get_translation('exit'),
                                 font=("Roboto", 38, "bold"),
-                                command=lambda: button_back_callback(frame_authentication_phase_1, frame_open_door),
-                                width=275,
-                                height=70)
+                                command=button_exit_callback, width=150, height=60)
+    button_exit.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+    button_back = ctk.CTkButton(master=frame_not_internet_connection, text=Translations.get_translation('back'),
+                                font=("Roboto", 38, "bold"),
+                                command=lambda: button_back_callback(frame_not_internet_connection, frame_open_door), width=150, height=60)
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
-    button_authenticate = ctk.CTkButton(master=frame_authentication_phase_1,
-                                        text=Translations.get_translation('authenticate'),
-                                        font=("Roboto", 38, "bold"),
-                                        command=lambda: button_authenticate_phase_1_callback(label_first_phase,
-                                                                                             label_authenticate_user,
-                                                                                             button_back,
-                                                                                             button_authenticate),
-                                        width=275,
-                                        height=70)
-    button_authenticate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+    entry_password = ctk.CTkEntry(master=frame_not_internet_connection, font=("Roboto", 38, "bold"), placeholder_text="", show="*",
+                                  justify=ctk.CENTER, width=150, height=60)
+    entry_password.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
 
-    window.update()
+    button_password = ctk.CTkButton(master=frame_not_internet_connection, text=Translations.get_translation('confirm'),
+                                    font=("Roboto", 38, "bold"),
+                                    command=lambda: button_password_callback(entry_password.get()), width=150,
+                                    height=60)
+    button_password.grid(row=7, column=4, pady=10, padx=10, sticky="nsew")
 
 
 def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_user, button_back, button_authenticate):
@@ -241,41 +288,54 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
     label_first_phase.destroy()
     button_back.destroy()
     button_authenticate.destroy()
-    label_authenticate_user.configure(text=Translations.get_translation('recording'))
-    window.update()
 
-    # SPEECH RECOGNITION
-    recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
-    speaker_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
-    speaker_nickname = speaker_nickname.lower()
-    speaker_exists = s_recognizer.verify_speaker_nickname(users.keys(), speaker_nickname)
+    internet_available = True
+    timeout = 10
+    start_time = time.time()
+    while not conn.check_internet_connection():
+        label_authenticate_user.configure(text=Translations.get_translation('waiting_for_connection'))
+        window.update()
+        if time.time() - start_time >= timeout:
+            frame_not_internet_connection_callback()
+            internet_available = False
+            break
 
-    msg_info = f"Recognized speaker nickname: {speaker_nickname}"
-    log.log_info(msg_info)
+    if internet_available:
+        label_authenticate_user.configure(text=Translations.get_translation('recording'))
+        window.update()
 
-    label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
-    window.update()
+        # SPEECH RECOGNITION
+        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+        speaker_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME, Translations.get_language().lower())
+        speaker_nickname = speaker_nickname.lower()
+        speaker_exists = s_recognizer.verify_speaker_nickname(users.keys(), speaker_nickname)
 
-    time.sleep(1.5)
+        msg_info = f"Recognized speaker nickname: {speaker_nickname}"
+        log.log_info(msg_info)
 
-    if speaker_exists:
-        currently_logged_user = speaker_nickname.lower()
+        label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
+        window.update()
 
-        speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + speaker_nickname + "/"
-        login_success = v_recognizer.verify_speaker(classifier, speaker_dir, const.RECORDED_AUDIO_FILENAME)
+        time.sleep(1.5)
 
-        if login_success:
-            msg_success = f"User {speaker_nickname} signed in successfully."
-            log.log_info(msg_success)
-            frame_authentication_phase_2_callback()
+        if speaker_exists:
+            currently_logged_user = speaker_nickname.lower()
+
+            speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + speaker_nickname + "/"
+            login_success = v_recognizer.verify_speaker(classifier, speaker_dir, const.RECORDED_AUDIO_FILENAME)
+
+            if login_success:
+                msg_success = f"User {speaker_nickname} signed in successfully."
+                log.log_info(msg_success)
+                frame_authentication_phase_2_callback()
+            else:
+                msg_warning = f"User {speaker_nickname} failed to sign in. Voice characteristics don't match."
+                log.log_warning(msg_warning)
+                frame_authentication_unsuccess_callback(1)
         else:
-            msg_warning = f"User {speaker_nickname} failed to sign in. Voice characteristics don't match."
+            msg_warning = f"Speaker {speaker_nickname} does not exist. "
             log.log_warning(msg_warning)
             frame_authentication_unsuccess_callback(1)
-    else:
-        msg_warning = f"Speaker {speaker_nickname} does not exist. "
-        log.log_warning(msg_warning)
-        frame_authentication_unsuccess_callback(1)
 
 
 # create AUTHENTICATION PHASE 2 FRAME widgets
@@ -338,45 +398,58 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
     button_back.destroy()
     button_authenticate.destroy()
 
-    random_word = s_recognizer.generate_random_word(const.VERIFICATION_WORDS[Translations.get_language()])
+    internet_available = True
+    timeout = 10
+    start_time = time.time()
+    while not conn.check_internet_connection():
+        label_authenticate_user.configure(text=Translations.get_translation('waiting_for_connection'))
+        window.update()
+        if time.time() - start_time >= timeout:
+            frame_not_internet_connection_callback()
+            internet_available = False
+            break
 
-    label_random_word = ctk.CTkLabel(master=frame_authentication_phase_2,
-                                     text=random_word.upper(),
-                                     font=("Roboto", 48, "bold"), text_color=("light green"), justify=ctk.CENTER)
-    label_random_word.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+    if internet_available:
+        random_word = s_recognizer.generate_random_word(const.VERIFICATION_WORDS[Translations.get_language()])
 
-    label_authenticate_user.configure(text=Translations.get_translation('recording'))
-    window.update()
+        label_random_word = ctk.CTkLabel(master=frame_authentication_phase_2,
+                                         text=random_word.upper(),
+                                         font=("Roboto", 48, "bold"), text_color=("light green"), justify=ctk.CENTER)
+        label_random_word.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
-    recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
-    spoken_verification_word = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
-                                                             Translations.get_language().lower())
-    spoken_verification_word_matches = s_recognizer.verify_verification_word(spoken_verification_word, random_word)
+        label_authenticate_user.configure(text=Translations.get_translation('recording'))
+        window.update()
 
-    msg_info = f"Recognized verification word: {spoken_verification_word}"
-    log.log_info(msg_info)
+        # SPEECH RECOGNITION
+        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+        spoken_verification_word = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                                 Translations.get_language().lower())
+        spoken_verification_word_matches = s_recognizer.verify_verification_word(spoken_verification_word, random_word)
 
-    label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
-    window.update()
+        msg_info = f"Recognized verification word: {spoken_verification_word}"
+        log.log_info(msg_info)
 
-    time.sleep(1.5)
+        label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
+        window.update()
 
-    if spoken_verification_word_matches:
-        speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
-        verification_success = v_recognizer.verify_speaker(classifier, speaker_dir, const.RECORDED_AUDIO_FILENAME)
+        time.sleep(1.5)
 
-        if verification_success:
-            msg_success = f"Verification word {random_word} matched with spoken word {spoken_verification_word}. Speaker is registered user."
-            log.log_info(msg_success)
-            frame_authentication_phase_3_callback()
+        if spoken_verification_word_matches:
+            speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
+            verification_success = v_recognizer.verify_speaker(classifier, speaker_dir, const.RECORDED_AUDIO_FILENAME)
+
+            if verification_success:
+                msg_success = f"Verification word {random_word} matched with spoken word {spoken_verification_word}. Speaker is registered user."
+                log.log_info(msg_success)
+                frame_authentication_phase_3_callback()
+            else:
+                msg_warning = f"Speaker's voice characteristics don't match."
+                log.log_warning(msg_warning)
+                frame_authentication_unsuccess_callback(2)
         else:
-            msg_warning = f"Speaker's voice characteristics don't match."
+            msg_warning = f"Verification word {random_word} didn't match with spoken word {spoken_verification_word}."
             log.log_warning(msg_warning)
             frame_authentication_unsuccess_callback(2)
-    else:
-        msg_warning = f"Verification word {random_word} didn't match with spoken word {spoken_verification_word}."
-        log.log_warning(msg_warning)
-        frame_authentication_unsuccess_callback(2)
 
 
 # create AUTHENTICATION PHASE 3 FRAME widgets
@@ -522,8 +595,8 @@ def frame_authentication_success_callback():
 
     label_logged_user = ctk.CTkLabel(master=frame_authentication_success,
                                      text=Translations.get_translation('logged_user') + currently_logged_user,
-                                     font=("Roboto", 32, "bold"), text_color="light green", justify=ctk.CENTER)
-    label_logged_user.grid(row=0, column=4, sticky="nsew")
+                                     font=("Roboto", 38, "bold"), text_color="light green", justify=ctk.CENTER)
+    label_logged_user.grid(row=2, column=4, sticky="nsew")
 
     button_end_interaction = ctk.CTkButton(master=frame_authentication_success,
                                            text=Translations.get_translation('end_interaction'),
@@ -1089,6 +1162,10 @@ registration_frames.append(frame_registrate_new_unique_phrase)
 # create MANAGE USERS FRAME
 frame_manage_users = create_frame()
 frame_manage_users.lower()
+
+# create NOT INTERNET CONNECTION FRAME
+frame_not_internet_connection = create_frame()
+frame_not_internet_connection.lower()
 
 # create INTRO FRAME widgets
 label_main_title = ctk.CTkLabel(master=frame_intro, text=Translations.get_translation('system_authentication'),

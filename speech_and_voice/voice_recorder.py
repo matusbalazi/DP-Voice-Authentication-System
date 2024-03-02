@@ -4,7 +4,7 @@ from scipy.io.wavfile import write
 import numpy as np
 
 
-def record_and_save_audio(file_path, duration=5, sample_rate=44100, volume=1.5) -> bool:
+def record_and_save_audio(file_path, duration=5, sample_rate=44100, volume=1.0) -> bool:
     try:
         audio_data = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=2, dtype="int16")
         sd.wait()

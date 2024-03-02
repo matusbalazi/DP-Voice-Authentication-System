@@ -77,7 +77,11 @@ class Translations:
             'delete': "Vymazať",
 
             'internet': "Bez internetového pripojenia",
-            'logged_user': "Aktuálne prihlásený používateľ: "
+            'logged_user': "Aktuálne prihlásený používateľ: ",
+
+            'limited_mode': "• Aplikácia pracuje v obmedzenom režime.",
+            'password_to_continue': "• Pre pokračovanie zadajte heslo.",
+            'waiting_for_connection': "ČAKANIE NA INTERNETOVÉ PRIPOJENIE..."
         },
         'EN': {
             'system_authentication': "Voice Authentication System",
@@ -156,7 +160,11 @@ class Translations:
             'delete': "Delete",
 
             'internet': "Without Internet Connection",
-            'logged_user': "Currently logged user: "
+            'logged_user': "Currently logged user: ",
+
+            'limited_mode': "• Application works in limited mode.",
+            'password_to_continue': "• Enter the password to continue.",
+            'waiting_for_connection': "WAITING FOR INTERNET CONNECTION..."
         }
     }
 
