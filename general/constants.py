@@ -2,8 +2,7 @@ LOGIN_SUCCESS = True
 VERIFICATION_SUCCESS = True
 AUTHENTICATION_SUCCESS = True
 IS_ADMIN = True
-NUMBER_OF_VOICEPRINTS = 2
-IS_INTERNET_CONN = False
+NUMBER_OF_VOICEPRINTS = 5
 
 RECORDED_AUDIO_FILENAME = "../recorded_audio.wav"
 USERS_FILENAME = "../users.json"
@@ -12,8 +11,8 @@ SPEAKER_RECORDINGS_DIR = "../speech_and_voice/speaker_recognition/speaker_record
 SPEAKER_VOICEPRINTS_DIR = "../speech_and_voice/speaker_recognition/speaker_voiceprints/"
 
 VERIFICATION_WORDS = {
-    "SK": ("jablko",
-           "stôl",
+    "SK": ("zelené jablko",
+           "kamenný stôl",
            "modrá obloha",
            "behať v lese",
            "slnečné lúče",
@@ -22,8 +21,8 @@ VERIFICATION_WORDS = {
            "sklenená fľaša",
            "vianočný stromček",
            "letná dovolenka",
-           "more",
-           "hora",
+           "rozbúrené more",
+           "vysoká hora",
            "počúvať hudbu",
            "rozprávanie príbehov",
            "plážový volejbal",
@@ -38,14 +37,14 @@ VERIFICATION_WORDS = {
            "tradičné oblečenie",
            "slnečné okuliare",
            "hviezdne nebo",
-           "vodopád",
-           "zmrzlina",
+           "majestátny vodopád",
+           "jahodová zmrzlina",
            "piknik v parku",
            "horská dráha",
            "hádzanie lopty",),
 
-    "EN": ("apple",
-           "table",
+    "EN": ("green apple",
+           "stone table",
            "blue sky",
            "running in the forest",
            "sun rays",
@@ -54,8 +53,8 @@ VERIFICATION_WORDS = {
            "glass bottle",
            "christmas tree",
            "summer vacation",
-           "sea",
-           "mountain",
+           "rough sea",
+           "high mountain",
            "listening to music",
            "storytelling",
            "beach volleyball",
@@ -70,11 +69,55 @@ VERIFICATION_WORDS = {
            "traditional clothing",
            "horseback riding",
            "starry sky",
-           "waterfall",
-           "ice cream",
+           "majestic waterfall",
+           "strawberry ice cream",
            "picnic in the park",
            "mountain coaster",
            "throwing the ball",)
+}
+
+VOICEPRINT_PHRASES = {
+       "SK": ("Dnes je krásne slnečné počasie.",
+              "Ahoj, ako sa máš?",
+              "Prajem ti pekný a úspešný deň!",
+              "Na večeru pôjdeme do reštaurácie.",
+              "Kedy si naposledy čítal knihu?",
+              "Cez víkend budem doma oddychovať.",
+              "Veľa šťastia na dnešnej obhajobe!",
+              "Ktorý film by si chcel vidieť?",
+              "Ráno musím skoro vstávať.",
+              "Poobede cestujem do zahraničia.",
+              "Na obed som mal rybu so zemiakmi.",
+              "Mal by som viac relaxovať.",
+              "Stratil som kľúče od auta.",
+              "Rád chodím na horskú turistiku.",
+              "Dúfam, že sa nikomu nič nestalo.",
+              "Prajem ti šťastné a pokojné sviatky.",
+              "Kde pôjdeme v lete na dovolenku?",
+              "Polej kvety a potom povysávaj!",
+              "Chcel by som vedieť tvoj názor.",
+              "Mohol by som vám nejako pomôcť?"),
+
+       "EN": ("Today is beautiful sunny weather.",
+              "Hello, how are you?",
+              "I wish you a nice and successful day!",
+              "We will go to a restaurant for dinner.",
+              "When was the last time you read a book?",
+              "I will rest at home during the weekend.",
+              "Good luck on your exam today!",
+              "Which movie would you like to watch?",
+              "I have to get up early in the morning.",
+              "I am traveling abroad in the afternoon.",
+              "I had fish and potatoes for lunch.",
+              "I should relax more.",
+              "I lost my car keys.",
+              "I like to go mountain hiking.",
+              "I hope no one got hurt.",
+              "I wish you happy and peaceful holidays.",
+              "Where will we go on vacation in the summer?",
+              "Water the flowers and then vacuum!",
+              "I would like to know your opinion.",
+              "Could I help you in any way?")
 }
 
 # VERIFICATION_WORDS = ["kvet", "počítač", "rieka", "stolička", "jablko", "škola", "letisko", "nástenka", "pláž", "okno",

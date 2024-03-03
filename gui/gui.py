@@ -434,6 +434,7 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
         log.log_info(msg_info)
 
         label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
+        label_random_word.destroy()
         window.update()
 
         time.sleep(1.5)
@@ -762,7 +763,9 @@ def button_register_user_callback():
 
 
 def button_registrate_phase_1_callback(label_first_phase, label_register_user, button_back, button_registrate):
-    global new_user_nickname, is_internet_connection
+    global new_user_nickname, is_internet_connection, voiceprints_phrases
+
+    voiceprints_phrases = list(const.VOICEPRINT_PHRASES[Translations.get_language()])
     is_internet_connection = conn.check_internet_connection()
 
     if is_internet_connection:
@@ -773,7 +776,7 @@ def button_registrate_phase_1_callback(label_first_phase, label_register_user, b
         window.update()
 
         # SPEECH recognition
-        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME, 6)
         new_user_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
                                                           Translations.get_language().lower())
         new_user_nickname = new_user_nickname.lower()
@@ -905,7 +908,9 @@ def button_confirm_phase_1_callback():
 
         # VOICE RECOGNITION
         new_user_dir = const.SPEAKER_RECORDINGS_DIR + new_user_nickname + "/"
-        os.mkdir(new_user_dir)
+        if not os.path.isdir(new_user_dir):
+            os.mkdir(new_user_dir)
+
         if is_internet_connection:
             new_user_file = new_user_nickname + "_" + str(recordings_counter) + ".wav"
             manager.move_and_rename_audio(const.RECORDED_AUDIO_FILENAME, new_user_file, new_user_dir)
@@ -959,13 +964,22 @@ def button_confirm_phase_1_callback():
 
 
 def button_registrate_phase_2_callback(label_second_phase, label_register_user, button_back, button_registrate):
+    global new_user_nickname, voiceprints_counter, recordings_counter, voiceprints_phrases
+
+    random_phrase = s_recognizer.generate_random_word(voiceprints_phrases)
+    voiceprints_phrases.remove(random_phrase)
+
+    label_random_phrase = ctk.CTkLabel(master=frame_register_new_voiceprints,
+                                     text=random_phrase,
+                                     font=("Roboto", 32, "bold"), text_color=("light green"), justify=ctk.CENTER)
+    label_random_phrase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+
     label_second_phase.destroy()
     label_register_user.configure(text=Translations.get_translation('recording'))
     button_back.destroy()
     button_registrate.destroy()
     window.update()
 
-    global new_user_nickname, voiceprints_counter, recordings_counter
     voiceprints_counter += 1
 
     recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
@@ -979,6 +993,7 @@ def button_registrate_phase_2_callback(label_second_phase, label_register_user, 
     recordings_counter += 1
 
     label_register_user.configure(text=Translations.get_translation('recording_ended'))
+    label_random_phrase.destroy()
     window.update()
 
     time.sleep(1.5)
@@ -1322,6 +1337,7 @@ segmented_button_language.grid(row=6, column=7, pady=10, padx=10, sticky="nsew")
 
 is_internet_connection = conn.check_internet_connection()
 users = json.load_json_file(const.USERS_FILENAME)
+voiceprints_phrases = list(const.VOICEPRINT_PHRASES[Translations.get_language()])
 classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb",
                                             savedir=r"pretrained_models/spkrec-ecapa-voxceleb",
                                             run_opts={"device": "cpu"})
