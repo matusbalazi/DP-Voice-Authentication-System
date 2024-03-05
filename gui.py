@@ -5,6 +5,7 @@ import tkinter as tk
 
 from speechbrain.pretrained import EncoderClassifier
 from translations import Translations
+
 from authentication import credentials, string_hasher
 from general import constants as const
 from general import log_file_builder as log
