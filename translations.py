@@ -6,6 +6,7 @@ class Translations:
             'about_project': "O projekte",
             'exit': "Koniec",
             'admin': "Admin",
+            'admin_interface': "• Pre sprístupnenie administrátorského rozhrania\n  zadajte prístupové heslo.",
             'university': "ŽILINSKÁ UNIVERZITA V ŽILINE",
             'faculty': "FAKULTA ELEKTROTECHNIKY\nA INFORMAČNÝCH TECHNOLÓGIÍ",
             'department': "Katedra multimédií a informačno-\nkomunikačných technológií",
@@ -74,6 +75,7 @@ class Translations:
             'registration_success': "Registrácia prebehla úspešne!",
             'registration_unsuccess': "Registrácia bola neúspešná!",
             'registration_unsuccess_info': "• Zvolené prihlasovacie meno už existuje.",
+            'processing_voiceprints': "PREBIEHA SPRACOVANIE HLASOVÝCH ODTLAČKOV...",
 
             'delete': "Vymazať",
 
@@ -92,6 +94,7 @@ class Translations:
             'about_project': "About",
             'exit': "Exit",
             'admin': "Admin",
+            'admin_interface': "• Enter the validation password to access\n  the admin interface",
             'university': "UNIVERSITY OF ŽILINA",
             'faculty': "Faculty of Electrical Engineering\n and Information Technology",
             'department': "Department of Multimedia and Information-\nCommunication Technologies",
@@ -160,6 +163,7 @@ class Translations:
             'registration_success': "Registration successful!",
             'registration_unsuccess': "Registration failed!",
             'registration_unsuccess_info': "• The chosen login name already exists.",
+            'processing_voiceprints': "PROCESSING VOICEPRINTS...",
 
             'delete': "Delete",
 

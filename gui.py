@@ -167,7 +167,8 @@ def button_about_project_callback():
 
     button_password = ctk.CTkButton(master=frame_about, text=Translations.get_translation('confirm'),
                                     font=("Roboto", 38, "bold"),
-                                    command=lambda: button_password_callback(entry_password.get(), "authentication"), width=150,
+                                    command=lambda: button_password_callback(entry_password.get(), "authentication"),
+                                    width=150,
                                     height=100)
     button_password.grid(row=7, column=4, pady=10, padx=10, sticky="nsew")
 
@@ -198,12 +199,10 @@ def button_admin_callback():
                                 command=lambda: button_back_callback(frame_admin, frame_intro), width=150, height=60)
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
-    label_about_project = ctk.CTkLabel(master=frame_admin,
-                                       text=Translations.get_translation('topic') + "\n" + Translations.get_translation(
-                                           'student') + "\n" + Translations.get_translation(
-                                           'mentor') + "\n" + Translations.get_translation('year'),
-                                       font=("Roboto", 32), justify=ctk.LEFT)
-    label_about_project.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+    label_admin_info = ctk.CTkLabel(master=frame_admin,
+                                    text=Translations.get_translation('admin_interface'),
+                                    font=("Roboto", 32), justify=ctk.LEFT)
+    label_admin_info.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     entry_password = ctk.CTkEntry(master=frame_admin, font=("Roboto", 38, "bold"), placeholder_text="", show="*",
                                   justify=ctk.CENTER, width=150, height=60)
@@ -231,7 +230,8 @@ def button_password_callback(value, phase):
     correct_password = False
 
     if phase == "authentication":
-        correct_password = string_hasher.check_string(value, credentials.authentication_password, credentials.authentication_salt)
+        correct_password = string_hasher.check_string(value, credentials.authentication_password,
+                                                      credentials.authentication_salt)
 
     if phase == "admin":
         correct_password = string_hasher.check_string(value, credentials.admin_password, credentials.admin_salt)
@@ -347,7 +347,8 @@ def frame_not_internet_connection_callback():
 
     button_password = ctk.CTkButton(master=frame_not_internet_connection, text=Translations.get_translation('confirm'),
                                     font=("Roboto", 38, "bold"),
-                                    command=lambda: button_password_callback(entry_password.get(), "authentication"), width=150,
+                                    command=lambda: button_password_callback(entry_password.get(), "authentication"),
+                                    width=150,
                                     height=60)
     button_password.grid(row=7, column=4, pady=10, padx=10, sticky="nsew")
 
@@ -1045,7 +1046,7 @@ def button_registrate_phase_2_callback(label_second_phase, label_register_user, 
 
     label_random_phrase = ctk.CTkLabel(master=frame_register_new_voiceprints,
                                        text=random_phrase,
-                                       font=("Roboto", 32, "bold"), text_color=("light green"), justify=ctk.CENTER)
+                                       font=("Roboto", 36, "bold"), text_color=("light green"), justify=ctk.CENTER)
     label_random_phrase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     label_second_phase.destroy()
@@ -1208,6 +1209,13 @@ def button_confirm_phase_3_callback(label_register_user, button_repeat, button_c
                                               font=("Roboto", 38, "bold"), text_color=("light green"),
                                               justify=ctk.CENTER)
     label_registration_success.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+
+    label_processing = ctk.CTkLabel(master=frame_registrate_new_unique_phrase,
+                                    text=Translations.get_translation(
+                                        'processing_voiceprints'),
+                                    font=("Roboto", 32), justify=ctk.CENTER)
+    label_processing.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
+
     window.update()
 
     time.sleep(1.5)
@@ -1421,8 +1429,10 @@ segmented_button_language = ctk.CTkSegmentedButton(master=frame_intro, values=["
                                                    command=segmented_button_language_callback, width=150, height=50)
 segmented_button_language.grid(row=6, column=7, pady=10, padx=10, sticky="nsew")
 
-button_admin = ctk.CTkButton(master=frame_intro, text=Translations.get_translation('admin'), font=("Roboto", 38, "bold"),
-                             command=button_admin_callback, width=150, height=50, fg_color="#4a4a4a", hover_color="#696969")
+button_admin = ctk.CTkButton(master=frame_intro, text=Translations.get_translation('admin'),
+                             font=("Roboto", 38, "bold"),
+                             command=button_admin_callback, width=150, height=50, fg_color="#4a4a4a",
+                             hover_color="#696969")
 button_admin.grid(row=6, column=1, pady=10, padx=10, sticky="nsew")
 
 is_internet_connection = conn.check_internet_connection()
