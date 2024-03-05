@@ -23,6 +23,8 @@ new_user_unique_phrase = ""
 remaining_attempts = 3
 voiceprints_counter = 0
 recordings_counter = 0
+registration_with_internet = True
+is_admin_logged = False
 
 ctk.set_ctk_parent_class(tk.Tk)
 ctk.set_appearance_mode("dark")
@@ -62,13 +64,16 @@ def clear_frames(frames):
 
 
 def clear_global_variables():
-    global user_to_delete, currently_logged_user, new_user_nickname, new_user_unique_phrase, remaining_attempts, voiceprints_counter
+    global user_to_delete, currently_logged_user, new_user_nickname, new_user_unique_phrase, remaining_attempts, voiceprints_counter, recordings_counter, registration_with_internet, is_admin_logged
     user_to_delete = ""
     currently_logged_user = ""
     new_user_nickname = ""
     new_user_unique_phrase = ""
     remaining_attempts = 3
     voiceprints_counter = 0
+    recordings_counter = 0
+    registration_with_internet = True
+    is_admin_logged = False
 
 
 def change_language(language):
@@ -85,6 +90,9 @@ def update_translations():
 
 # create OPEN DOOR FRAME widgets
 def button_open_door_callback():
+    global is_admin_logged
+    is_admin_logged = False
+
     frame_intro.lower()
     frame_open_door.lift()
     clear_frames(authentication_frames)
@@ -115,6 +123,9 @@ def button_open_door_callback():
 
 # create ABOUT FRAME widgets
 def button_about_project_callback():
+    global is_admin_logged
+    is_admin_logged = False
+
     frame_intro.lower()
     frame_about.lift()
 
@@ -155,7 +166,7 @@ def button_about_project_callback():
 
     button_password = ctk.CTkButton(master=frame_about, text=Translations.get_translation('confirm'),
                                     font=("Roboto", 38, "bold"),
-                                    command=lambda: button_password_callback(entry_password.get()), width=150,
+                                    command=lambda: button_password_callback(entry_password.get(), "authentication"), width=150,
                                     height=100)
     button_password.grid(row=7, column=4, pady=10, padx=10, sticky="nsew")
 
@@ -168,6 +179,42 @@ def segmented_button_language_callback(value):
     change_language(value)
 
 
+def button_admin_callback():
+    frame_intro.lower()
+    frame_admin.lift()
+
+    label_main_title = ctk.CTkLabel(master=frame_admin, text=Translations.get_translation('system_authentication'),
+                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+    label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+
+    button_exit = ctk.CTkButton(master=frame_admin, text=Translations.get_translation('exit'),
+                                font=("Roboto", 38, "bold"),
+                                command=button_exit_callback, width=150, height=60)
+    button_exit.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+    button_back = ctk.CTkButton(master=frame_admin, text=Translations.get_translation('back'),
+                                font=("Roboto", 38, "bold"),
+                                command=lambda: button_back_callback(frame_admin, frame_intro), width=150, height=60)
+    button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+
+    label_about_project = ctk.CTkLabel(master=frame_admin,
+                                       text=Translations.get_translation('topic') + "\n" + Translations.get_translation(
+                                           'student') + "\n" + Translations.get_translation(
+                                           'mentor') + "\n" + Translations.get_translation('year'),
+                                       font=("Roboto", 32), justify=ctk.LEFT)
+    label_about_project.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+
+    entry_password = ctk.CTkEntry(master=frame_admin, font=("Roboto", 38, "bold"), placeholder_text="", show="*",
+                                  justify=ctk.CENTER, width=150, height=60)
+    entry_password.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
+
+    button_password = ctk.CTkButton(master=frame_admin, text=Translations.get_translation('confirm'),
+                                    font=("Roboto", 38, "bold"),
+                                    command=lambda: button_password_callback(entry_password.get(), "admin"), width=150,
+                                    height=60)
+    button_password.grid(row=7, column=4, pady=10, padx=10, sticky="nsew")
+
+
 def button_back_callback(frame_to_hide, frame_to_show):
     global voiceprints_counter
     voiceprints_counter = 0
@@ -177,15 +224,34 @@ def button_back_callback(frame_to_hide, frame_to_show):
     window.update()
 
 
-def button_password_callback(value):
-    correct_password = string_hasher.check_string(value, credentials.password, credentials.sol)
-    if correct_password:
-        if conn.check_internet_connection():
-            frame_about.lower()
-        else:
-            frame_not_internet_connection.lower()
+def button_password_callback(value, phase):
+    global is_admin_logged
 
-        frame_authentication_phase_3_callback()
+    correct_password = False
+
+    if phase == "authentication":
+        correct_password = string_hasher.check_string(value, credentials.authentication_password, credentials.authentication_salt)
+
+    if phase == "admin":
+        correct_password = string_hasher.check_string(value, credentials.admin_password, credentials.admin_salt)
+
+    if correct_password:
+        if phase == "authentication":
+            is_admin_logged = False
+            if conn.check_internet_connection():
+                frame_about.lower()
+            else:
+                frame_not_internet_connection.lower()
+
+            button_open_door_callback()
+            frame_open_door.lower()
+            frame_authentication_phase_3_callback()
+
+        if phase == "admin":
+            is_admin_logged = True
+            frame_admin.lower()
+            frame_authentication_success_callback()
+
         msg_success = "Entered password was correct."
         log.log_info(msg_success)
     else:
@@ -280,7 +346,7 @@ def frame_not_internet_connection_callback():
 
     button_password = ctk.CTkButton(master=frame_not_internet_connection, text=Translations.get_translation('confirm'),
                                     font=("Roboto", 38, "bold"),
-                                    command=lambda: button_password_callback(entry_password.get()), width=150,
+                                    command=lambda: button_password_callback(entry_password.get(), "authentication"), width=150,
                                     height=60)
     button_password.grid(row=7, column=4, pady=10, padx=10, sticky="nsew")
 
@@ -325,8 +391,11 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
         if speaker_exists:
             currently_logged_user = speaker_nickname.lower()
 
-            speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + speaker_nickname + "/"
-            login_success = v_recognizer.verify_speaker(classifier, speaker_dir, const.RECORDED_AUDIO_FILENAME)
+            if s_recognizer.user_registered_with_internet(users, currently_logged_user):
+                speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + speaker_nickname + "/"
+                login_success = v_recognizer.verify_speaker(classifier, speaker_dir, const.RECORDED_AUDIO_FILENAME)
+            else:
+                login_success = speaker_exists
 
             if login_success:
                 msg_success = f"User {speaker_nickname} signed in successfully."
@@ -574,7 +643,7 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
 
 # create AUTHENTICATION SUCCESS FRAME widgets
 def frame_authentication_success_callback():
-    global remaining_attempts, is_internet_connection
+    global remaining_attempts, is_internet_connection, currently_logged_user, is_admin_logged
     remaining_attempts = 3
 
     is_internet_connection = conn.check_internet_connection()
@@ -599,6 +668,9 @@ def frame_authentication_success_callback():
     time.sleep(1.5)
 
     label_authentication_success.destroy()
+
+    if is_admin_logged:
+        currently_logged_user = "admin"
 
     label_logged_user = ctk.CTkLabel(master=frame_authentication_success,
                                      text=Translations.get_translation('logged_user') + currently_logged_user,
@@ -763,10 +835,11 @@ def button_register_user_callback():
 
 
 def button_registrate_phase_1_callback(label_first_phase, label_register_user, button_back, button_registrate):
-    global new_user_nickname, is_internet_connection, voiceprints_phrases
+    global new_user_nickname, is_internet_connection, voiceprints_phrases, registration_with_internet
 
     voiceprints_phrases = list(const.VOICEPRINT_PHRASES[Translations.get_language()])
     is_internet_connection = conn.check_internet_connection()
+    registration_with_internet = is_internet_connection
 
     if is_internet_connection:
         label_first_phase.destroy()
@@ -970,8 +1043,8 @@ def button_registrate_phase_2_callback(label_second_phase, label_register_user, 
     voiceprints_phrases.remove(random_phrase)
 
     label_random_phrase = ctk.CTkLabel(master=frame_register_new_voiceprints,
-                                     text=random_phrase,
-                                     font=("Roboto", 32, "bold"), text_color=("light green"), justify=ctk.CENTER)
+                                       text=random_phrase,
+                                       font=("Roboto", 32, "bold"), text_color=("light green"), justify=ctk.CENTER)
     label_random_phrase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     label_second_phase.destroy()
@@ -1049,7 +1122,7 @@ def frame_registrate_new_unique_phrase_callback():
 
 
 def button_registrate_phase_3_callback(label_third_phase, label_register_user, button_back, button_registrate):
-    global new_user_unique_phrase, is_internet_connection
+    global new_user_unique_phrase, is_internet_connection, registration_with_internet
 
     button_repeat = ctk.CTkButton(master=frame_registrate_new_unique_phrase,
                                   text=Translations.get_translation('repeat'),
@@ -1067,6 +1140,9 @@ def button_registrate_phase_3_callback(label_third_phase, label_register_user, b
                                    height=70)
 
     is_internet_connection = conn.check_internet_connection()
+
+    if registration_with_internet and not is_internet_connection:
+        registration_with_internet = is_internet_connection
 
     if is_internet_connection:
         label_third_phase.destroy()
@@ -1105,7 +1181,7 @@ def button_repeat_phase_3_callback():
 
 
 def button_confirm_phase_3_callback(label_register_user, button_repeat, button_confirm):
-    global new_user_nickname, new_user_unique_phrase, users, recordings_counter, is_internet_connection
+    global new_user_nickname, new_user_unique_phrase, users, recordings_counter, is_internet_connection, registration_with_internet
     msg_info = f"New unique phrase {string_hasher.encode_string(new_user_unique_phrase)} registered successfully."
     log.log_info(msg_info)
 
@@ -1135,7 +1211,10 @@ def button_confirm_phase_3_callback(label_register_user, button_repeat, button_c
 
     time.sleep(1.5)
 
-    if json.add_user_to_json_file(users, new_user_nickname, string_hasher.encode_string(new_user_unique_phrase),
+    user_values = string_hasher.encode_string(new_user_unique_phrase) + (registration_with_internet,)
+
+    if json.add_user_to_json_file(users, new_user_nickname,
+                                  user_values,
                                   const.USERS_FILENAME):
         output_dir = const.SPEAKER_VOICEPRINTS_DIR + new_user_nickname + "/"
         os.mkdir(output_dir)
@@ -1163,7 +1242,7 @@ def button_confirm_phase_3_callback(label_register_user, button_repeat, button_c
 
 # create MANAGE USERS FRAME widgets
 def button_manage_users_callback():
-    global is_internet_connection
+    global is_internet_connection, is_admin_logged
 
     is_internet_connection = conn.check_internet_connection()
 
@@ -1173,7 +1252,9 @@ def button_manage_users_callback():
 
     if is_internet_connection:
         users_to_show = users.copy()
-        del users_to_show[currently_logged_user]
+
+        if not is_admin_logged:
+            del users_to_show[currently_logged_user]
 
         label_main_title = ctk.CTkLabel(master=frame_manage_users,
                                         text=Translations.get_translation('system_authentication'),
@@ -1250,6 +1331,10 @@ frame_intro.lift()
 # create ABOUT FRAME
 frame_about = create_frame()
 frame_about.lower()
+
+# create ADMIN FRAME
+frame_admin = create_frame()
+frame_admin.lower()
 
 # create OPEN DOOR FRAME
 frame_open_door = create_frame()
@@ -1334,6 +1419,10 @@ button_exit.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 segmented_button_language = ctk.CTkSegmentedButton(master=frame_intro, values=["SK", "EN"], font=("Roboto", 38, "bold"),
                                                    command=segmented_button_language_callback, width=150, height=50)
 segmented_button_language.grid(row=6, column=7, pady=10, padx=10, sticky="nsew")
+
+button_admin = ctk.CTkButton(master=frame_intro, text=Translations.get_translation('admin'), font=("Roboto", 38, "bold"),
+                             command=button_admin_callback, width=150, height=50, fg_color="#4a4a4a", hover_color="#696969")
+button_admin.grid(row=6, column=1, pady=10, padx=10, sticky="nsew")
 
 is_internet_connection = conn.check_internet_connection()
 users = json.load_json_file(const.USERS_FILENAME)

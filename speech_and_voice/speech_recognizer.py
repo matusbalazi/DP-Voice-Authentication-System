@@ -80,3 +80,7 @@ def find_user_nickname(users, recognized_unique_phrase) -> str:
             break
 
     return user_nickname
+
+
+def user_registered_with_internet(users, recognized_speaker_nickname) -> bool:
+    return list(users[recognized_speaker_nickname])[2]
