@@ -120,6 +120,21 @@ VOICEPRINT_PHRASES = {
               "Could I help you in any way?")
 }
 
+FONT_ROBOTO = "Roboto"
+FONT_BOLD = "bold"
+FONT_48 = 48
+FONT_42 = 42
+FONT_38 = 38
+FONT_36 = 36
+FONT_32 = 32
+WIDTH_275 = 275
+WIDTH_150 = 150
+HEIGHT_100 = 100
+HEIGHT_70 = 70
+HEIGHT_60 = 60
+HEIGHT_50 = 50
+
+
 # VERIFICATION_WORDS = ["kvet", "počítač", "rieka", "stolička", "jablko", "škola", "letisko", "nástenka", "pláž", "okno",
 #                      "hora", "kľúč", "rukavica", "káva", "slúchadlo", "vlak"]
 # SPEAKERS = ["martin", "ema", "baláži"]

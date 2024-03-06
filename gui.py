@@ -41,6 +41,33 @@ window.attributes("-fullscreen", True)
 window.grid_rowconfigure(0, weight=1)
 window.grid_columnconfigure(0, weight=1)
 
+font_roboto = const.FONT_ROBOTO
+font_bold = const.FONT_BOLD
+font_48 = const.FONT_48
+font_42 = const.FONT_42
+font_38 = const.FONT_38
+font_36 = const.FONT_36
+font_32 = const.FONT_32
+width_275 = const.WIDTH_275
+width_150 = const.WIDTH_150
+height_100 = const.HEIGHT_100
+height_70 = const.HEIGHT_70
+height_60 = const.HEIGHT_60
+height_50 = const.HEIGHT_50
+
+if width == 1280 and height == 720:
+    font_48 = round(font_48 / 1.5)
+    font_42 = round(font_42 / 1.5)
+    font_38 = round(font_38 / 1.5)
+    font_36 = round(font_36 / 1.5)
+    font_32 = round(font_32 / 1.5)
+    width_275 = round(width_275 / 1.5)
+    width_150 = round(width_150 / 1.5)
+    height_100 = round(height_100 / 1.5)
+    height_70 = round(height_70 / 1.5)
+    height_60 = round(height_60 / 1.5)
+    height_50 = round(height_50 / 1.5)
+
 
 def create_frame():
     frame = ctk.CTkFrame(master=window)
@@ -99,26 +126,26 @@ def button_open_door_callback():
     clear_frames(authentication_frames)
 
     label_main_title = ctk.CTkLabel(master=frame_open_door, text=Translations.get_translation('system_authentication'),
-                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                    font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
     button_exit = ctk.CTkButton(master=frame_open_door, text=Translations.get_translation('exit'),
-                                font=("Roboto", 38, "bold"),
-                                command=button_exit_callback, width=150, height=50)
+                                font=(font_roboto, font_38, font_bold),
+                                command=button_exit_callback, width=width_150, height=height_50)
     button_exit.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
     button_back = ctk.CTkButton(master=frame_open_door, text=Translations.get_translation('back'),
-                                font=("Roboto", 38, "bold"),
-                                command=lambda: button_back_callback(frame_open_door, frame_intro), width=150,
-                                height=50)
+                                font=(font_roboto, font_38, font_bold),
+                                command=lambda: button_back_callback(frame_open_door, frame_intro), width=width_150,
+                                height=height_50)
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
     button_sign_in = ctk.CTkButton(master=frame_open_door, text=Translations.get_translation('sign_in'),
-                                   font=("Roboto", 48, "bold"), command=button_sign_in_callback)
+                                   font=(font_roboto, font_48, font_bold), command=button_sign_in_callback)
     button_sign_in.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
     button_sign_up = ctk.CTkButton(master=frame_open_door, text=Translations.get_translation('sign_up'),
-                                   font=("Roboto", 48, "bold"), command=button_sign_up_callback)
+                                   font=(font_roboto, font_48, font_bold), command=button_sign_up_callback)
     button_sign_up.grid(row=5, column=4, pady=10, padx=10, sticky="nsew")
 
 
@@ -131,45 +158,47 @@ def button_about_project_callback():
     frame_about.lift()
 
     label_main_title = ctk.CTkLabel(master=frame_about, text=Translations.get_translation('system_authentication'),
-                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                    font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
     button_exit = ctk.CTkButton(master=frame_about, text=Translations.get_translation('exit'),
-                                font=("Roboto", 38, "bold"),
-                                command=button_exit_callback, width=150, height=100)
+                                font=(font_roboto, font_38, font_bold),
+                                command=button_exit_callback, width=width_150, height=height_100)
     button_exit.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
     button_back = ctk.CTkButton(master=frame_about, text=Translations.get_translation('back'),
-                                font=("Roboto", 38, "bold"),
-                                command=lambda: button_back_callback(frame_about, frame_intro), width=150, height=100)
+                                font=(font_roboto, font_38, font_bold),
+                                command=lambda: button_back_callback(frame_about, frame_intro), width=width_150,
+                                height=height_100)
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
     label_thesis = ctk.CTkLabel(master=frame_about, text=Translations.get_translation('thesis'),
-                                font=("Roboto", 42, "bold"), justify=ctk.CENTER)
+                                font=(font_roboto, font_42, font_bold), justify=ctk.CENTER)
     label_thesis.grid(row=2, column=4, pady=10, padx=10, sticky="nsew")
 
     label_about_project = ctk.CTkLabel(master=frame_about,
                                        text=Translations.get_translation('topic') + "\n" + Translations.get_translation(
                                            'student') + "\n" + Translations.get_translation(
                                            'mentor') + "\n" + Translations.get_translation('year'),
-                                       font=("Roboto", 32), justify=ctk.LEFT)
+                                       font=(font_roboto, font_32), justify=ctk.LEFT)
     label_about_project.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     label_school = ctk.CTkLabel(master=frame_about, text=(
             Translations.get_translation('university') + "\n\n" + Translations.get_translation(
-        'faculty') + "\n\n" + Translations.get_translation('department')), font=("Roboto", 32),
+        'faculty') + "\n\n" + Translations.get_translation('department')), font=(font_roboto, font_32),
                                 justify=ctk.CENTER)
     label_school.grid(row=5, column=4, pady=10, padx=10, sticky="nsew")
 
-    entry_password = ctk.CTkEntry(master=frame_about, font=("Roboto", 38, "bold"), placeholder_text="", show="*",
-                                  justify=ctk.CENTER, width=150, height=100)
+    entry_password = ctk.CTkEntry(master=frame_about, font=(font_roboto, font_38, font_bold), placeholder_text="",
+                                  show="*",
+                                  justify=ctk.CENTER, width=width_150, height=height_100)
     entry_password.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
 
     button_password = ctk.CTkButton(master=frame_about, text=Translations.get_translation('confirm'),
-                                    font=("Roboto", 38, "bold"),
+                                    font=(font_roboto, font_38, font_bold),
                                     command=lambda: button_password_callback(entry_password.get(), "authentication"),
-                                    width=150,
-                                    height=100)
+                                    width=width_150,
+                                    height=height_100)
     button_password.grid(row=7, column=4, pady=10, padx=10, sticky="nsew")
 
 
@@ -186,32 +215,35 @@ def button_admin_callback():
     frame_admin.lift()
 
     label_main_title = ctk.CTkLabel(master=frame_admin, text=Translations.get_translation('system_authentication'),
-                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                    font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
     button_exit = ctk.CTkButton(master=frame_admin, text=Translations.get_translation('exit'),
-                                font=("Roboto", 38, "bold"),
-                                command=button_exit_callback, width=150, height=60)
+                                font=(font_roboto, font_38, font_bold),
+                                command=button_exit_callback, width=width_150, height=height_60)
     button_exit.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
     button_back = ctk.CTkButton(master=frame_admin, text=Translations.get_translation('back'),
-                                font=("Roboto", 38, "bold"),
-                                command=lambda: button_back_callback(frame_admin, frame_intro), width=150, height=60)
+                                font=(font_roboto, font_38, font_bold),
+                                command=lambda: button_back_callback(frame_admin, frame_intro), width=width_150,
+                                height=height_60)
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
     label_admin_info = ctk.CTkLabel(master=frame_admin,
                                     text=Translations.get_translation('admin_interface'),
-                                    font=("Roboto", 32), justify=ctk.LEFT)
+                                    font=(font_roboto, font_36), justify=ctk.LEFT)
     label_admin_info.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
-    entry_password = ctk.CTkEntry(master=frame_admin, font=("Roboto", 38, "bold"), placeholder_text="", show="*",
-                                  justify=ctk.CENTER, width=150, height=60)
+    entry_password = ctk.CTkEntry(master=frame_admin, font=(font_roboto, font_38, font_bold), placeholder_text="",
+                                  show="*",
+                                  justify=ctk.CENTER, width=width_150, height=height_60)
     entry_password.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
 
     button_password = ctk.CTkButton(master=frame_admin, text=Translations.get_translation('confirm'),
-                                    font=("Roboto", 38, "bold"),
-                                    command=lambda: button_password_callback(entry_password.get(), "admin"), width=150,
-                                    height=60)
+                                    font=(font_roboto, font_38, font_bold),
+                                    command=lambda: button_password_callback(entry_password.get(), "admin"),
+                                    width=width_150,
+                                    height=height_60)
     button_password.grid(row=7, column=4, pady=10, padx=10, sticky="nsew")
 
 
@@ -270,37 +302,38 @@ def button_sign_in_callback():
 
         label_main_title = ctk.CTkLabel(master=frame_authentication_phase_1,
                                         text=Translations.get_translation('system_authentication'),
-                                        font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                        font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
         label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
         label_first_phase = ctk.CTkLabel(master=frame_authentication_phase_1,
                                          text=Translations.get_translation('first_phase'),
-                                         font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
+                                         font=(font_roboto, font_38, font_bold), text_color=("light green"),
+                                         justify=ctk.CENTER)
         label_first_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
         label_authenticate_user = ctk.CTkLabel(master=frame_authentication_phase_1,
                                                text=Translations.get_translation(
                                                    'come_closer_1') + "\n\n" + Translations.get_translation(
                                                    'start_recording'),
-                                               font=("Roboto", 38), justify=ctk.LEFT)
+                                               font=(font_roboto, font_38), justify=ctk.LEFT)
         label_authenticate_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
         button_back = ctk.CTkButton(master=frame_authentication_phase_1, text=Translations.get_translation('back'),
-                                    font=("Roboto", 38, "bold"),
+                                    font=(font_roboto, font_38, font_bold),
                                     command=lambda: button_back_callback(frame_authentication_phase_1, frame_open_door),
-                                    width=275,
-                                    height=70)
+                                    width=width_275,
+                                    height=height_70)
         button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
         button_authenticate = ctk.CTkButton(master=frame_authentication_phase_1,
                                             text=Translations.get_translation('authenticate'),
-                                            font=("Roboto", 38, "bold"),
+                                            font=(font_roboto, font_38, font_bold),
                                             command=lambda: button_authenticate_phase_1_callback(label_first_phase,
                                                                                                  label_authenticate_user,
                                                                                                  button_back,
                                                                                                  button_authenticate),
-                                            width=275,
-                                            height=70)
+                                            width=width_275,
+                                            height=height_70)
         button_authenticate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
         window.update()
@@ -314,42 +347,42 @@ def frame_not_internet_connection_callback():
 
     label_main_title = ctk.CTkLabel(master=frame_not_internet_connection,
                                     text=Translations.get_translation('system_authentication'),
-                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                    font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
     label_not_connection = ctk.CTkLabel(master=frame_not_internet_connection,
                                         text=Translations.get_translation('internet'),
-                                        font=("Roboto", 38, "bold"), text_color="red", justify=ctk.CENTER)
+                                        font=(font_roboto, font_38, font_bold), text_color="red", justify=ctk.CENTER)
     label_not_connection.grid(row=3, column=4, sticky="nsew")
 
     label_limited_mode = ctk.CTkLabel(master=frame_not_internet_connection,
                                       text=Translations.get_translation(
                                           'limited_mode') + "\n\n" + Translations.get_translation(
                                           'password_to_continue'),
-                                      font=("Roboto", 38), justify=ctk.LEFT)
+                                      font=(font_roboto, font_38), justify=ctk.LEFT)
     label_limited_mode.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
     button_exit = ctk.CTkButton(master=frame_not_internet_connection, text=Translations.get_translation('exit'),
-                                font=("Roboto", 38, "bold"),
-                                command=button_exit_callback, width=150, height=60)
+                                font=(font_roboto, font_38, font_bold),
+                                command=button_exit_callback, width=width_150, height=height_60)
     button_exit.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
     button_back = ctk.CTkButton(master=frame_not_internet_connection, text=Translations.get_translation('back'),
-                                font=("Roboto", 38, "bold"),
+                                font=(font_roboto, font_38, font_bold),
                                 command=lambda: button_back_callback(frame_not_internet_connection, frame_open_door),
-                                width=150, height=60)
+                                width=width_150, height=height_60)
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
-    entry_password = ctk.CTkEntry(master=frame_not_internet_connection, font=("Roboto", 38, "bold"),
+    entry_password = ctk.CTkEntry(master=frame_not_internet_connection, font=(font_roboto, font_38, font_bold),
                                   placeholder_text="", show="*",
-                                  justify=ctk.CENTER, width=150, height=60)
+                                  justify=ctk.CENTER, width=width_150, height=height_60)
     entry_password.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
 
     button_password = ctk.CTkButton(master=frame_not_internet_connection, text=Translations.get_translation('confirm'),
-                                    font=("Roboto", 38, "bold"),
+                                    font=(font_roboto, font_38, font_bold),
                                     command=lambda: button_password_callback(entry_password.get(), "authentication"),
-                                    width=150,
-                                    height=60)
+                                    width=width_150,
+                                    height=height_60)
     button_password.grid(row=7, column=4, pady=10, padx=10, sticky="nsew")
 
 
@@ -421,12 +454,13 @@ def frame_authentication_phase_2_callback():
 
     label_main_title = ctk.CTkLabel(master=frame_authentication_phase_2,
                                     text=Translations.get_translation('system_authentication'),
-                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                    font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
     label_sign_in_success = ctk.CTkLabel(master=frame_authentication_phase_2,
                                          text=Translations.get_translation('sign_in_success'),
-                                         font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
+                                         font=(font_roboto, font_38, font_bold), text_color=("light green"),
+                                         justify=ctk.CENTER)
     label_sign_in_success.grid(row=2, column=4, pady=10, padx=10, sticky="nsew")
 
     window.update()
@@ -437,32 +471,33 @@ def frame_authentication_phase_2_callback():
 
     label_second_phase = ctk.CTkLabel(master=frame_authentication_phase_2,
                                       text=Translations.get_translation('second_phase'),
-                                      font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
+                                      font=(font_roboto, font_38, font_bold), text_color=("light green"),
+                                      justify=ctk.CENTER)
     label_second_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     label_authenticate_user = ctk.CTkLabel(master=frame_authentication_phase_2,
                                            text=Translations.get_translation(
                                                'come_closer_2') + "\n\n" + Translations.get_translation(
                                                'start_recording'),
-                                           font=("Roboto", 38), justify=ctk.LEFT)
+                                           font=(font_roboto, font_38), justify=ctk.LEFT)
     label_authenticate_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
     button_back = ctk.CTkButton(master=frame_authentication_phase_2, text=Translations.get_translation('back'),
-                                font=("Roboto", 38, "bold"),
+                                font=(font_roboto, font_38, font_bold),
                                 command=lambda: button_back_callback(frame_authentication_phase_2, frame_open_door),
-                                width=275,
-                                height=70)
+                                width=width_275,
+                                height=height_70)
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
     button_authenticate = ctk.CTkButton(master=frame_authentication_phase_2,
                                         text=Translations.get_translation('authenticate'),
-                                        font=("Roboto", 38, "bold"),
+                                        font=(font_roboto, font_38, font_bold),
                                         command=lambda: button_authenticate_phase_2_callback(label_second_phase,
                                                                                              label_authenticate_user,
                                                                                              button_back,
                                                                                              button_authenticate),
-                                        width=275,
-                                        height=70)
+                                        width=width_275,
+                                        height=height_70)
     button_authenticate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
     window.update()
@@ -489,7 +524,8 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
 
         label_random_word = ctk.CTkLabel(master=frame_authentication_phase_2,
                                          text=random_word.upper(),
-                                         font=("Roboto", 48, "bold"), text_color=("light green"), justify=ctk.CENTER)
+                                         font=(font_roboto, font_48, font_bold), text_color=("light green"),
+                                         justify=ctk.CENTER)
         label_random_word.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
         label_authenticate_user.configure(text=Translations.get_translation('recording'))
@@ -536,12 +572,12 @@ def frame_authentication_phase_3_callback():
 
     label_main_title = ctk.CTkLabel(master=frame_authentication_phase_3,
                                     text=Translations.get_translation('system_authentication'),
-                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                    font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
     label_verification_success = ctk.CTkLabel(master=frame_authentication_phase_3,
                                               text=Translations.get_translation('verification_success'),
-                                              font=("Roboto", 38, "bold"), text_color=("light green"),
+                                              font=(font_roboto, font_38, font_bold), text_color=("light green"),
                                               justify=ctk.CENTER)
     label_verification_success.grid(row=2, column=4, pady=10, padx=10, sticky="nsew")
 
@@ -553,32 +589,33 @@ def frame_authentication_phase_3_callback():
 
     label_third_phase = ctk.CTkLabel(master=frame_authentication_phase_3,
                                      text=Translations.get_translation('third_phase'),
-                                     font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
+                                     font=(font_roboto, font_38, font_bold), text_color=("light green"),
+                                     justify=ctk.CENTER)
     label_third_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     label_authenticate_user = ctk.CTkLabel(master=frame_authentication_phase_3,
                                            text=Translations.get_translation(
                                                'come_closer_3') + "\n\n" + Translations.get_translation(
                                                'start_recording'),
-                                           font=("Roboto", 38), justify=ctk.LEFT)
+                                           font=(font_roboto, font_38), justify=ctk.LEFT)
     label_authenticate_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
     button_back = ctk.CTkButton(master=frame_authentication_phase_3, text=Translations.get_translation('back'),
-                                font=("Roboto", 38, "bold"),
+                                font=(font_roboto, font_38, font_bold),
                                 command=lambda: button_back_callback(frame_authentication_phase_3, frame_open_door),
-                                width=275,
-                                height=70)
+                                width=width_275,
+                                height=height_70)
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
     button_authenticate = ctk.CTkButton(master=frame_authentication_phase_3,
                                         text=Translations.get_translation('authenticate'),
-                                        font=("Roboto", 38, "bold"),
+                                        font=(font_roboto, font_38, font_bold),
                                         command=lambda: button_authenticate_phase_3_callback(label_third_phase,
                                                                                              label_authenticate_user,
                                                                                              button_back,
                                                                                              button_authenticate),
-                                        width=275,
-                                        height=70)
+                                        width=width_275,
+                                        height=height_70)
     button_authenticate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
     window.update()
@@ -656,12 +693,12 @@ def frame_authentication_success_callback():
 
     label_main_title = ctk.CTkLabel(master=frame_authentication_success,
                                     text=Translations.get_translation('system_authentication'),
-                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                    font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
     label_authentication_success = ctk.CTkLabel(master=frame_authentication_success,
                                                 text=Translations.get_translation('authentication_success'),
-                                                font=("Roboto", 38, "bold"), text_color=("light green"),
+                                                font=(font_roboto, font_38, font_bold), text_color=("light green"),
                                                 justify=ctk.CENTER)
     label_authentication_success.grid(row=2, column=4, pady=10, padx=10, sticky="nsew")
 
@@ -676,22 +713,24 @@ def frame_authentication_success_callback():
 
     label_logged_user = ctk.CTkLabel(master=frame_authentication_success,
                                      text=Translations.get_translation('logged_user') + currently_logged_user,
-                                     font=("Roboto", 38, "bold"), text_color="light green", justify=ctk.CENTER)
+                                     font=(font_roboto, font_38, font_bold), text_color="light green",
+                                     justify=ctk.CENTER)
     label_logged_user.grid(row=2, column=4, sticky="nsew")
 
     button_end_interaction = ctk.CTkButton(master=frame_authentication_success,
                                            text=Translations.get_translation('end_interaction'),
-                                           font=("Roboto", 48, "bold"), command=button_end_interaction_callback)
+                                           font=(font_roboto, font_48, font_bold),
+                                           command=button_end_interaction_callback)
     button_end_interaction.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
     button_register_user = ctk.CTkButton(master=frame_authentication_success,
                                          text=Translations.get_translation('register_user'),
-                                         font=("Roboto", 48, "bold"), command=button_register_user_callback)
+                                         font=(font_roboto, font_48, font_bold), command=button_register_user_callback)
     button_register_user.grid(row=5, column=4, pady=10, padx=10, sticky="nsew")
 
     button_manage_users = ctk.CTkButton(master=frame_authentication_success,
                                         text=Translations.get_translation('manage_users'),
-                                        font=("Roboto", 48, "bold"), command=button_manage_users_callback)
+                                        font=(font_roboto, font_48, font_bold), command=button_manage_users_callback)
 
     if const.IS_ADMIN and is_internet_connection:
         button_manage_users.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
@@ -731,12 +770,13 @@ def frame_authentication_unsuccess_callback(phase):
 
     label_main_title = ctk.CTkLabel(master=frame_authentication_unsuccess,
                                     text=Translations.get_translation('system_authentication'),
-                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                    font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
     label_authentication_unsuccess = ctk.CTkLabel(master=frame_authentication_unsuccess,
                                                   text=Translations.get_translation('authentication_unsuccess'),
-                                                  font=("Roboto", 38, "bold"), text_color=("red"), justify=ctk.CENTER)
+                                                  font=(font_roboto, font_38, font_bold), text_color=("red"),
+                                                  justify=ctk.CENTER)
     label_authentication_unsuccess.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     label_authentication_unsuccess_info = ctk.CTkLabel(master=frame_authentication_unsuccess,
@@ -745,15 +785,15 @@ def frame_authentication_unsuccess_callback(phase):
                                                            'remaining_attempts') + str(
                                                            remaining_attempts) + "\n\n" + Translations.get_translation(
                                                            'start_authentication_again'),
-                                                       font=("Roboto", 38), justify=ctk.LEFT)
+                                                       font=(font_roboto, font_38), justify=ctk.LEFT)
     label_authentication_unsuccess_info.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
     button_authenticate_again = ctk.CTkButton(master=frame_authentication_unsuccess,
                                               text=Translations.get_translation('authenticate_again'),
-                                              font=("Roboto", 48, "bold"),
+                                              font=(font_roboto, font_48, font_bold),
                                               command=lambda: button_authenticate_again_callback(phase),
-                                              width=150,
-                                              height=100)
+                                              width=width_150,
+                                              height=height_100)
     button_authenticate_again.grid(row=7, column=4, pady=10, padx=10, sticky="nsew")
 
 
@@ -778,18 +818,18 @@ def button_sign_up_callback():
 
     label_main_title = ctk.CTkLabel(master=frame_registration,
                                     text=Translations.get_translation('system_authentication'),
-                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                    font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
     label_registration = ctk.CTkLabel(master=frame_registration,
                                       text=Translations.get_translation(
                                           'registration_info') + "\n\n" + Translations.get_translation(
                                           'continue_to_sign_in'),
-                                      font=("Roboto", 38), justify=ctk.LEFT)
+                                      font=(font_roboto, font_38), justify=ctk.LEFT)
     label_registration.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     button_sign_in_again = ctk.CTkButton(master=frame_registration, text=Translations.get_translation('sign_in'),
-                                         font=("Roboto", 48, "bold"), command=button_sign_in_callback)
+                                         font=(font_roboto, font_48, font_bold), command=button_sign_in_callback)
     button_sign_in_again.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
 
 
@@ -801,38 +841,39 @@ def button_register_user_callback():
 
     label_main_title = ctk.CTkLabel(master=frame_register_new_user,
                                     text=Translations.get_translation('system_authentication'),
-                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                    font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
     label_first_phase = ctk.CTkLabel(master=frame_register_new_user,
                                      text=Translations.get_translation('registration_first_phase'),
-                                     font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
+                                     font=(font_roboto, font_38, font_bold), text_color=("light green"),
+                                     justify=ctk.CENTER)
     label_first_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     label_register_user = ctk.CTkLabel(master=frame_register_new_user,
                                        text=Translations.get_translation(
                                            'register_come_closer_1') + "\n\n" + Translations.get_translation(
                                            'register_start_recording'),
-                                       font=("Roboto", 38), justify=ctk.LEFT)
+                                       font=(font_roboto, font_38), justify=ctk.LEFT)
     label_register_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
     button_back = ctk.CTkButton(master=frame_register_new_user, text=Translations.get_translation('back'),
-                                font=("Roboto", 38, "bold"),
+                                font=(font_roboto, font_38, font_bold),
                                 command=lambda: button_back_callback(frame_register_new_user,
                                                                      frame_authentication_success),
-                                width=275,
-                                height=70)
+                                width=width_275,
+                                height=height_70)
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
     button_registrate = ctk.CTkButton(master=frame_register_new_user,
                                       text=Translations.get_translation('registrate'),
-                                      font=("Roboto", 38, "bold"),
+                                      font=(font_roboto, font_38, font_bold),
                                       command=lambda: button_registrate_phase_1_callback(label_first_phase,
                                                                                          label_register_user,
                                                                                          button_back,
                                                                                          button_registrate),
-                                      width=275,
-                                      height=70)
+                                      width=width_275,
+                                      height=height_70)
     button_registrate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
 
@@ -867,18 +908,18 @@ def button_registrate_phase_1_callback(label_first_phase, label_register_user, b
         label_register_user.configure(text=Translations.get_translation('confirmation_nickname') + new_user_nickname)
 
         button_repeat = ctk.CTkButton(master=frame_register_new_user, text=Translations.get_translation('repeat'),
-                                      font=("Roboto", 38, "bold"),
+                                      font=(font_roboto, font_38, font_bold),
                                       command=button_repeat_phase_1_callback,
-                                      width=275,
-                                      height=70)
+                                      width=width_275,
+                                      height=height_70)
         button_repeat.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
         button_confirm = ctk.CTkButton(master=frame_register_new_user,
                                        text=Translations.get_translation('confirm'),
-                                       font=("Roboto", 38, "bold"),
+                                       font=(font_roboto, font_38, font_bold),
                                        command=button_confirm_phase_1_callback,
-                                       width=275,
-                                       height=70, state="normal")
+                                       width=width_275,
+                                       height=height_70, state="normal")
         button_confirm.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
         if new_user_nickname in users:
@@ -887,7 +928,7 @@ def button_registrate_phase_1_callback(label_first_phase, label_register_user, b
                 text=Translations.get_translation(
                     'nickname_exists_1') + new_user_nickname + Translations.get_translation(
                     'nickname_exists_2') + "\n\n" + Translations.get_translation('nickname_exists_3'),
-                font=("Roboto", 38, "bold"), text_color="red")
+                font=(font_roboto, font_38, font_bold), text_color="red")
 
         window.update()
     else:
@@ -899,12 +940,12 @@ def frame_register_not_internet_callback(phase, label_register_user, button_repe
 
     label_main_title = ctk.CTkLabel(master=frame_register_not_internet,
                                     text=Translations.get_translation('system_authentication'),
-                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                    font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
     label_not_connection = ctk.CTkLabel(master=frame_register_not_internet,
                                         text=Translations.get_translation('internet'),
-                                        font=("Roboto", 38, "bold"), text_color="red", justify=ctk.CENTER)
+                                        font=(font_roboto, font_38, font_bold), text_color="red", justify=ctk.CENTER)
     label_not_connection.grid(row=3, column=4, sticky="nsew")
 
     label_register_user = ctk.CTkLabel(master=frame_register_not_internet,
@@ -912,20 +953,20 @@ def frame_register_not_internet_callback(phase, label_register_user, button_repe
                                            'nickname_exists_1') + new_user_nickname + Translations.get_translation(
                                            'nickname_exists_2') + "\n\n" + Translations.get_translation(
                                            'nickname_exists_3'),
-                                       font=("Roboto", 32, "bold"), text_color="red", justify=ctk.LEFT)
+                                       font=(font_roboto, font_32, font_bold), text_color="red", justify=ctk.LEFT)
 
-    entry_register = ctk.CTkEntry(master=frame_register_not_internet, font=("Roboto", 38, "bold"),
+    entry_register = ctk.CTkEntry(master=frame_register_not_internet, font=(font_roboto, font_38, font_bold),
                                   placeholder_text="",
-                                  justify=ctk.CENTER, width=150, height=60)
+                                  justify=ctk.CENTER, width=width_150, height=height_60)
     entry_register.grid(row=6, column=4, pady=10, padx=10, sticky="nsew")
 
     button_confirm = ctk.CTkButton(master=frame_register_not_internet,
                                    text=Translations.get_translation('confirm'),
-                                   font=("Roboto", 38, "bold"),
+                                   font=(font_roboto, font_38, font_bold),
                                    command=lambda: button_confirm_register_callback(entry_register.get(), phase,
                                                                                     label_register_user, button_repeat,
-                                                                                    button_confirm), width=150,
-                                   height=60)
+                                                                                    button_confirm), width=width_150,
+                                   height=height_60)
     button_confirm.grid(row=7, column=4, pady=10, padx=10, sticky="nsew")
 
     if phase == "nickname":
@@ -933,7 +974,7 @@ def frame_register_not_internet_callback(phase, label_register_user, button_repe
                                           text=Translations.get_translation(
                                               'limited_mode') + "\n\n" + Translations.get_translation(
                                               'nickname_to_continue'),
-                                          font=("Roboto", 38), justify=ctk.LEFT)
+                                          font=(font_roboto, font_38), justify=ctk.LEFT)
         label_limited_mode.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
         if new_user_nickname in users:
@@ -946,7 +987,7 @@ def frame_register_not_internet_callback(phase, label_register_user, button_repe
                                           text=Translations.get_translation(
                                               'limited_mode') + "\n\n" + Translations.get_translation(
                                               'phrase_to_continue'),
-                                          font=("Roboto", 38), justify=ctk.LEFT)
+                                          font=(font_roboto, font_38), justify=ctk.LEFT)
         label_limited_mode.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
 
@@ -999,12 +1040,13 @@ def button_confirm_phase_1_callback():
     if voiceprints_counter < number_of_voiceprints:
         label_main_title = ctk.CTkLabel(master=frame_register_new_voiceprints,
                                         text=Translations.get_translation('system_authentication'),
-                                        font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                        font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
         label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
         label_second_phase = ctk.CTkLabel(master=frame_register_new_voiceprints,
                                           text=Translations.get_translation('registration_second_phase'),
-                                          font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
+                                          font=(font_roboto, font_38, font_bold), text_color=("light green"),
+                                          justify=ctk.CENTER)
         label_second_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
         label_register_user = ctk.CTkLabel(master=frame_register_new_voiceprints,
@@ -1012,26 +1054,26 @@ def button_confirm_phase_1_callback():
                                                'register_come_closer_2') + "\n\n" + Translations.get_translation(
                                                'register_start_recording') + "\n\n" + Translations.get_translation(
                                                'recording_number') + str(voiceprints_counter + 1) + ".",
-                                           font=("Roboto", 38), justify=ctk.LEFT)
+                                           font=(font_roboto, font_38), justify=ctk.LEFT)
         label_register_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
         button_back = ctk.CTkButton(master=frame_register_new_voiceprints, text=Translations.get_translation('back'),
-                                    font=("Roboto", 38, "bold"),
+                                    font=(font_roboto, font_38, font_bold),
                                     command=lambda: button_back_callback(frame_register_new_voiceprints,
                                                                          frame_authentication_success),
-                                    width=275,
-                                    height=70)
+                                    width=width_275,
+                                    height=height_70)
         button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
         button_registrate = ctk.CTkButton(master=frame_register_new_voiceprints,
                                           text=Translations.get_translation('registrate'),
-                                          font=("Roboto", 38, "bold"),
+                                          font=(font_roboto, font_38, font_bold),
                                           command=lambda: button_registrate_phase_2_callback(label_second_phase,
                                                                                              label_register_user,
                                                                                              button_back,
                                                                                              button_registrate),
-                                          width=275,
-                                          height=70)
+                                          width=width_275,
+                                          height=height_70)
         button_registrate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
     else:
         voiceprints_counter = 0
@@ -1046,7 +1088,8 @@ def button_registrate_phase_2_callback(label_second_phase, label_register_user, 
 
     label_random_phrase = ctk.CTkLabel(master=frame_register_new_voiceprints,
                                        text=random_phrase,
-                                       font=("Roboto", 36, "bold"), text_color=("light green"), justify=ctk.CENTER)
+                                       font=(font_roboto, font_36, font_bold), text_color=("light green"),
+                                       justify=ctk.CENTER)
     label_random_phrase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     label_second_phase.destroy()
@@ -1088,38 +1131,39 @@ def frame_registrate_new_unique_phrase_callback():
 
     label_main_title = ctk.CTkLabel(master=frame_registrate_new_unique_phrase,
                                     text=Translations.get_translation('system_authentication'),
-                                    font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                    font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
     label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
     label_third_phase = ctk.CTkLabel(master=frame_registrate_new_unique_phrase,
                                      text=Translations.get_translation('registration_third_phase'),
-                                     font=("Roboto", 38, "bold"), text_color=("light green"), justify=ctk.CENTER)
+                                     font=(font_roboto, font_38, font_bold), text_color=("light green"),
+                                     justify=ctk.CENTER)
     label_third_phase.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     label_register_user = ctk.CTkLabel(master=frame_registrate_new_unique_phrase,
                                        text=Translations.get_translation(
                                            'register_come_closer_3') + "\n\n" + Translations.get_translation(
                                            'register_start_recording'),
-                                       font=("Roboto", 38), justify=ctk.LEFT)
+                                       font=(font_roboto, font_38), justify=ctk.LEFT)
     label_register_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
     button_back = ctk.CTkButton(master=frame_registrate_new_unique_phrase, text=Translations.get_translation('back'),
-                                font=("Roboto", 38, "bold"),
+                                font=(font_roboto, font_38, font_bold),
                                 command=lambda: button_back_callback(frame_registrate_new_unique_phrase,
                                                                      frame_authentication_success),
-                                width=275,
-                                height=70)
+                                width=width_275,
+                                height=height_70)
     button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
     button_registrate = ctk.CTkButton(master=frame_registrate_new_unique_phrase,
                                       text=Translations.get_translation('registrate'),
-                                      font=("Roboto", 38, "bold"),
+                                      font=(font_roboto, font_38, font_bold),
                                       command=lambda: button_registrate_phase_3_callback(label_third_phase,
                                                                                          label_register_user,
                                                                                          button_back,
                                                                                          button_registrate),
-                                      width=275,
-                                      height=70)
+                                      width=width_275,
+                                      height=height_70)
     button_registrate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
 
@@ -1128,18 +1172,18 @@ def button_registrate_phase_3_callback(label_third_phase, label_register_user, b
 
     button_repeat = ctk.CTkButton(master=frame_registrate_new_unique_phrase,
                                   text=Translations.get_translation('repeat'),
-                                  font=("Roboto", 38, "bold"),
+                                  font=(font_roboto, font_38, font_bold),
                                   command=button_repeat_phase_3_callback,
-                                  width=275,
-                                  height=70)
+                                  width=width_275,
+                                  height=height_70)
 
     button_confirm = ctk.CTkButton(master=frame_registrate_new_unique_phrase,
                                    text=Translations.get_translation('confirm'),
-                                   font=("Roboto", 38, "bold"),
+                                   font=(font_roboto, font_38, font_bold),
                                    command=lambda: button_confirm_phase_3_callback(label_register_user, button_repeat,
                                                                                    button_confirm),
-                                   width=275,
-                                   height=70)
+                                   width=width_275,
+                                   height=height_70)
 
     is_internet_connection = conn.check_internet_connection()
 
@@ -1206,14 +1250,14 @@ def button_confirm_phase_3_callback(label_register_user, button_repeat, button_c
 
     label_registration_success = ctk.CTkLabel(master=frame_registrate_new_unique_phrase,
                                               text=Translations.get_translation('registration_success'),
-                                              font=("Roboto", 38, "bold"), text_color=("light green"),
+                                              font=(font_roboto, font_38, font_bold), text_color=("light green"),
                                               justify=ctk.CENTER)
     label_registration_success.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
     label_processing = ctk.CTkLabel(master=frame_registrate_new_unique_phrase,
                                     text=Translations.get_translation(
                                         'processing_voiceprints'),
-                                    font=("Roboto", 32), justify=ctk.CENTER)
+                                    font=(font_roboto, font_32), justify=ctk.CENTER)
     label_processing.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
     window.update()
@@ -1267,34 +1311,36 @@ def button_manage_users_callback():
 
         label_main_title = ctk.CTkLabel(master=frame_manage_users,
                                         text=Translations.get_translation('system_authentication'),
-                                        font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                        font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
         label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
         combobox_users = ctk.CTkComboBox(master=frame_manage_users, values=list(users_to_show.keys()),
-                                         font=("Roboto", 38, "bold"),
-                                         dropdown_font=("Roboto", 38, "bold"), justify=ctk.CENTER, hover=True,
+                                         font=(font_roboto, font_38, font_bold),
+                                         dropdown_font=(font_roboto, font_38, font_bold), justify=ctk.CENTER,
+                                         hover=True,
                                          command=combobox_users_callback)
         combobox_users.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
 
         button_back = ctk.CTkButton(master=frame_manage_users, text=Translations.get_translation('back'),
-                                    font=("Roboto", 38, "bold"),
+                                    font=(font_roboto, font_38, font_bold),
                                     command=lambda: button_back_callback(frame_manage_users,
                                                                          frame_authentication_success),
-                                    width=275,
-                                    height=70)
+                                    width=width_275,
+                                    height=height_70)
         button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
         button_delete_user = ctk.CTkButton(master=frame_manage_users,
                                            text=Translations.get_translation('delete'),
-                                           font=("Roboto", 38, "bold"),
+                                           font=(font_roboto, font_38, font_bold),
                                            command=button_delete_user_callback,
-                                           width=275,
-                                           height=70)
+                                           width=width_275,
+                                           height=height_70)
         button_delete_user.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
     else:
         label_not_connection = ctk.CTkLabel(master=frame_manage_users,
                                             text=Translations.get_translation('internet'),
-                                            font=("Roboto", 38, "bold"), text_color="red", justify=ctk.CENTER)
+                                            font=(font_roboto, font_38, font_bold), text_color="red",
+                                            justify=ctk.CENTER)
         label_not_connection.grid(row=3, column=4, sticky="nsew")
         window.update()
 
@@ -1409,29 +1455,33 @@ registration_frames.append(frame_register_not_internet)
 
 # create INTRO FRAME widgets
 label_main_title = ctk.CTkLabel(master=frame_intro, text=Translations.get_translation('system_authentication'),
-                                font=("Roboto", 48, "bold"), justify=ctk.CENTER)
+                                font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
 label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
 
 button_open_door = ctk.CTkButton(master=frame_intro, text=Translations.get_translation('open_door'),
-                                 font=("Roboto", 48, "bold"), command=button_open_door_callback)
+                                 font=(font_roboto, font_48, font_bold), command=button_open_door_callback)
 button_open_door.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
 
 button_about_project = ctk.CTkButton(master=frame_intro, text=Translations.get_translation('about_project'),
-                                     font=("Roboto", 38, "bold"), command=button_about_project_callback, width=150,
-                                     height=50)
+                                     font=(font_roboto, font_38, font_bold), command=button_about_project_callback,
+                                     width=width_150,
+                                     height=height_50)
 button_about_project.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
 
-button_exit = ctk.CTkButton(master=frame_intro, text=Translations.get_translation('exit'), font=("Roboto", 38, "bold"),
-                            command=button_exit_callback, width=150, height=50)
+button_exit = ctk.CTkButton(master=frame_intro, text=Translations.get_translation('exit'),
+                            font=(font_roboto, font_38, font_bold),
+                            command=button_exit_callback, width=width_150, height=height_50)
 button_exit.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
 
-segmented_button_language = ctk.CTkSegmentedButton(master=frame_intro, values=["SK", "EN"], font=("Roboto", 38, "bold"),
-                                                   command=segmented_button_language_callback, width=150, height=50)
+segmented_button_language = ctk.CTkSegmentedButton(master=frame_intro, values=["SK", "EN"],
+                                                   font=(font_roboto, font_38, font_bold),
+                                                   command=segmented_button_language_callback, width=width_150,
+                                                   height=height_50)
 segmented_button_language.grid(row=6, column=7, pady=10, padx=10, sticky="nsew")
 
 button_admin = ctk.CTkButton(master=frame_intro, text=Translations.get_translation('admin'),
-                             font=("Roboto", 38, "bold"),
-                             command=button_admin_callback, width=150, height=50, fg_color="#4a4a4a",
+                             font=(font_roboto, font_38, font_bold),
+                             command=button_admin_callback, width=width_150, height=height_50, fg_color="#4a4a4a",
                              hover_color="#696969")
 button_admin.grid(row=6, column=1, pady=10, padx=10, sticky="nsew")
 
