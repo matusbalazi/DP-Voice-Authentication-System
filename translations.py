@@ -75,7 +75,7 @@ class Translations:
             'registration_success': "Registrácia prebehla úspešne!",
             'registration_unsuccess': "Registrácia bola neúspešná!",
             'registration_unsuccess_info': "• Zvolené prihlasovacie meno už existuje.",
-            'processing_voiceprints': "PREBIEHA SPRACOVANIE HLASOVÝCH ODTLAČKOV...",
+            'processing_voiceprints': "PREBIEHA VYTVÁRANIE HLASOVÝCH ODTLAČKOV...",
 
             'delete': "Vymazať",
 
