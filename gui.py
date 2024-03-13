@@ -26,6 +26,7 @@ voiceprints_counter = 0
 recordings_counter = 0
 registration_with_internet = True
 is_admin_logged = False
+partial_authentication = 0.0
 
 ctk.set_ctk_parent_class(tk.Tk)
 ctk.set_appearance_mode("dark")
@@ -387,7 +388,7 @@ def frame_not_internet_connection_callback():
 
 
 def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_user, button_back, button_authenticate):
-    global currently_logged_user
+    global currently_logged_user, partial_authentication
 
     label_first_phase.destroy()
     button_back.destroy()
@@ -428,7 +429,10 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
 
             if s_recognizer.user_registered_with_internet(users, currently_logged_user):
                 speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + speaker_nickname + "/"
-                login_success = v_recognizer.verify_speaker(classifier, speaker_dir, const.RECORDED_AUDIO_FILENAME)
+                # login_success = v_recognizer.verify_speaker(classifier, speaker_dir, const.RECORDED_AUDIO_FILENAME)
+                login_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                    const.RECORDED_AUDIO_FILENAME, phase=1)
+                partial_authentication = partial_authentication + score
             else:
                 login_success = speaker_exists
 
@@ -504,6 +508,7 @@ def frame_authentication_phase_2_callback():
 
 
 def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_user, button_back, button_authenticate):
+    global partial_authentication
     label_second_phase.destroy()
     button_back.destroy()
     button_authenticate.destroy()
@@ -548,7 +553,10 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
 
         if spoken_verification_word_matches:
             speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
-            verification_success = v_recognizer.verify_speaker(classifier, speaker_dir, const.RECORDED_AUDIO_FILENAME)
+            # verification_success = v_recognizer.verify_speaker(classifier, speaker_dir, const.RECORDED_AUDIO_FILENAME)
+            verification_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                       const.RECORDED_AUDIO_FILENAME, phase=2)
+            partial_authentication = partial_authentication + score
 
             if verification_success:
                 msg_success = f"Verification word {random_word} matched with spoken word {spoken_verification_word}. Speaker is registered user."
@@ -622,7 +630,8 @@ def frame_authentication_phase_3_callback():
 
 
 def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_user, button_back, button_authenticate):
-    global currently_logged_user
+    global currently_logged_user, partial_authentication
+    skipped_phases = False
 
     label_third_phase.destroy()
     button_back.destroy()
@@ -650,6 +659,7 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
         if currently_logged_user == "":
             currently_logged_user = v_recognizer.verify_all_speakers(classifier, const.SPEAKER_VOICEPRINTS_DIR,
                                                                      const.RECORDED_AUDIO_FILENAME)
+            skipped_phases = True
 
             if unique_phrase != "":
                 if not s_recognizer.verify_unique_phrase(users, currently_logged_user, unique_phrase):
@@ -657,15 +667,31 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
 
         if currently_logged_user != "":
             speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
-            authentication_success = v_recognizer.verify_speaker(classifier, speaker_dir,
-                                                                 const.RECORDED_AUDIO_FILENAME)
+            # authentication_success = v_recognizer.verify_speaker(classifier, speaker_dir,
+            #                                                     const.RECORDED_AUDIO_FILENAME)
+
+            if not skipped_phases:
+                authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                             const.RECORDED_AUDIO_FILENAME, phase=3)
+            else:
+                authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                                    const.RECORDED_AUDIO_FILENAME)
+
+            partial_authentication = partial_authentication + score
 
             if authentication_success:
                 msg_success = f"Authentication with unique phrase was successful. User {currently_logged_user} opened the door."
                 log.log_info(msg_success)
-                if os.path.isfile(const.RECORDED_AUDIO_FILENAME):
-                    os.remove(const.RECORDED_AUDIO_FILENAME)
-                frame_authentication_success_callback()
+
+                if partial_authentication >= const.PARTIAL_AUTHORIZATION_THRESHOLD:
+                    if os.path.isfile(const.RECORDED_AUDIO_FILENAME):
+                        os.remove(const.RECORDED_AUDIO_FILENAME)
+                    frame_authentication_success_callback()
+                else:
+                    msg_warning = f"Final result of partial authentication is under the threshold."
+                    log.log_warning(msg_warning)
+                    partial_authentication = partial_authentication - score
+                    frame_authentication_unsuccess_callback(3)
             else:
                 msg_warning = f"Speaker's voice characteristics don't match. Door can't be opened."
                 log.log_warning(msg_warning)

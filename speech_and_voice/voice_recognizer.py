@@ -103,7 +103,7 @@ def verify_all_speakers(classifier, input_dir, speaker_audio_path, threshold=0.6
         return speaker_nickname
 
 
-def verify_speaker(classifier, input_dir, speaker_audio_path, threshold=0.6):
+def verify_speaker(classifier, input_dir, speaker_audio_path, threshold=0.6) -> bool:
     success = False
 
     if not os.path.isdir(input_dir):
@@ -136,6 +136,61 @@ def verify_speaker(classifier, input_dir, speaker_audio_path, threshold=0.6):
             log.log_info(msg_info)
 
     return success
+
+
+def verify_speaker_concept(classifier, input_dir, speaker_audio_path, threshold=0.5, phase=None) -> tuple:
+    success = False
+    results = []
+    partial_authorization = 0.0
+
+    if not os.path.isdir(input_dir):
+        msg_error = f"Error: Input directory {input_dir} not found."
+        log.log_error(msg_error)
+        return success, partial_authorization
+
+    device = torch.device("cpu")
+    speaker_audio_signal = open_and_resample_audio_signal(speaker_audio_path)
+
+    if speaker_audio_signal is not None:
+        voiceprint_test = classifier.encode_batch(speaker_audio_signal)
+        cos = torch.nn.CosineSimilarity(dim=2, eps=1e-6)
+
+        score = 0
+        file_ext = "*.pt"
+        for filename in glob.glob(os.path.join(input_dir, file_ext)):
+            enrolled_voiceprint = torch.load(filename, map_location=device)
+            result = cos(enrolled_voiceprint, voiceprint_test)
+            results.append(round(result[0].cpu().detach().numpy().item(), 2))
+
+            if result[0].cpu().detach().numpy() > threshold:
+                score += 1
+
+        if score == 0:
+            msg_warning = "Speaker is not an eligible person."
+            log.log_warning(msg_warning)
+        else:
+            success = True
+
+            partial_authorization = max(results) * 100
+
+            if phase is not None and phase in [1, 2, 3]:
+                if phase == 1:
+                    # partial_authorization = round((stats.mean(results) * 10), 2)
+                    # partial_authorization = round((stats.median(results) * 10), 2)
+                    partial_authorization = max(results) * 10
+                elif phase == 2:
+                    # partial_authorization = round((stats.mean(results) * 20), 2)
+                    # partial_authorization = round((stats.median(results) * 20), 2)
+                    partial_authorization = max(results) * 20
+                elif phase == 3:
+                    # partial_authorization = round((stats.mean(results) * 70), 2)
+                    # partial_authorization = round((stats.median(results) * 70), 2)
+                    partial_authorization = max(results) * 70
+
+            msg_info = f"This is an authorized speaker with a score of {score}."
+            log.log_info(msg_info)
+
+    return success, partial_authorization
 
 # input_dir = "speaker_recognition/speaker_recordings/"
 # output_dir = "speaker_recognition/speaker_voiceprints/"
