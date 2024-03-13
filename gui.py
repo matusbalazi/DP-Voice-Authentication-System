@@ -1049,7 +1049,11 @@ def button_confirm_phase_1_callback():
         log.log_info(msg_info)
 
         # VOICE RECOGNITION
+        if not os.path.isdir(const.SPEAKER_RECORDINGS_DIR):
+            os.mkdir(const.SPEAKER_RECORDINGS_DIR)
+
         new_user_dir = const.SPEAKER_RECORDINGS_DIR + new_user_nickname + "/"
+
         if not os.path.isdir(new_user_dir):
             os.mkdir(new_user_dir)
 
