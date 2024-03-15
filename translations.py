@@ -25,6 +25,7 @@ class Translations:
             'authenticate': "Autentifikovať",
             'first_phase': "1. fáza autentifikácie",
             'come_closer_1': "• Pristúpte bližšie k mikrofónu zariadenia a povedzte\n  svoje prihlasovacie meno.",
+            'short_info_1': "Povedzte PRIHLASOVACIE MENO.",
             'start_recording': "• Nahrávanie spustíte stlačením tlačidla Autentifikovať.",
             'recording': "PREBIEHA NAHRÁVANIE... ",
             'recording_ended': "Nahrávanie skončilo.",
@@ -32,9 +33,11 @@ class Translations:
             'sign_in_success': "Prihlásenie prebehlo úspešne!",
             'second_phase': "2. fáza autentifikácie",
             'come_closer_2': "• Pristúpte bližšie k mikrofónu zariadenia a povedzte náhodne\n  vygenerované slovo, ktoré sa zobrazí na displeji.",
+            'short_info_2': "Povedzte NÁHODNÚ FRÁZU.",
 
             'verification_success': "Overenie prebehlo úspešne!",
             'third_phase': "3. fáza autentifikácie",
+            'short_info_3': "Povedzte JEDINEČNÚ FRÁZU.",
             'come_closer_3': "• Pristúpte bližšie k mikrofónu zariadenia a povedzte jedinečnú\n  frázu, ktorú ste si zvolili pri registrácii.",
 
             'authentication_success': "Dvere sa otvorili!",
@@ -113,6 +116,7 @@ class Translations:
             'authenticate': "Authenticate",
             'first_phase': "1st Authentication Phase",
             'come_closer_1': "• Come closer to the device's microphone and say your login name.",
+            'short_info_1': "Say LOGIN NAME.",
             'start_recording': "• You can start recording by pressing the Authenticate button.",
             'recording': "RECORDING...",
             'recording_ended': "Recording ended.",
@@ -120,10 +124,12 @@ class Translations:
             'sign_in_success': "Login successful!",
             'second_phase': "2nd Authentication Phase",
             'come_closer_2': "• Come closer to the device's microphone and say a randomly\n  generated word that appears on the display.",
+            'short_info_2': "Say RANDOM PHRASE.",
 
             'verification_success': "Verification successful!",
             'third_phase': "3rd Authentication Phase",
             'come_closer_3': "• Come closer to the device's microphone and say the unique\n  phrase you chose during registration.",
+            'short_info_3': "Say UNIQUE PHRASE.",
 
             'authentication_success': "Door opened!",
             'end_interaction': "End the Interaction",

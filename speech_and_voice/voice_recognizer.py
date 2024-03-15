@@ -138,7 +138,7 @@ def verify_speaker(classifier, input_dir, speaker_audio_path, threshold=0.6) -> 
     return success
 
 
-def verify_speaker_concept(classifier, input_dir, speaker_audio_path, threshold=0.5, phase=None) -> tuple:
+def verify_speaker_concept(classifier, input_dir, speaker_audio_path, threshold=0.5, auth_weight=None) -> tuple:
     success = False
     results = []
     partial_authorization = 0.0
@@ -173,19 +173,8 @@ def verify_speaker_concept(classifier, input_dir, speaker_audio_path, threshold=
 
             partial_authorization = max(results) * 100
 
-            if phase is not None and phase in [1, 2, 3]:
-                if phase == 1:
-                    # partial_authorization = round((stats.mean(results) * 10), 2)
-                    # partial_authorization = round((stats.median(results) * 10), 2)
-                    partial_authorization = max(results) * 10
-                elif phase == 2:
-                    # partial_authorization = round((stats.mean(results) * 20), 2)
-                    # partial_authorization = round((stats.median(results) * 20), 2)
-                    partial_authorization = max(results) * 20
-                elif phase == 3:
-                    # partial_authorization = round((stats.mean(results) * 70), 2)
-                    # partial_authorization = round((stats.median(results) * 70), 2)
-                    partial_authorization = max(results) * 70
+            if auth_weight is not None:
+                partial_authorization = max(results) * auth_weight
 
             msg_info = f"This is an authorized speaker with a score of {score}."
             log.log_info(msg_info)
