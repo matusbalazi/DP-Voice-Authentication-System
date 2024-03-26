@@ -8,6 +8,7 @@ PARTIAL_AUTHORIZATION_THRESHOLD = 70
 
 RECORDED_AUDIO_FILENAME = "recorded_audio.wav"
 USERS_FILENAME = "users.json"
+TMP_USERS_FILENAME = "tmp_users.json"
 LOGS_FILENAME = "app_logs.txt"
 SPEAKER_RECORDINGS_DIR = "speech_and_voice/speaker_recognition/speaker_recordings/"
 SPEAKER_VOICEPRINTS_DIR = "speech_and_voice/speaker_recognition/speaker_voiceprints/"

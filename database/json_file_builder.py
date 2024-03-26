@@ -6,7 +6,10 @@ from general import log_file_builder as log
 def load_json_file(filename):
     try:
         with open(filename, "r") as file:
-            data = json.load(file)
+            data = file.read().strip()
+            if not data:
+                return {}
+            data = json.loads(data)
             msg_success = f"File {filename} loaded successfully."
             log.log_info(msg_success)
             return data
@@ -55,3 +58,16 @@ def remove_user_from_json_file(users, user_key, filename):
         log.log_error(msg_error)
 
     return success
+
+
+def compare_json_files(filename_1, filename_2) -> bool:
+    with open(filename_1, 'r') as file_1:
+        data_1 = json.load(file_1)
+
+    with open(filename_2, 'r') as file_2:
+        data_2 = json.load(file_2)
+
+    if data_1 == data_2:
+        return True
+    else:
+        return False

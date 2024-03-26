@@ -15,6 +15,7 @@ from speech_and_voice import speech_recognizer as s_recognizer
 from speech_and_voice import voice_recognizer as v_recognizer
 from database import json_file_builder as json
 from database import connection_controller as conn
+from database import db_operations as db
 
 user_to_delete = ""
 currently_logged_user = ""
@@ -1398,7 +1399,11 @@ def button_confirm_phase_3_callback(label_register_user, button_repeat, button_c
                                   const.USERS_FILENAME):
         output_dir = const.SPEAKER_VOICEPRINTS_DIR + new_user_nickname + "/"
         os.mkdir(output_dir)
-        v_recognizer.create_voiceprints(classifier, new_user_dir, output_dir)
+        v_recognizer.create_voiceprints(classifier, new_user_dir, output_dir, const.NUMBER_OF_VOICEPRINTS + 2)
+
+        if conn.check_internet_connection():
+            db.insert_user_to_db(new_user_nickname)
+
         msg_info = f"New user {new_user_nickname} registered successfully."
         log.log_info(msg_info)
         manager.remove_dir_with_files(new_user_dir)
@@ -1487,6 +1492,7 @@ def button_delete_user_callback():
     if conn.check_internet_connection():
         if user_to_delete in users.keys():
             if json.remove_user_from_json_file(users, user_to_delete, const.USERS_FILENAME):
+                db.delete_user_from_db(user_to_delete)
                 manager.remove_dir_with_files(const.SPEAKER_RECORDINGS_DIR + user_to_delete + "/")
                 manager.remove_dir_with_files(const.SPEAKER_VOICEPRINTS_DIR + user_to_delete + "/")
                 msg_info = f"User {user_to_delete} deleted successfully from the app database."
@@ -1618,6 +1624,14 @@ voiceprints_phrases = list(const.VOICEPRINT_PHRASES[Translations.get_language()]
 classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb",
                                             savedir=r"pretrained_models/spkrec-ecapa-voxceleb",
                                             run_opts={"device": "cpu"})
+
+if conn.check_internet_connection():
+    records = db.get_all_users_from_db()
+    db_users = json.load_json_file(const.TMP_USERS_FILENAME)
+    if users != db_users:
+        db.sync_with_local()
+    if os.path.isfile(const.TMP_USERS_FILENAME):
+        os.remove(const.TMP_USERS_FILENAME)
 
 
 def disable_minimize(event):
