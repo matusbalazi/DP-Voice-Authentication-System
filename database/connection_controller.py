@@ -2,6 +2,7 @@ import mysql.connector as mysql
 import requests
 from general import log_file_builder as log
 from authentication import credentials
+from cryptography.fernet import Fernet
 
 
 def check_internet_connection():
@@ -17,9 +18,15 @@ def check_internet_connection():
 
 
 def connect_to_database():
+    key = credentials.database_password_key
+    cipher_suite = Fernet(key)
+    encrypted_password = credentials.database_password_encrypted
+    decrypted_password = cipher_suite.decrypt(encrypted_password)
+    database_password = decrypted_password.decode()
+
     try:
         db_connection = mysql.connect(host=credentials.server_host_ip, database=credentials.database_name,
-                                      user=credentials.database_user, password=credentials.database_password)
+                                      user=credentials.database_user, password=database_password)
         msg_info = "Connected to database succesfully."
         log.log_info(msg_info)
         return db_connection

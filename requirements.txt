@@ -1,4 +1,6 @@
+cryptography==42.0.5
 customtkinter==5.2.2
+mysql-connector-python==8.3.0
 numpy==1.26.4
 pandas==2.2.1
 requests==2.31.0

@@ -6,4 +6,6 @@ admin_salt = "f0ca346795189fcec07599fab87e1dfd"
 server_host_ip = "localhost"
 database_name = "voice_authentication_system"
 database_user = "root"
-database_password = "root"
+database_password_key = "a7NoGsjzRLScJH55gKmmkwPWR-5Foo6eS6lV_gO-vcA="
+database_password_encrypted = "gAAAAABmA8vaxe98zetEdwetzR_2U0Tk0MXW1DfDVR2mGhNNl5QDbchnthkVy0iCcosUu593YUTr9R9gq0oq0Dp2zwcm47AF1w=="
+

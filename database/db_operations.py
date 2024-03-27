@@ -199,6 +199,6 @@ def get_all_users_from_db():
 
 # insert_user_to_db("jozef")
 # delete_user_from_db("jozef")
-# print(select_user_from_db("michal"))
+# print(select_user_from_db("jano"))
 # sync_with_local()
 # print(get_all_users_from_db())
