@@ -51,3 +51,15 @@ def remove_dir_with_files(dir):
         msg_error = f"Removing the directory {dir} failed. An error occurred: {str(e)}"
         log.log_error(msg_error)
         return False
+
+
+def get_subdirectory_names(dir):
+    subdir_names = []
+
+    for entry in os.listdir(dir):
+        full_path = os.path.join(dir, entry)
+
+        if os.path.isdir(full_path) and not os.path.islink(full_path):
+            subdir_names.append(entry)
+
+    return subdir_names

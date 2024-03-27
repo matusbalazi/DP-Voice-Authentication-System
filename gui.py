@@ -1397,8 +1397,15 @@ def button_confirm_phase_3_callback(label_register_user, button_repeat, button_c
     if json.add_user_to_json_file(users, new_user_nickname,
                                   user_values,
                                   const.USERS_FILENAME):
+
+        if not os.path.isdir(const.SPEAKER_VOICEPRINTS_DIR):
+            os.mkdir(const.SPEAKER_VOICEPRINTS_DIR)
+
         output_dir = const.SPEAKER_VOICEPRINTS_DIR + new_user_nickname + "/"
-        os.mkdir(output_dir)
+
+        if not os.path.isdir(output_dir):
+            os.mkdir(output_dir)
+
         v_recognizer.create_voiceprints(classifier, new_user_dir, output_dir, const.NUMBER_OF_VOICEPRINTS + 2)
 
         if conn.check_internet_connection():
@@ -1628,7 +1635,7 @@ classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-vox
 if conn.check_internet_connection():
     records = db.get_all_users_from_db()
     db_users = json.load_json_file(const.TMP_USERS_FILENAME)
-    if users != db_users:
+    if users != db_users or list(users.keys()) != list(manager.get_subdirectory_names(const.SPEAKER_VOICEPRINTS_DIR)):
         db.sync_with_local()
     if os.path.isfile(const.TMP_USERS_FILENAME):
         os.remove(const.TMP_USERS_FILENAME)
