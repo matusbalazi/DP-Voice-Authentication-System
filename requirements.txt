@@ -9,3 +9,4 @@ sounddevice==0.4.6
 torch==2.2.1
 torchaudio==2.2.1
 speechbrain==0.5.16
+SpeechRecognition==3.10.1
