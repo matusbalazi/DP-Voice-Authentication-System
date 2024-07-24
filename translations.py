@@ -1,6 +1,7 @@
 class Translations:
     translations = {
         'SK': {
+            'intro': "Úvod",
             'system_authentication': "Systém hlasovej autentifikácie",
             'open_door': "Otvoriť dvere",
             'about_project': "O projekte",
@@ -92,6 +93,7 @@ class Translations:
             'phrase_to_continue': "• Zadajte unikátnu frázu do textového poľa\n  s použitím klávesnice."
         },
         'EN': {
+            'intro': "Intro",
             'system_authentication': "Voice Authentication System",
             'open_door': "Open the Door",
             'about_project': "About",
