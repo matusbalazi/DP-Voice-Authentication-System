@@ -4,32 +4,55 @@ from PyQt6.QtWidgets import (QApplication,
                              QGridLayout,
                              QHBoxLayout,
                              QLabel,
+                             QLineEdit,
                              QMainWindow,
                              QPushButton,
                              QStackedWidget,
                              QWidget)
-from PyQt6.QtGui import QFont, QAction
+from PyQt6.QtGui import QFont, QAction, QPixmap
 from PyQt6.QtCore import Qt
 
 from translations import Translations
 from general import constants as const
+from general import log_file_builder as log
+from authentication import credentials, string_hasher
+from database import connection_controller as conn
 
-def initialize_font_sizes(width, height):
+index_intro_frame = 0
+index_open_door_frame = 1
+index_admin_frame = 2
+index_about_frame = 3
+
+
+def initialize_font_sizes(window_width, window_height):
     fonts = [0, 0, 0]
 
-    if width == 1920 and height == 1080:
+    if window_width == 1920 and window_height == 1080:
         fonts[0] = const.FONT_LARGE
         fonts[1] = const.FONT_MEDIUM
         fonts[2] = const.FONT_SMALL
 
-    if width == 1280 and height == 720:
+    if window_width == 1280 and window_height == 720:
         fonts[0] = round(const.FONT_LARGE / 1.5)
         fonts[1] = round(const.FONT_MEDIUM / 1.5)
         fonts[2] = round(const.FONT_SMALL / 1.5)
 
     return fonts
 
-def create_grid(layout):
+
+def initialize_image_sizes(window_width, window_height):
+    rescaler = 0
+
+    if window_width == 1920 and window_height == 1080:
+        rescaler = const.IMAGE_RESCALER_FHD
+
+    if window_width == 1280 and window_height == 720:
+        rescaler = const.IMAGE_RESCALER_HD
+
+    return rescaler
+
+
+def create_rows_cols(layout):
     layout.setRowStretch(0, 1)
     layout.setRowStretch(1, 0)
     layout.setRowStretch(2, 1)
@@ -40,32 +63,59 @@ def create_grid(layout):
     layout.setColumnStretch(1, 0)
     layout.setColumnStretch(2, 1)
 
-class IntroFrame(QWidget):
-    def __init__(self, switch_function, update_menubar_items_translations):
+
+class Frame(QWidget):
+    def __init__(self):
         super().__init__()
-        self.switch_function = switch_function
-        self.update_menubar_items_translations = update_menubar_items_translations
-        layout = QGridLayout()
 
-        create_grid(layout)
+        self.grid_layout = QGridLayout()
+        create_rows_cols(self.grid_layout)
 
+        self.grid_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setLayout(self.grid_layout)
+
+    def create_items(self):
         self.label_main_title = QLabel(Translations.get_translation("system_authentication"))
-        self.label_main_title.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.label_main_title.setFont(QFont(const.FONT_RALEWAY_BOLD, font_large))
-        layout.addWidget(self.label_main_title, 0, 1, Qt.AlignmentFlag.AlignCenter)
+        self.grid_layout.addWidget(self.label_main_title, 0, 1, Qt.AlignmentFlag.AlignCenter)
 
-        self.button_open_door = QPushButton(Translations.get_translation("open_door"))
+    def clear_items(self):
+        while self.grid_layout.count():
+            item = self.grid_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+            else:
+                self.grid_layout.removeItem(item)
+
+
+class IntroFrame(Frame):
+    def __init__(self, switch_frames, update_menubar_items_translations):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+        self.update_menubar_items_translations = update_menubar_items_translations
+
+        self.create_items()
+
+    def create_items(self):
+        super().create_items()
+
+        self.button_open_door = QPushButton(Translations.get_translation("open_door", True))
         self.button_open_door.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
-        self.button_open_door.clicked.connect(lambda: self.switch_function(2))
-        layout.addWidget(self.button_open_door, 2, 1, Qt.AlignmentFlag.AlignCenter)
+        self.button_open_door.clicked.connect(lambda: self.switch_frames(1))
+        self.grid_layout.addWidget(self.button_open_door, 2, 1, Qt.AlignmentFlag.AlignCenter)
 
-        language_layout = QHBoxLayout()
+        languages_layout = QHBoxLayout()
 
         button_sk = QPushButton("SK")
         button_en = QPushButton("EN")
         button_sk.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_medium))
         button_en.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_medium))
-        button_sk.setEnabled(False)
+        if Translations.get_language() == "SK":
+            button_sk.setEnabled(False)
+        else:
+            button_en.setEnabled(False)
 
         button_sk.setStyleSheet("QPushButton { padding: 20px 30px; margin: 0px; }")
         button_en.setStyleSheet("QPushButton { padding: 20px 30px; margin: 0px; }")
@@ -75,16 +125,17 @@ class IntroFrame(QWidget):
         button_en.clicked.connect(lambda: self.change_language("EN", button_en, button_sk))
         button_en.clicked.connect(lambda: self.update_menubar_items_translations())
 
-        radio_group = QButtonGroup(self)
-        radio_group.addButton(button_sk)
-        radio_group.addButton(button_en)
+        languages_layout.addWidget(button_sk)
+        languages_layout.addWidget(button_en)
+        self.grid_layout.addLayout(languages_layout, 3, 1, Qt.AlignmentFlag.AlignCenter)
 
-        language_layout.addWidget(button_sk)
-        language_layout.addWidget(button_en)
-        layout.addLayout(language_layout, 4, 1, Qt.AlignmentFlag.AlignCenter)
-
-        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.setLayout(layout)
+        image_label = QLabel()
+        self.grid_layout.addWidget(image_label, 4, 1, Qt.AlignmentFlag.AlignCenter)
+        image_pixmap = QPixmap('VAS - logo.png')
+        scaled_pixmap = image_pixmap.scaled(round(image_pixmap.width() / rescale_factor),
+                                            round(image_pixmap.height() / rescale_factor))
+        image_label.setPixmap(scaled_pixmap)
+        image_label.setStyleSheet("margin-top: 40px; margin-bottom: 40px")
 
     def change_language(self, language, button_clicked, button_unclicked):
         Translations.set_language(language)
@@ -94,7 +145,81 @@ class IntroFrame(QWidget):
 
     def update_translations(self):
         self.label_main_title.setText(Translations.get_translation("system_authentication"))
-        self.button_open_door.setText(Translations.get_translation("open_door"))
+        self.button_open_door.setText(Translations.get_translation("open_door", True))
+
+
+class OpenDoorFrame(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    def create_items(self):
+        super().create_items()
+
+
+class AdminFrame(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    def create_items(self):
+        super().create_items()
+
+
+class AboutFrame(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    def create_items(self):
+        super().create_items()
+
+        label_thesis = QLabel(Translations.get_translation("thesis", True))
+        label_thesis.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_medium))
+        self.grid_layout.addWidget(label_thesis, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        label_about_project = QLabel(
+            Translations.get_translation("topic_new") + "\n" + Translations.get_translation(
+                "student_new") + "\n" + Translations.get_translation(
+                "mentor_new") + "\n" + Translations.get_translation(
+                "year_new"))
+        label_about_project.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small))
+        self.grid_layout.addWidget(label_about_project, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        label_school = QLabel(Translations.get_translation("university") + "\n\n" + Translations.get_translation(
+            "faculty_new") + "\n\n" + Translations.get_translation("department_new"))
+        label_school.setFont(QFont(const.FONT_RALEWAY_MEDIUM, round(font_small / 1.4)))
+        label_school.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.grid_layout.addWidget(label_school, 3, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_back = QPushButton(Translations.get_translation("back", True))
+        button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_back.clicked.connect(lambda: self.switch_frames(0))
+        self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignLeft)
+
+        entry_password = QLineEdit()
+        entry_password.setEchoMode(QLineEdit.EchoMode.Password)
+        entry_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        entry_password.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.grid_layout.addWidget(entry_password, 4, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_password = QPushButton(Translations.get_translation("confirm", True))
+        button_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_password.clicked.connect(lambda: self.verify_password(entry_password.text()))
+        self.grid_layout.addWidget(button_password, 4, 2, Qt.AlignmentFlag.AlignRight)
+
+    def verify_password(self, value):
+        is_password_correct = string_hasher.check_string(value, credentials.authentication_password, credentials.authentication_salt)
+
+        if is_password_correct and conn.check_internet_connection():
+            msg_success = "Entered password was correct."
+            log.log_info(msg_success)
+        else:
+            msg_warning = "Entered password was incorrect."
+            log.log_warning(msg_warning)
 
 
 class MainWindow(QMainWindow):
@@ -106,10 +231,9 @@ class MainWindow(QMainWindow):
         self.menu_bar = None
 
         font_sizes = initialize_font_sizes(self.geometry().width(), self.geometry().height())
-        print(self.size().width())
-        print(self.size().height())
-        global font_large, font_medium, font_small
+        global font_large, font_medium, font_small, rescale_factor
         font_large, font_medium, font_small = font_sizes[0], font_sizes[1], font_sizes[2]
+        rescale_factor = initialize_image_sizes(self.geometry().width(), self.geometry().height())
 
         self.setWindowTitle(Translations.get_translation("system_authentication"))
 
@@ -117,7 +241,14 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.stacked_widget)
 
         self.intro_frame = IntroFrame(self.switch_frame, self.update_menubar_items_translations)
+        self.open_door_frame = OpenDoorFrame(self.switch_frame)
+        self.admin_frame = AdminFrame(self.switch_frame)
+        self.about_frame = AboutFrame(self.switch_frame)
+
         self.stacked_widget.addWidget(self.intro_frame)
+        self.stacked_widget.addWidget(self.open_door_frame)
+        self.stacked_widget.addWidget(self.admin_frame)
+        self.stacked_widget.addWidget(self.about_frame)
 
         self.create_menu()
         self.apply_styles()
@@ -127,13 +258,13 @@ class MainWindow(QMainWindow):
         self.menu_bar.setFont(QFont(const.FONT_RHD_MEDIUM, font_small))
 
         intro_action = QAction(Translations.get_translation("intro"), self)
-        intro_action.triggered.connect(lambda: self.switch_frame(1))
+        intro_action.triggered.connect(lambda: self.switch_frame(0))
 
         about_action = QAction(Translations.get_translation("about_project"), self)
-        about_action.triggered.connect(lambda: self.switch_frame(4))
+        about_action.triggered.connect(lambda: self.switch_frame(3))
 
         admin_action = QAction(Translations.get_translation("admin"), self)
-        admin_action.triggered.connect(lambda: self.switch_frame(3))
+        admin_action.triggered.connect(lambda: self.switch_frame(2))
 
         exit_action = QAction(Translations.get_translation("exit"), self)
         exit_action.triggered.connect(lambda: sys.exit())
@@ -141,27 +272,34 @@ class MainWindow(QMainWindow):
         self.menu_bar.addActions([intro_action, about_action, admin_action, exit_action])
 
     def update_menubar_items_translations(self):
+        self.setWindowTitle(Translations.get_translation("system_authentication"))
         self.menu_bar.actions()[0].setText(Translations.get_translation("intro"))
         self.menu_bar.actions()[1].setText(Translations.get_translation("about_project"))
         self.menu_bar.actions()[2].setText(Translations.get_translation("admin"))
         self.menu_bar.actions()[3].setText(Translations.get_translation("exit"))
 
     """
-        1 - intro_frame
-        2 - open_door_frame
-        3 - admin_frame
-        4 - about_frame
+        indexes:
+            0 - intro_frame
+            1 - open_door_frame
+            2 - admin_frame
+            3 - about_frame
     """
+
     def switch_frame(self, index):
+        self.stacked_widget.currentWidget().clear_items()
         self.stacked_widget.setCurrentIndex(index)
+        self.stacked_widget.currentWidget().create_items()
 
     """
-        orange - #f47e21
-        blue - #58a6d4
-        light blue - #a2d5ec
-        black - #000000
-        white - #ffffff
+        color palette:
+            orange - #f47e21
+            blue - #58a6d4
+            light blue - #a2d5ec
+            black - #000000
+            white - #ffffff
     """
+
     def apply_styles(self):
         self.setStyleSheet("""
             QMainWindow {
@@ -200,11 +338,16 @@ class MainWindow(QMainWindow):
                 color: #000000; 
                 padding: 20px;
             }
+            QLineEdit {
+                background-color: #58a6d4;
+                color: #000000;
+                padding: 30px 80px;
+                border-radius: 15px;
+                border: 5px solid #000000;
+            }
         """)
 
 
 app = QApplication(sys.argv)
 window = MainWindow()
 sys.exit(app.exec())
-
-

@@ -3,7 +3,7 @@ class Translations:
         'SK': {
             'intro': "Úvod",
             'system_authentication': "Systém hlasovej autentifikácie",
-            'open_door': "Otvoriť dvere",
+            'open_door': "Otvoriť  dvere",
             'about_project': "O projekte",
             'exit': "Koniec",
             'admin': "Admin",
@@ -11,6 +11,8 @@ class Translations:
             'university': "ŽILINSKÁ UNIVERZITA V ŽILINE",
             'faculty': "FAKULTA ELEKTROTECHNIKY\nA INFORMAČNÝCH TECHNOLÓGIÍ",
             'department': "Katedra multimédií a informačno-\nkomunikačných technológií",
+            'faculty_new': "FAKULTA ELEKTROTECHNIKY A INFORMAČNÝCH TECHNOLÓGIÍ",
+            'department_new': "Katedra multimédií a informačno-komunikačných technológií",
 
             'back': "Späť",
             'thesis': "Diplomová práca",
@@ -18,6 +20,10 @@ class Translations:
             'student': "Študent:\tBc. Matúš Baláži",
             'mentor': "Vedúci:\tdoc. Ing. Roman Jarina, PhD.",
             'year': "Rok:\t2023/2024",
+            'topic_new': "Téma:\t   Systém hlasovej autentifikácie",
+            'student_new': "Študent:\t   Bc. Matúš Baláži",
+            'mentor_new': "Vedúci:\t   doc. Ing. Roman Jarina, PhD.",
+            'year_new': "Rok:\t   2023/2024",
             'confirm': "Potvrdiť",
 
             'sign_in': "Prihlásenie",
@@ -95,7 +101,7 @@ class Translations:
         'EN': {
             'intro': "Intro",
             'system_authentication': "Voice Authentication System",
-            'open_door': "Open the Door",
+            'open_door': "Open  the  Door",
             'about_project': "About",
             'exit': "Exit",
             'admin': "Admin",
@@ -103,6 +109,8 @@ class Translations:
             'university': "UNIVERSITY OF ŽILINA",
             'faculty': "Faculty of Electrical Engineering\n and Information Technology",
             'department': "Department of Multimedia and Information-\nCommunication Technologies",
+            'faculty_new': "Faculty of Electrical Engineering and Information Technology",
+            'department_new': "Department of Multimedia and Information-Communication Technologies",
 
             'back': "Back",
             'thesis': "Diploma Thesis",
@@ -110,6 +118,10 @@ class Translations:
             'student': "Student:\tBc. Matúš Baláži",
             'mentor': "Mentor:\tdoc. Ing. Roman Jarina, PhD.",
             'year': "Year:\t2023/2024",
+            'topic_new': "Topic:\t   Voice Authentication System",
+            'student_new': "Student:\t   Bc. Matúš Baláži",
+            'mentor_new': "Mentor:\t   Assoc. Prof. Ing. Roman Jarina, PhD.",
+            'year_new': "Year:\t   2023/2024",
             'confirm': "Confirm",
 
             'sign_in': "Sign In",
@@ -189,8 +201,11 @@ class Translations:
     current_language = 'SK'
 
     @classmethod
-    def get_translation(cls, key):
-        return cls.translations[cls.current_language][key]
+    def get_translation(cls, key, uppercase=False):
+        if uppercase is False:
+            return cls.translations[cls.current_language][key]
+        else:
+            return cls.translations[cls.current_language][key].upper()
 
     @classmethod
     def set_language(cls, language):

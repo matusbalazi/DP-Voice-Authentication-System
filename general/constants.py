@@ -148,6 +148,8 @@ HEIGHT_100 = 100
 HEIGHT_70 = 70
 HEIGHT_60 = 60
 HEIGHT_50 = 50
+IMAGE_RESCALER_FHD = 3
+IMAGE_RESCALER_HD = 4
 
 
 # VERIFICATION_WORDS = ["kvet", "počítač", "rieka", "stolička", "jablko", "škola", "letisko", "nástenka", "pláž", "okno",
