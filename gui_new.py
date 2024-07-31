@@ -1,12 +1,12 @@
 import sys
 from PyQt6.QtWidgets import (QApplication,
-                             QButtonGroup,
                              QGridLayout,
                              QHBoxLayout,
                              QLabel,
                              QLineEdit,
                              QMainWindow,
                              QPushButton,
+                             QSizePolicy,
                              QStackedWidget,
                              QWidget)
 from PyQt6.QtGui import QFont, QAction, QPixmap
@@ -22,6 +22,8 @@ index_intro_frame = 0
 index_open_door_frame = 1
 index_admin_frame = 2
 index_about_frame = 3
+index_sign_in_frame = 4
+index_sign_up_frame = 5
 
 
 def initialize_font_sizes(window_width, window_height):
@@ -86,24 +88,40 @@ class Frame(QWidget):
             if widget is not None:
                 widget.deleteLater()
             else:
+                child_layout = item.layout()
+                if child_layout is not None:
+                    self.clear_layout(child_layout)
                 self.grid_layout.removeItem(item)
+
+    def clear_layout(self, layout):
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+            else:
+                child_layout = item.layout()
+                if child_layout is not None:
+                    self.clear_layout(child_layout)
+                layout.removeItem(item)
+        layout.deleteLater()
 
 
 class IntroFrame(Frame):
     def __init__(self, switch_frames, update_menubar_items_translations):
         super().__init__()
 
+        is_admin_logged = False
+
         self.switch_frames = switch_frames
         self.update_menubar_items_translations = update_menubar_items_translations
-
-        self.create_items()
 
     def create_items(self):
         super().create_items()
 
         self.button_open_door = QPushButton(Translations.get_translation("open_door", True))
         self.button_open_door.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
-        self.button_open_door.clicked.connect(lambda: self.switch_frames(1))
+        self.button_open_door.clicked.connect(lambda: self.switch_frames(index_open_door_frame))
         self.grid_layout.addWidget(self.button_open_door, 2, 1, Qt.AlignmentFlag.AlignCenter)
 
         languages_layout = QHBoxLayout()
@@ -157,6 +175,27 @@ class OpenDoorFrame(Frame):
     def create_items(self):
         super().create_items()
 
+        button_sign_in = QPushButton(Translations.get_translation("sign_in", True))
+        button_sign_in.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_sign_in.clicked.connect(lambda: self.switch_frames(index_sign_in_frame))
+        self.grid_layout.addWidget(button_sign_in, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_sign_up = QPushButton(Translations.get_translation("sign_up", True))
+        button_sign_up.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_sign_up.clicked.connect(lambda: self.switch_frames(index_sign_up_frame))
+        self.grid_layout.addWidget(button_sign_up, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        max_width = max(button_sign_in.width(), button_sign_up.width())
+        button_sign_in.setMinimumWidth(max_width)
+        button_sign_up.setMinimumWidth(max_width)
+
+        button_back = QPushButton(Translations.get_translation("back", True))
+        button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_back.setStyleSheet(
+            "QPushButton { background-color: #58a6d4; } QPushButton:hover { background-color: #f47e21; }")
+        button_back.clicked.connect(lambda: self.switch_frames(index_intro_frame))
+        self.grid_layout.addWidget(button_back, 4, 1, Qt.AlignmentFlag.AlignCenter)
+
 
 class AdminFrame(Frame):
     def __init__(self, switch_frames):
@@ -166,6 +205,40 @@ class AdminFrame(Frame):
 
     def create_items(self):
         super().create_items()
+
+        label_admin_info = QLabel(Translations.get_translation("admin_interface"))
+        label_admin_info.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small))
+        self.grid_layout.addWidget(label_admin_info, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_back = QPushButton(Translations.get_translation("back", True))
+        button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_back.setStyleSheet("padding: 30px 60px;")
+        button_back.clicked.connect(lambda: self.switch_frames(index_intro_frame))
+        self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignLeft)
+
+        entry_password = QLineEdit()
+        entry_password.setEchoMode(QLineEdit.EchoMode.Password)
+        entry_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        entry_password.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.grid_layout.addWidget(entry_password, 4, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_password = QPushButton(Translations.get_translation("confirm", True))
+        button_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_password.setStyleSheet("padding: 30px;")
+        button_password.clicked.connect(lambda: self.verify_password(entry_password.text()))
+        self.grid_layout.addWidget(button_password, 4, 2, Qt.AlignmentFlag.AlignRight)
+
+    def verify_password(self, value):
+        is_password_correct = string_hasher.check_string(value, credentials.admin_password,
+                                                         credentials.admin_salt)
+
+        if is_password_correct:
+            is_admin_logged = True
+            msg_success = "Entered password was correct."
+            log.log_info(msg_success)
+        else:
+            msg_warning = "Entered password was incorrect."
+            log.log_warning(msg_warning)
 
 
 class AboutFrame(Frame):
@@ -197,7 +270,8 @@ class AboutFrame(Frame):
 
         button_back = QPushButton(Translations.get_translation("back", True))
         button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
-        button_back.clicked.connect(lambda: self.switch_frames(0))
+        button_back.setStyleSheet("padding: 30px 60px;")
+        button_back.clicked.connect(lambda: self.switch_frames(index_intro_frame))
         self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignLeft)
 
         entry_password = QLineEdit()
@@ -208,11 +282,13 @@ class AboutFrame(Frame):
 
         button_password = QPushButton(Translations.get_translation("confirm", True))
         button_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_password.setStyleSheet("padding: 30px;")
         button_password.clicked.connect(lambda: self.verify_password(entry_password.text()))
         self.grid_layout.addWidget(button_password, 4, 2, Qt.AlignmentFlag.AlignRight)
 
     def verify_password(self, value):
-        is_password_correct = string_hasher.check_string(value, credentials.authentication_password, credentials.authentication_salt)
+        is_password_correct = string_hasher.check_string(value, credentials.authentication_password,
+                                                         credentials.authentication_salt)
 
         if is_password_correct and conn.check_internet_connection():
             msg_success = "Entered password was correct."
@@ -220,6 +296,40 @@ class AboutFrame(Frame):
         else:
             msg_warning = "Entered password was incorrect."
             log.log_warning(msg_warning)
+
+
+class SignInFrame(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    def create_items(self):
+        super().create_items()
+
+        button_back = QPushButton(Translations.get_translation("back", True))
+        button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_back.setStyleSheet(
+            "QPushButton { background-color: #58a6d4; } QPushButton:hover { background-color: #f47e21; }")
+        button_back.clicked.connect(lambda: self.switch_frames(index_open_door_frame))
+        self.grid_layout.addWidget(button_back, 4, 1, Qt.AlignmentFlag.AlignCenter)
+
+
+class SignUpFrame(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    def create_items(self):
+        super().create_items()
+
+        button_back = QPushButton(Translations.get_translation("back", True))
+        button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_back.setStyleSheet(
+            "QPushButton { background-color: #58a6d4; } QPushButton:hover { background-color: #f47e21; }")
+        button_back.clicked.connect(lambda: self.switch_frames(index_open_door_frame))
+        self.grid_layout.addWidget(button_back, 4, 1, Qt.AlignmentFlag.AlignCenter)
 
 
 class MainWindow(QMainWindow):
@@ -231,9 +341,10 @@ class MainWindow(QMainWindow):
         self.menu_bar = None
 
         font_sizes = initialize_font_sizes(self.geometry().width(), self.geometry().height())
-        global font_large, font_medium, font_small, rescale_factor
+        global font_large, font_medium, font_small, rescale_factor, is_admin_logged
         font_large, font_medium, font_small = font_sizes[0], font_sizes[1], font_sizes[2]
         rescale_factor = initialize_image_sizes(self.geometry().width(), self.geometry().height())
+        is_admin_logged = False
 
         self.setWindowTitle(Translations.get_translation("system_authentication"))
 
@@ -244,12 +355,17 @@ class MainWindow(QMainWindow):
         self.open_door_frame = OpenDoorFrame(self.switch_frame)
         self.admin_frame = AdminFrame(self.switch_frame)
         self.about_frame = AboutFrame(self.switch_frame)
+        self.sign_in_frame = SignInFrame(self.switch_frame)
+        self.sign_up_frame = SignUpFrame(self.switch_frame)
 
         self.stacked_widget.addWidget(self.intro_frame)
         self.stacked_widget.addWidget(self.open_door_frame)
         self.stacked_widget.addWidget(self.admin_frame)
         self.stacked_widget.addWidget(self.about_frame)
+        self.stacked_widget.addWidget(self.sign_in_frame)
+        self.stacked_widget.addWidget(self.sign_up_frame)
 
+        self.intro_frame.create_items()
         self.create_menu()
         self.apply_styles()
 
@@ -258,13 +374,13 @@ class MainWindow(QMainWindow):
         self.menu_bar.setFont(QFont(const.FONT_RHD_MEDIUM, font_small))
 
         intro_action = QAction(Translations.get_translation("intro"), self)
-        intro_action.triggered.connect(lambda: self.switch_frame(0))
+        intro_action.triggered.connect(lambda: self.switch_frame(index_intro_frame))
 
         about_action = QAction(Translations.get_translation("about_project"), self)
-        about_action.triggered.connect(lambda: self.switch_frame(3))
+        about_action.triggered.connect(lambda: self.switch_frame(index_about_frame))
 
         admin_action = QAction(Translations.get_translation("admin"), self)
-        admin_action.triggered.connect(lambda: self.switch_frame(2))
+        admin_action.triggered.connect(lambda: self.switch_frame(index_admin_frame))
 
         exit_action = QAction(Translations.get_translation("exit"), self)
         exit_action.triggered.connect(lambda: sys.exit())
@@ -284,6 +400,8 @@ class MainWindow(QMainWindow):
             1 - open_door_frame
             2 - admin_frame
             3 - about_frame
+            4 - sign_in_frame
+            5 - sign_up_frame
     """
 
     def switch_frame(self, index):
