@@ -124,16 +124,7 @@ VOICEPRINT_PHRASES = {
 }
 
 FONT_ROBOTO = "Roboto"
-FONT_RALEWAY_BOLD = "Raleway ExtraBold"
-FONT_RALEWAY_MEDIUM = "Raleway Medium"
-FONT_RALEWAY = "Raleway"
-FONT_RHD_BOLD = "Red Hat Display SemiBold"
-FONT_RHD_MEDIUM = "Red Hat Display Medium"
-FONT_RHD = "Red Hat Display"
 FONT_BOLD = "bold"
-FONT_LARGE = 50
-FONT_MEDIUM = 40
-FONT_SMALL = 30
 FONT_52 = 52
 FONT_48 = 48
 FONT_42 = 42
@@ -148,16 +139,31 @@ HEIGHT_100 = 100
 HEIGHT_70 = 70
 HEIGHT_60 = 60
 HEIGHT_50 = 50
+
+FONT_RALEWAY_BOLD = "Raleway ExtraBold"
+FONT_RALEWAY_MEDIUM = "Raleway Medium"
+FONT_RALEWAY = "Raleway"
+FONT_RHD_BOLD = "Red Hat Display SemiBold"
+FONT_RHD_MEDIUM = "Red Hat Display Medium"
+FONT_RHD = "Red Hat Display"
+
+FONT_LARGE = 50
+FONT_MEDIUM = 40
+FONT_SMALL = 30
+
 IMAGE_RESCALER_FHD = 3
 IMAGE_RESCALER_HD = 4
 
+BTN_PADDING_T_B_20 = 20
+BTN_PADDING_T_B_30 = 30
+BTN_PADDING_T_B_60 = 60
+BTN_PADDING_L_R_30 = 30
+BTN_PADDING_L_R_60 = 60
+BTN_PADDING_L_R_80 = 80
+BTN_MARGIN_0 = 0
+BTN_MARGIN_20 = 20
+LBL_PADDING_10 = 10
+LBL_PADDING_20 = 20
+IMG_MARGIN_30 = 30
+IMG_MARGIN_40 = 40
 
-# VERIFICATION_WORDS = ["kvet", "počítač", "rieka", "stolička", "jablko", "škola", "letisko", "nástenka", "pláž", "okno",
-#                      "hora", "kľúč", "rukavica", "káva", "slúchadlo", "vlak"]
-# SPEAKERS = ["martin", "ema", "baláži"]
-# USERS = {
-#    "martin": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9"),
-#    "ema": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9"),
-#    "baláži": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9"),
-#    "vista": ("a713e2c7b57053c8ec7b709b553bdfab77f185f2d07cc7c6fab661a00b7e794e", "c0fac90777089ec970ef51edf5fb6ea9")
-# }
