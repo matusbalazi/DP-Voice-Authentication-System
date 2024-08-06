@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (QApplication,
                              QLabel,
                              QLineEdit,
                              QMainWindow,
+                             QProgressBar,
                              QPushButton,
                              QStackedWidget,
                              QVBoxLayout,
@@ -24,6 +25,7 @@ index_admin_frame = 2
 index_about_frame = 3
 index_sign_in_frame = 4
 index_sign_up_frame = 5
+index_auth_first_phase_frame = 6
 
 
 def initialize_font_sizes(window_width, window_height):
@@ -232,11 +234,11 @@ class OpenDoorFrame(Frame):
         button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
         button_back.setStyleSheet("QPushButton:hover { background-color: #f47e21; }")
         button_back.setStyleSheet(
-            f"QPushButton {{background-color: #58a6d4; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
+            f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
             f"margin: {btn_margin_20}px;}} "
-            f"QPushButton:hover {{ background-color: #f47e21; }}")
+            f"QPushButton:hover {{ background-color: #58a6d4; }}")
         button_back.clicked.connect(lambda: self.switch_frames(index_intro_frame))
-        self.grid_layout.addWidget(button_back, 4, 1, Qt.AlignmentFlag.AlignCenter)
+        self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
 
 
 class AdminFrame(Frame):
@@ -248,16 +250,18 @@ class AdminFrame(Frame):
     def create_items(self):
         super().create_items()
 
-        label_admin_info = QLabel(Translations.get_translation("admin_interface"))
+        label_admin_info = QLabel("\n\n" + Translations.get_translation("admin_interface"))
         label_admin_info.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small))
-        label_admin_info.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        label_admin_info.setAlignment(Qt.AlignmentFlag.AlignJustify)
         label_admin_info.setStyleSheet(f"padding: {lbl_padding_20}px;")
         self.grid_layout.addWidget(label_admin_info, 1, 1, Qt.AlignmentFlag.AlignCenter)
 
         button_back = QPushButton(Translations.get_translation("back", True))
         button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
         button_back.setStyleSheet(
-            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px;")
+            f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px; "
+            f"margin: {btn_margin_20}px;}} "
+            f"QPushButton:hover {{ background-color: #58a6d4; }}")
         button_back.clicked.connect(lambda: self.switch_frames(index_intro_frame))
         self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignLeft)
 
@@ -318,7 +322,9 @@ class AboutFrame(Frame):
         button_back = QPushButton(Translations.get_translation("back", True))
         button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
         button_back.setStyleSheet(
-            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px;")
+            f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px; "
+            f"margin: {btn_margin_20}px;}} "
+            f"QPushButton:hover {{ background-color: #58a6d4; }}")
         button_back.clicked.connect(lambda: self.switch_frames(index_intro_frame))
         self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignLeft)
 
@@ -358,14 +364,47 @@ class SignInFrame(Frame):
     def create_items(self):
         super().create_items()
 
+        first_phase_layout = QVBoxLayout()
+
+        label_first_phase = QLabel(Translations.get_translation("first_phase"))
+        label_first_phase.setFont(QFont(const.FONT_RALEWAY_BOLD, font_medium))
+        label_first_phase.setStyleSheet(f"padding: {lbl_padding_20}px; color: #58a6d4;")
+        label_first_phase.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        progress_bar = QProgressBar(self)
+        progress_bar.setRange(0, 100)
+        progress_bar.setTextVisible(False)
+        progress_bar.setValue(round(100 / 3))
+        progress_bar.setFixedSize(label_first_phase.width(), (2 * btn_padding_t_b_30))
+        progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        first_phase_layout.addWidget(label_first_phase)
+        first_phase_layout.addWidget(progress_bar)
+        self.grid_layout.addLayout(first_phase_layout, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        label_authenticate_user = QLabel(
+            "\n" + Translations.get_translation("come_closer_1") + "\n\n" + Translations.get_translation(
+                "start_recording"))
+        label_authenticate_user.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small))
+        label_authenticate_user.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_authenticate_user.setStyleSheet(f"padding: {lbl_padding_20}px;")
+        self.grid_layout.addWidget(label_authenticate_user, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_authenticate = QPushButton(Translations.get_translation("authenticate", True))
+        button_authenticate.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_authenticate.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
+        button_authenticate.clicked.connect(lambda: self.switch_frames(index_auth_first_phase_frame))
+        self.grid_layout.addWidget(button_authenticate, 4, 1, Qt.AlignmentFlag.AlignCenter)
+
         button_back = QPushButton(Translations.get_translation("back", True))
         button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
         button_back.setStyleSheet(
-            f"QPushButton {{background-color: #58a6d4; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
+            f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
             f"margin: {btn_margin_20}px;}} "
-            f"QPushButton:hover {{ background-color: #f47e21; }}")
+            f"QPushButton:hover {{ background-color: #58a6d4; }}")
         button_back.clicked.connect(lambda: self.switch_frames(index_open_door_frame))
-        self.grid_layout.addWidget(button_back, 4, 1, Qt.AlignmentFlag.AlignCenter)
+        self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
 
 
 class SignUpFrame(Frame):
@@ -377,14 +416,39 @@ class SignUpFrame(Frame):
     def create_items(self):
         super().create_items()
 
+        label_registration_info = QLabel(
+            "\n" + Translations.get_translation("registration_info") +
+            "\n\n" + Translations.get_translation("continue_to_sign_in"))
+        label_registration_info.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small))
+        label_registration_info.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_registration_info.setStyleSheet(f"padding: {lbl_padding_20}px;")
+        self.grid_layout.addWidget(label_registration_info, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_sign_in_again = QPushButton(Translations.get_translation("sign_in", True))
+        button_sign_in_again.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_sign_in_again.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
+        button_sign_in_again.clicked.connect(lambda: self.switch_frames(index_sign_in_frame))
+        self.grid_layout.addWidget(button_sign_in_again, 4, 1, Qt.AlignmentFlag.AlignCenter)
+
         button_back = QPushButton(Translations.get_translation("back", True))
         button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
         button_back.setStyleSheet(
-            f"QPushButton {{background-color: #58a6d4; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
+            f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
             f"margin: {btn_margin_20}px;}} "
-            f"QPushButton:hover {{ background-color: #f47e21; }}")
+            f"QPushButton:hover {{ background-color: #58a6d4; }}")
         button_back.clicked.connect(lambda: self.switch_frames(index_open_door_frame))
-        self.grid_layout.addWidget(button_back, 4, 1, Qt.AlignmentFlag.AlignCenter)
+        self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
+
+
+class AuthFirstPhaseFrame(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    def create_items(self):
+        super().create_items()
 
 
 class MainWindow(QMainWindow):
@@ -408,6 +472,7 @@ class MainWindow(QMainWindow):
         self.about_frame = AboutFrame(self.switch_frame)
         self.sign_in_frame = SignInFrame(self.switch_frame)
         self.sign_up_frame = SignUpFrame(self.switch_frame)
+        self.auth_first_phase_frame = AuthFirstPhaseFrame(self.switch_frame)
 
         self.stacked_widget.addWidget(self.intro_frame)
         self.stacked_widget.addWidget(self.open_door_frame)
@@ -415,6 +480,7 @@ class MainWindow(QMainWindow):
         self.stacked_widget.addWidget(self.about_frame)
         self.stacked_widget.addWidget(self.sign_in_frame)
         self.stacked_widget.addWidget(self.sign_up_frame)
+        self.stacked_widget.addWidget(self.auth_first_phase_frame)
 
         self.intro_frame.create_items()
         self.create_menu()
@@ -453,6 +519,7 @@ class MainWindow(QMainWindow):
             3 - about_frame
             4 - sign_in_frame
             5 - sign_up_frame
+            6 - auth_first_phase_frame
     """
 
     def switch_frame(self, index):
@@ -470,56 +537,66 @@ class MainWindow(QMainWindow):
     """
 
     def apply_styles(self):
-        self.setStyleSheet("""
-            QMainWindow {
+        self.setStyleSheet(f"""
+            QMainWindow {{
                 background-color: #a2d5ec;
-            }
-            QMenuBar {
+            }}
+            QMenuBar {{
                 background-color: #58a6d4;
                 color: #000000;
-            }
-            QMenuBar::item {
-                padding: 30px 40px;
-                margin: 0px 20px;
+            }}
+            QMenuBar::item {{
+                padding: {btn_padding_t_b_30}px {btn_padding_l_r_40}px;
+                margin: {btn_margin_0}px {btn_margin_20}px;
                 background-color: transparent;
-            }
-            QMenuBar::item:selected {
+            }}
+            QMenuBar::item:selected {{
                 background-color: #f47e21;
                 color: #000000;
-                border-radius: 15px;
-                border: 5px solid #000000;
-            }
-            QPushButton {
+                border-radius: {border_radius_15}px;
+                border: {border_width_5}px solid #000000;
+            }}
+            QPushButton {{
                 background-color: #f47e21;
                 color: #000000;
-                border-radius: 15px;
-                border: 5px solid #000000;
-            }
-            QPushButton:hover {
+                border-radius: {border_radius_15}px;
+                border: {border_width_5}px solid #000000;
+            }}
+            QPushButton:hover {{
                 background-color: #58a6d4;
-            }
-            QPushButton:disabled {
+            }}
+            QPushButton:disabled {{
                 background-color: #58a6d4;
-            }
-            QLabel {
+            }}
+            QLabel {{
                 color: #000000; 
-            }
-            QLineEdit {
+            }}
+            QLineEdit {{
                 background-color: #58a6d4;
                 color: #000000;
-                border-radius: 15px;
-                border: 5px solid #000000;
-            }
+                border-radius: {border_radius_15}px;
+                border: {border_width_5}px solid #000000;
+            }}
+            QProgressBar {{
+                background-color: #a2d5ec;
+                border-radius: {border_radius_15}px;
+                border: {border_width_5}px solid #000000;
+            }}
+            QProgressBar::chunk {{
+                background-color: #58a6d4;
+                border-radius: {border_radius_10}px;
+            }}
         """)
 
     def initialize_screen_resolution(self):
         global font_large, font_medium, font_small
         global rescale_factor
         global btn_padding_t_b_20, btn_padding_t_b_30, btn_padding_t_b_60
-        global btn_padding_l_r_30, btn_padding_l_r_60, btn_padding_l_r_80
+        global btn_padding_l_r_30, btn_padding_l_r_40, btn_padding_l_r_60, btn_padding_l_r_80
         global btn_margin_0, btn_margin_20
         global lbl_padding_10, lbl_padding_20
         global img_margin_30, img_margin_40
+        global border_width_5, border_radius_10, border_radius_15
         global is_admin_logged
 
         font_sizes = initialize_font_sizes(self.size().width(), self.size().height())
@@ -534,6 +611,8 @@ class MainWindow(QMainWindow):
         btn_padding_t_b_60 = initialize_paddings_margins(const.BTN_PADDING_T_B_60, self.size().width(),
                                                          self.size().height())
         btn_padding_l_r_30 = initialize_paddings_margins(const.BTN_PADDING_L_R_30, self.size().width(),
+                                                         self.size().height())
+        btn_padding_l_r_40 = initialize_paddings_margins(const.BTN_PADDING_L_R_40, self.size().width(),
                                                          self.size().height())
         btn_padding_l_r_60 = initialize_paddings_margins(const.BTN_PADDING_L_R_60, self.size().width(),
                                                          self.size().height())
@@ -551,6 +630,12 @@ class MainWindow(QMainWindow):
                                                     self.size().height())
         img_margin_40 = initialize_paddings_margins(const.IMG_MARGIN_40, self.size().width(),
                                                     self.size().height())
+        border_width_5 = initialize_paddings_margins(const.BORDER_WIDTH_5, self.size().width(),
+                                                     self.size().height())
+        border_radius_10 = initialize_paddings_margins(const.BORDER_RADIUS_10, self.size().width(),
+                                                       self.size().height())
+        border_radius_15 = initialize_paddings_margins(const.BORDER_RADIUS_15, self.size().width(),
+                                                       self.size().height())
 
         is_admin_logged = False
 
