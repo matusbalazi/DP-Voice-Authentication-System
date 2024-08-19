@@ -17,6 +17,14 @@ def check_internet_connection():
         return False
 
 
+def quick_check_internet_connection():
+    try:
+        response = requests.get("https://www.google.com")
+        return response.status_code == 200
+    except requests.ConnectionError:
+        return False
+
+
 def connect_to_database():
     key = credentials.database_password_key
     cipher_suite = Fernet(key)

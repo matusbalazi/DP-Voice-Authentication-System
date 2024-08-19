@@ -1,4 +1,8 @@
+import os
 import sys
+import asyncio
+import time
+
 from PyQt6.QtWidgets import (QApplication,
                              QGridLayout,
                              QHBoxLayout,
@@ -11,13 +15,21 @@ from PyQt6.QtWidgets import (QApplication,
                              QVBoxLayout,
                              QWidget)
 from PyQt6.QtGui import QFont, QAction, QPixmap
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
+from qasync import QEventLoop
+from speechbrain.pretrained import EncoderClassifier
 
-from translations import Translations
+from authentication import credentials, string_hasher
+from database import json_file_builder as json
+from database import connection_controller as conn
+from database import db_operations as db
 from general import constants as const
 from general import log_file_builder as log
-from authentication import credentials, string_hasher
-from database import connection_controller as conn
+from general import file_manager as manager
+from speech_and_voice import voice_recorder as recorder
+from speech_and_voice import speech_recognizer as s_recognizer
+from speech_and_voice import voice_recognizer as v_recognizer
+from translations import Translations
 
 index_intro_frame = 0
 index_open_door_frame = 1
@@ -26,6 +38,8 @@ index_about_frame = 3
 index_sign_in_frame = 4
 index_sign_up_frame = 5
 index_auth_first_phase_frame = 6
+index_not_internet_conn_frame = 7
+index_auth_unsuccess_frame = 8
 
 
 def initialize_font_sizes(window_width, window_height):
@@ -450,6 +464,103 @@ class AuthFirstPhaseFrame(Frame):
     def create_items(self):
         super().create_items()
 
+        self.label_authenticate_user = QLabel(Translations.get_translation("recording"))
+        self.label_authenticate_user.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_medium))
+        self.label_authenticate_user.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        self.label_authenticate_user.setStyleSheet(f"padding: {lbl_padding_20}px;")
+        self.grid_layout.addWidget(self.label_authenticate_user, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        if not conn.quick_check_internet_connection():
+            asyncio.create_task(self.quick_check_internet_conn())
+            return
+
+        label_short_info = QLabel(Translations.get_translation("short_info_1"))
+        label_short_info.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_medium))
+        label_short_info.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_short_info.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #f47e21; border-radius: {border_radius_15};")
+        self.grid_layout.addWidget(label_short_info, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        asyncio.create_task(self.verify_speaker_name())
+
+    async def quick_check_internet_conn(self):
+        timeout = 10
+        start_time = time.time()
+
+        while not conn.quick_check_internet_connection():
+            self.label_authenticate_user.setText(Translations.get_translation("waiting_for_connection"))
+            if time.time() - start_time >= timeout:
+                break
+            await asyncio.sleep(0.5)
+
+        if conn.quick_check_internet_connection():
+            self.clear_items()
+            self.create_items()
+        else:
+            self.switch_frames(index_not_internet_conn_frame)
+
+    async def verify_speaker_name(self):
+        global currently_logged_user, partial_authentication
+
+        await asyncio.sleep(0.5)
+        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+        speaker_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                         Translations.get_language().lower())
+        speaker_nickname = speaker_nickname.lower()
+        speaker_exists = s_recognizer.verify_speaker_nickname(users.keys(), speaker_nickname)
+
+        msg_info = f"Recognized speaker nickname: {speaker_nickname}"
+        log.log_info(msg_info)
+
+        self.label_authenticate_user.setText(Translations.get_translation("recording_ended"))
+
+        time.sleep(1.5)
+
+        if speaker_exists:
+            currently_logged_user = speaker_nickname
+
+            if s_recognizer.user_registered_with_internet(users, currently_logged_user):
+                speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + speaker_nickname + "/"
+                login_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                           const.RECORDED_AUDIO_FILENAME,
+                                                                           auth_weight=10)
+                partial_authentication = partial_authentication + score
+            else:
+                login_success = speaker_exists
+
+            if login_success:
+                msg_success = f"User {speaker_nickname} signed in successfully."
+                log.log_info(msg_success)
+                self.switch_frames(index_intro_frame)
+            else:
+                msg_warning = f"User {speaker_nickname} failed to sign in. Voice characteristics don't match."
+                log.log_warning(msg_warning)
+                self.switch_frames(index_auth_unsuccess_frame)
+        else:
+            msg_warning = f"Speaker {speaker_nickname} does not exist. "
+            log.log_warning(msg_warning)
+            self.switch_frames(index_auth_unsuccess_frame)
+
+
+class NotInternetConnFrame(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    def create_items(self):
+        super().create_items()
+
+
+class AuthUnsuccessFrame(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    def create_items(self):
+        super().create_items()
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -473,6 +584,8 @@ class MainWindow(QMainWindow):
         self.sign_in_frame = SignInFrame(self.switch_frame)
         self.sign_up_frame = SignUpFrame(self.switch_frame)
         self.auth_first_phase_frame = AuthFirstPhaseFrame(self.switch_frame)
+        self.not_internet_conn_frame = NotInternetConnFrame(self.switch_frame)
+        self.auth_unsuccess_frame = AuthUnsuccessFrame(self.switch_frame)
 
         self.stacked_widget.addWidget(self.intro_frame)
         self.stacked_widget.addWidget(self.open_door_frame)
@@ -481,6 +594,8 @@ class MainWindow(QMainWindow):
         self.stacked_widget.addWidget(self.sign_in_frame)
         self.stacked_widget.addWidget(self.sign_up_frame)
         self.stacked_widget.addWidget(self.auth_first_phase_frame)
+        self.stacked_widget.addWidget(self.not_internet_conn_frame)
+        self.stacked_widget.addWidget(self.auth_unsuccess_frame)
 
         self.intro_frame.create_items()
         self.create_menu()
@@ -524,6 +639,7 @@ class MainWindow(QMainWindow):
 
     def switch_frame(self, index):
         self.stacked_widget.currentWidget().clear_items()
+        self.stacked_widget.currentWidget().destroy()
         self.stacked_widget.setCurrentIndex(index)
         self.stacked_widget.currentWidget().create_items()
 
@@ -597,7 +713,6 @@ class MainWindow(QMainWindow):
         global lbl_padding_10, lbl_padding_20
         global img_margin_30, img_margin_40
         global border_width_5, border_radius_10, border_radius_15
-        global is_admin_logged
 
         font_sizes = initialize_font_sizes(self.size().width(), self.size().height())
         font_large, font_medium, font_small = font_sizes[0], font_sizes[1], font_sizes[2]
@@ -637,9 +752,31 @@ class MainWindow(QMainWindow):
         border_radius_15 = initialize_paddings_margins(const.BORDER_RADIUS_15, self.size().width(),
                                                        self.size().height())
 
-        is_admin_logged = False
 
+currently_logged_user = ""
+partial_authentication = 0.0
+is_admin_logged = False
+users = json.load_json_file(const.USERS_FILENAME)
+voiceprints_phrases = list(const.VOICEPRINT_PHRASES[Translations.get_language()])
+classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb",
+                                            savedir=r"pretrained_models/spkrec-ecapa-voxceleb",
+                                            run_opts={"device": "cpu"})
 
-app = QApplication(sys.argv)
-window = MainWindow()
-sys.exit(app.exec())
+if conn.check_internet_connection():
+    records = db.get_all_users_from_db()
+    db_users = json.load_json_file(const.TMP_USERS_FILENAME)
+    if users != db_users or list(users.keys()) != list(manager.get_subdirectory_names(const.SPEAKER_VOICEPRINTS_DIR)):
+        db.sync_with_local()
+    if os.path.isfile(const.TMP_USERS_FILENAME):
+        os.remove(const.TMP_USERS_FILENAME)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    loop = QEventLoop(app)
+    asyncio.set_event_loop(loop)
+
+    window = MainWindow()
+    window.show()
+
+    with loop:
+        loop.run_forever()
