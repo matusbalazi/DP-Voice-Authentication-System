@@ -478,7 +478,8 @@ class AuthFirstPhaseFrame(Frame):
         label_short_info.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_medium))
         label_short_info.setAlignment(Qt.AlignmentFlag.AlignJustify)
         label_short_info.setStyleSheet(
-            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #f47e21; border-radius: {border_radius_15};")
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #f47e21; "
+            f"border-radius: {border_radius_15};")
         self.grid_layout.addWidget(label_short_info, 1, 1, Qt.AlignmentFlag.AlignCenter)
 
         asyncio.create_task(self.verify_speaker_name())
@@ -551,6 +552,56 @@ class NotInternetConnFrame(Frame):
     def create_items(self):
         super().create_items()
 
+        label_not_connection = QLabel(Translations.get_translation("internet", True))
+        label_not_connection.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_medium))
+        label_not_connection.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_not_connection.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #58a6d4; "
+            f"border-radius: {border_radius_15};")
+        self.grid_layout.addWidget(label_not_connection, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        label_limited_mode = QLabel(Translations.get_translation("limited_mode") +
+                                    "\n\n" + Translations.get_translation("password_to_continue"))
+        label_limited_mode.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small))
+        label_limited_mode.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_limited_mode.setStyleSheet(f"padding: {lbl_padding_20}px;")
+        self.grid_layout.addWidget(label_limited_mode, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_back = QPushButton(Translations.get_translation("back", True))
+        button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_back.setStyleSheet(
+            f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px; "
+            f"margin: {btn_margin_20}px;}} "
+            f"QPushButton:hover {{ background-color: #58a6d4; }}")
+        button_back.clicked.connect(lambda: self.switch_frames(index_sign_in_frame))
+        self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignLeft)
+
+        entry_password = QLineEdit()
+        entry_password.setEchoMode(QLineEdit.EchoMode.Password)
+        entry_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        entry_password.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        entry_password.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
+        self.grid_layout.addWidget(entry_password, 4, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_password = QPushButton(Translations.get_translation("confirm", True))
+        button_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_password.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_30}px;")
+        button_password.clicked.connect(lambda: self.verify_password(entry_password.text()))
+        self.grid_layout.addWidget(button_password, 4, 2, Qt.AlignmentFlag.AlignRight)
+
+    def verify_password(self, value):
+        is_password_correct = string_hasher.check_string(value, credentials.authentication_password,
+                                                         credentials.authentication_salt)
+
+        if is_password_correct and conn.check_internet_connection():
+            msg_success = "Entered password was correct."
+            log.log_info(msg_success)
+        else:
+            msg_warning = "Entered password was incorrect."
+            log.log_warning(msg_warning)
+
 
 class AuthUnsuccessFrame(Frame):
     def __init__(self, switch_frames):
@@ -560,6 +611,52 @@ class AuthUnsuccessFrame(Frame):
 
     def create_items(self):
         super().create_items()
+
+        self.verify_remaining_attempts()
+
+        label_authentication_unsuccess = QLabel(Translations.get_translation("authentication_unsuccess", True))
+        label_authentication_unsuccess.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_medium))
+        label_authentication_unsuccess.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_authentication_unsuccess.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #58a6d4;; "
+            f"border-radius: {border_radius_15};")
+        self.grid_layout.addWidget(label_authentication_unsuccess, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        label_authentication_unsuccess_info = QLabel(Translations.get_translation("authentication_unsuccess_info") +
+                                    "\n\n" + Translations.get_translation("remaining_attempts") +
+                                    str(remaining_attempts) +
+                                    "\n\n" + Translations.get_translation("start_authentication_again")                 )
+        label_authentication_unsuccess_info.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small))
+        label_authentication_unsuccess_info.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_authentication_unsuccess_info.setStyleSheet(f"padding: {lbl_padding_20}px;")
+        self.grid_layout.addWidget(label_authentication_unsuccess_info, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_authenticate_again = QPushButton(Translations.get_translation("authenticate_again", True))
+        button_authenticate_again.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_authenticate_again.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
+        button_authenticate_again.clicked.connect(lambda: self.switch_frames(index_auth_first_phase_frame, 1))
+        self.grid_layout.addWidget(button_authenticate_again, 4, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_back = QPushButton(Translations.get_translation("back", True))
+        button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_back.setStyleSheet(
+            f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
+            f"margin: {btn_margin_20}px;}} "
+            f"QPushButton:hover {{ background-color: #58a6d4; }}")
+        button_back.clicked.connect(lambda: self.switch_frames(index_sign_in_frame))
+        self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
+
+    def verify_remaining_attempts(self):
+        global remaining_attempts
+        remaining_attempts -= 1
+
+        msg_warning = f"Error during authentication process. Remaining attempts: {remaining_attempts}"
+        log.log_warning(msg_warning)
+
+        if remaining_attempts == 0:
+            remaining_attempts = 3
+            self.switch_frames(index_intro_frame)
 
 
 class MainWindow(QMainWindow):
@@ -637,7 +734,17 @@ class MainWindow(QMainWindow):
             6 - auth_first_phase_frame
     """
 
-    def switch_frame(self, index):
+    def switch_frame(self, index, auth_phase=None):
+        if auth_phase is not None:
+            if auth_phase == 1:
+                index = index_auth_first_phase_frame
+            if auth_phase == 2:
+                #index = index_auth_second_phase_frame
+                return
+            if auth_phase == 3:
+                #index = index_auth_third_phase_frame
+                return
+
         self.stacked_widget.currentWidget().clear_items()
         self.stacked_widget.currentWidget().destroy()
         self.stacked_widget.setCurrentIndex(index)
@@ -755,6 +862,7 @@ class MainWindow(QMainWindow):
 
 currently_logged_user = ""
 partial_authentication = 0.0
+remaining_attempts = 3
 is_admin_logged = False
 users = json.load_json_file(const.USERS_FILENAME)
 voiceprints_phrases = list(const.VOICEPRINT_PHRASES[Translations.get_language()])
