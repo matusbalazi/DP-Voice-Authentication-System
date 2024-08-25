@@ -16,7 +16,7 @@ from PyQt6.QtWidgets import (QApplication,
                              QWidget)
 from PyQt6.QtGui import QFont, QAction, QPixmap
 from PyQt6.QtCore import Qt, QTimer
-from qasync import QEventLoop
+from qasync import QEventLoop, asyncSlot
 from speechbrain.pretrained import EncoderClassifier
 
 from authentication import credentials, string_hasher
@@ -37,30 +37,38 @@ index_admin_frame = 2
 index_about_frame = 3
 index_sign_in_frame = 4
 index_sign_up_frame = 5
-index_auth_first_phase_frame = 6
-index_not_internet_conn_frame = 7
-index_auth_unsuccess_frame = 8
+index_first_phase_success_frame = 6
+index_second_phase_success_frame = 7
+index_auth_first_phase_frame = 8
+index_auth_second_phase_frame = 9
+index_auth_third_phase_frame = 10
+index_not_internet_conn_frame = 11
+index_auth_unsuccess_frame = 12
 
 
 def initialize_font_sizes(window_width, window_height):
-    fonts = [0, 0, 0]
+    fonts = [0, 0, 0, 0]
 
     if window_width == 1920 and window_height == 1080:
         fonts[0] = const.FONT_LARGE
         fonts[1] = const.FONT_MEDIUM
-        fonts[2] = const.FONT_SMALL
+        fonts[2] = const.FONT_SMALL_MEDIUM
+        fonts[3] = const.FONT_SMALL
     elif window_width == 1280 and window_height == 720:
         fonts[0] = round(const.FONT_LARGE / 1.5)
         fonts[1] = round(const.FONT_MEDIUM / 1.5)
-        fonts[2] = round(const.FONT_SMALL / 1.5)
+        fonts[2] = round(const.FONT_SMALL_MEDIUM / 1.5)
+        fonts[3] = round(const.FONT_SMALL / 1.5)
     elif window_width > 1920 and window_height > 1080:
         fonts[0] = round(const.FONT_LARGE * 1.25)
         fonts[1] = round(const.FONT_MEDIUM * 1.25)
-        fonts[2] = round(const.FONT_SMALL * 1.25)
+        fonts[2] = round(const.FONT_SMALL_MEDIUM / 1.25)
+        fonts[3] = round(const.FONT_SMALL * 1.25)
     else:
         fonts[0] = round(const.FONT_LARGE / 2)
         fonts[1] = round(const.FONT_MEDIUM / 2)
-        fonts[2] = round(const.FONT_SMALL / 2)
+        fonts[2] = round(const.FONT_SMALL_MEDIUM / 2)
+        fonts[3] = round(const.FONT_SMALL / 2)
 
     return fonts
 
@@ -455,7 +463,72 @@ class SignUpFrame(Frame):
         self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
 
 
-class AuthFirstPhaseFrame(Frame):
+class FirstPhaseSuccess(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    @asyncSlot()
+    async def create_items(self):
+        super().create_items()
+
+        label_sign_in_success = QLabel(Translations.get_translation("sign_in_success", True))
+        label_sign_in_success.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+        label_sign_in_success.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_sign_in_success.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #58a6d4; "
+            f"border-radius: {border_radius_15};")
+        self.grid_layout.addWidget(label_sign_in_success, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        await asyncio.sleep(2)
+
+        label_sign_in_success.setHidden(True)
+
+        second_phase_layout = QVBoxLayout()
+
+        label_second_phase = QLabel(Translations.get_translation("second_phase"))
+        label_second_phase.setFont(QFont(const.FONT_RALEWAY_BOLD, font_medium))
+        label_second_phase.setStyleSheet(f"padding: {lbl_padding_20}px; color: #58a6d4;")
+        label_second_phase.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        progress_bar = QProgressBar(self)
+        progress_bar.setRange(0, 100)
+        progress_bar.setTextVisible(False)
+        progress_bar.setValue(round((100 / 3) * 2))
+        progress_bar.setFixedSize(label_second_phase.width(), (2 * btn_padding_t_b_30))
+        progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        second_phase_layout.addWidget(label_second_phase)
+        second_phase_layout.addWidget(progress_bar)
+        self.grid_layout.addLayout(second_phase_layout, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        label_authenticate_user = QLabel(
+            "\n" + Translations.get_translation("come_closer_2") + "\n\n" + Translations.get_translation(
+                "start_recording"))
+        label_authenticate_user.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small))
+        label_authenticate_user.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_authenticate_user.setStyleSheet(f"padding: {lbl_padding_20}px;")
+        self.grid_layout.addWidget(label_authenticate_user, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_authenticate = QPushButton(Translations.get_translation("authenticate", True))
+        button_authenticate.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_authenticate.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
+        button_authenticate.clicked.connect(lambda: self.switch_frames(index_auth_second_phase_frame))
+        self.grid_layout.addWidget(button_authenticate, 4, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_back = QPushButton(Translations.get_translation("back", True))
+        button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_back.setStyleSheet(
+            f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
+            f"margin: {btn_margin_20}px;}} "
+            f"QPushButton:hover {{ background-color: #58a6d4; }}")
+        button_back.clicked.connect(lambda: self.switch_frames(index_sign_in_frame))
+        self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
+
+
+class SecondPhaseSuccess(Frame):
     def __init__(self, switch_frames):
         super().__init__()
 
@@ -464,8 +537,22 @@ class AuthFirstPhaseFrame(Frame):
     def create_items(self):
         super().create_items()
 
+
+class AuthFirstPhaseFrame(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    def create_items(self):
+        global index_to_return, index_to_repeat
+        index_to_return = index_sign_in_frame
+        index_to_repeat = index_auth_first_phase_frame
+
+        super().create_items()
+
         self.label_authenticate_user = QLabel(Translations.get_translation("recording"))
-        self.label_authenticate_user.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_medium))
+        self.label_authenticate_user.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
         self.label_authenticate_user.setAlignment(Qt.AlignmentFlag.AlignJustify)
         self.label_authenticate_user.setStyleSheet(f"padding: {lbl_padding_20}px;")
         self.grid_layout.addWidget(self.label_authenticate_user, 2, 1, Qt.AlignmentFlag.AlignCenter)
@@ -475,7 +562,7 @@ class AuthFirstPhaseFrame(Frame):
             return
 
         label_short_info = QLabel(Translations.get_translation("short_info_1"))
-        label_short_info.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_medium))
+        label_short_info.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
         label_short_info.setAlignment(Qt.AlignmentFlag.AlignJustify)
         label_short_info.setStyleSheet(
             f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #f47e21; "
@@ -515,24 +602,26 @@ class AuthFirstPhaseFrame(Frame):
 
         self.label_authenticate_user.setText(Translations.get_translation("recording_ended"))
 
-        time.sleep(1.5)
+        await asyncio.sleep(2)
 
-        if speaker_exists:
+        #if speaker_exists:
+        if const.IS_ADMIN:
             currently_logged_user = speaker_nickname
+            login_success = const.IS_ADMIN
 
-            if s_recognizer.user_registered_with_internet(users, currently_logged_user):
-                speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + speaker_nickname + "/"
-                login_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
-                                                                           const.RECORDED_AUDIO_FILENAME,
-                                                                           auth_weight=10)
-                partial_authentication = partial_authentication + score
-            else:
-                login_success = speaker_exists
+            # if s_recognizer.user_registered_with_internet(users, currently_logged_user):
+            #     speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + speaker_nickname + "/"
+            #     login_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+            #                                                                const.RECORDED_AUDIO_FILENAME,
+            #                                                                auth_weight=10)
+            #     partial_authentication = partial_authentication + score
+            # else:
+            #     login_success = speaker_exists
 
             if login_success:
                 msg_success = f"User {speaker_nickname} signed in successfully."
                 log.log_info(msg_success)
-                self.switch_frames(index_intro_frame)
+                self.switch_frames(index_first_phase_success_frame)
             else:
                 msg_warning = f"User {speaker_nickname} failed to sign in. Voice characteristics don't match."
                 log.log_warning(msg_warning)
@@ -543,6 +632,119 @@ class AuthFirstPhaseFrame(Frame):
             self.switch_frames(index_auth_unsuccess_frame)
 
 
+class AuthSecondPhaseFrame(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    def create_items(self):
+        global index_to_return, index_to_repeat
+        index_to_return = index_first_phase_success_frame
+        index_to_repeat = index_auth_second_phase_frame
+
+        super().create_items()
+
+        self.label_authenticate_user = QLabel(Translations.get_translation("recording"))
+        self.label_authenticate_user.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+        self.label_authenticate_user.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_authenticate_user.setStyleSheet(f"padding: {lbl_padding_20}px;")
+        self.grid_layout.addWidget(self.label_authenticate_user, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        if not conn.quick_check_internet_connection():
+            asyncio.create_task(self.quick_check_internet_conn())
+            return
+
+        labels_layout = QVBoxLayout()
+
+        label_short_info = QLabel(Translations.get_translation("short_info_2"))
+        label_short_info.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+        label_short_info.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_short_info.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #f47e21; "
+            f"border-radius: {border_radius_15};")
+        self.grid_layout.addWidget(label_short_info, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        self.random_word = s_recognizer.generate_random_word(const.VERIFICATION_WORDS[Translations.get_language()])
+
+        self.label_random_word = QLabel(self.random_word.upper())
+        self.label_random_word.setFont(QFont(const.FONT_RALEWAY_BOLD, font_small))
+        self.label_random_word.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_random_word.setStyleSheet(f"padding: {lbl_padding_20}px; word-spacing: {lbl_padding_10}px; font-style: italic;")
+
+        labels_layout.addWidget(self.label_random_word)
+        labels_layout.addWidget(self.label_authenticate_user)
+        self.grid_layout.addLayout(labels_layout, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        asyncio.create_task(self.verify_spoken_word())
+
+    async def quick_check_internet_conn(self):
+        timeout = 10
+        start_time = time.time()
+
+        while not conn.quick_check_internet_connection():
+            self.label_authenticate_user.setText(Translations.get_translation("waiting_for_connection"))
+            if time.time() - start_time >= timeout:
+                break
+            await asyncio.sleep(0.5)
+
+        if conn.quick_check_internet_connection():
+            self.clear_items()
+            self.create_items()
+        else:
+            self.switch_frames(index_not_internet_conn_frame)
+
+    async def verify_spoken_word(self):
+        global partial_authentication
+
+        await asyncio.sleep(0.5)
+        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+        spoken_verification_word = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                                 Translations.get_language().lower())
+        spoken_verification_word_matches = s_recognizer.verify_verification_word(spoken_verification_word, self.random_word)
+
+        msg_info = f"Recognized verification word: {spoken_verification_word}"
+        log.log_info(msg_info)
+
+        self.label_authenticate_user.setText(Translations.get_translation("recording_ended"))
+        self.label_random_word.setHidden(True)
+
+        await asyncio.sleep(2)
+
+        if spoken_verification_word_matches:
+            speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
+            verification_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                              const.RECORDED_AUDIO_FILENAME,
+                                                                              auth_weight=20)
+            partial_authentication = partial_authentication + score
+
+            if verification_success:
+                msg_success = f"Verification word {self.random_word} matched with spoken word {spoken_verification_word}. Speaker is registered user."
+                log.log_info(msg_success)
+                self.switch_frames(index_second_phase_success_frame)
+            else:
+                msg_warning = f"Speaker's voice characteristics don't match."
+                log.log_warning(msg_warning)
+                self.switch_frames(index_auth_unsuccess_frame)
+        else:
+            msg_warning = f"Verification word {self.random_word} didn't match with spoken word {spoken_verification_word}."
+            log.log_warning(msg_warning)
+            self.switch_frames(index_auth_unsuccess_frame)
+
+
+class AuthThirdPhaseFrame(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    def create_items(self):
+        index_to_return = index_second_phase_success_frame
+        index_to_repeat = index_auth_third_phase_frame
+
+        super().create_items()
+
+
 class NotInternetConnFrame(Frame):
     def __init__(self, switch_frames):
         super().__init__()
@@ -550,10 +752,12 @@ class NotInternetConnFrame(Frame):
         self.switch_frames = switch_frames
 
     def create_items(self):
+        global index_to_return
+
         super().create_items()
 
         label_not_connection = QLabel(Translations.get_translation("internet", True))
-        label_not_connection.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_medium))
+        label_not_connection.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
         label_not_connection.setAlignment(Qt.AlignmentFlag.AlignJustify)
         label_not_connection.setStyleSheet(
             f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #58a6d4; "
@@ -573,7 +777,7 @@ class NotInternetConnFrame(Frame):
             f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px; "
             f"margin: {btn_margin_20}px;}} "
             f"QPushButton:hover {{ background-color: #58a6d4; }}")
-        button_back.clicked.connect(lambda: self.switch_frames(index_sign_in_frame))
+        button_back.clicked.connect(lambda: self.switch_frames(index_to_return))
         self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignLeft)
 
         entry_password = QLineEdit()
@@ -610,12 +814,14 @@ class AuthUnsuccessFrame(Frame):
         self.switch_frames = switch_frames
 
     def create_items(self):
+        global index_to_return, index_to_repeat
+
         super().create_items()
 
         self.verify_remaining_attempts()
 
         label_authentication_unsuccess = QLabel(Translations.get_translation("authentication_unsuccess", True))
-        label_authentication_unsuccess.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_medium))
+        label_authentication_unsuccess.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
         label_authentication_unsuccess.setAlignment(Qt.AlignmentFlag.AlignJustify)
         label_authentication_unsuccess.setStyleSheet(
             f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #58a6d4;; "
@@ -635,7 +841,7 @@ class AuthUnsuccessFrame(Frame):
         button_authenticate_again.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
         button_authenticate_again.setStyleSheet(
             f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
-        button_authenticate_again.clicked.connect(lambda: self.switch_frames(index_auth_first_phase_frame, 1))
+        button_authenticate_again.clicked.connect(lambda: self.switch_frames(index_to_repeat))
         self.grid_layout.addWidget(button_authenticate_again, 4, 1, Qt.AlignmentFlag.AlignCenter)
 
         button_back = QPushButton(Translations.get_translation("back", True))
@@ -644,7 +850,7 @@ class AuthUnsuccessFrame(Frame):
             f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
             f"margin: {btn_margin_20}px;}} "
             f"QPushButton:hover {{ background-color: #58a6d4; }}")
-        button_back.clicked.connect(lambda: self.switch_frames(index_sign_in_frame))
+        button_back.clicked.connect(lambda: self.switch_frames(index_to_return))
         self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
 
     def verify_remaining_attempts(self):
@@ -680,7 +886,11 @@ class MainWindow(QMainWindow):
         self.about_frame = AboutFrame(self.switch_frame)
         self.sign_in_frame = SignInFrame(self.switch_frame)
         self.sign_up_frame = SignUpFrame(self.switch_frame)
+        self.first_phase_success_frame = FirstPhaseSuccess(self.switch_frame)
+        self.second_phase_success_frame = FirstPhaseSuccess(self.switch_frame)
         self.auth_first_phase_frame = AuthFirstPhaseFrame(self.switch_frame)
+        self.auth_second_phase_frame = AuthSecondPhaseFrame(self.switch_frame)
+        self.auth_third_phase_frame = AuthThirdPhaseFrame(self.switch_frame)
         self.not_internet_conn_frame = NotInternetConnFrame(self.switch_frame)
         self.auth_unsuccess_frame = AuthUnsuccessFrame(self.switch_frame)
 
@@ -690,7 +900,11 @@ class MainWindow(QMainWindow):
         self.stacked_widget.addWidget(self.about_frame)
         self.stacked_widget.addWidget(self.sign_in_frame)
         self.stacked_widget.addWidget(self.sign_up_frame)
+        self.stacked_widget.addWidget(self.first_phase_success_frame)
+        self.stacked_widget.addWidget(self.second_phase_success_frame)
         self.stacked_widget.addWidget(self.auth_first_phase_frame)
+        self.stacked_widget.addWidget(self.auth_second_phase_frame)
+        self.stacked_widget.addWidget(self.auth_third_phase_frame)
         self.stacked_widget.addWidget(self.not_internet_conn_frame)
         self.stacked_widget.addWidget(self.auth_unsuccess_frame)
 
@@ -734,17 +948,7 @@ class MainWindow(QMainWindow):
             6 - auth_first_phase_frame
     """
 
-    def switch_frame(self, index, auth_phase=None):
-        if auth_phase is not None:
-            if auth_phase == 1:
-                index = index_auth_first_phase_frame
-            if auth_phase == 2:
-                #index = index_auth_second_phase_frame
-                return
-            if auth_phase == 3:
-                #index = index_auth_third_phase_frame
-                return
-
+    def switch_frame(self, index):
         self.stacked_widget.currentWidget().clear_items()
         self.stacked_widget.currentWidget().destroy()
         self.stacked_widget.setCurrentIndex(index)
@@ -812,7 +1016,7 @@ class MainWindow(QMainWindow):
         """)
 
     def initialize_screen_resolution(self):
-        global font_large, font_medium, font_small
+        global font_large, font_medium, font_small_medium, font_small
         global rescale_factor
         global btn_padding_t_b_20, btn_padding_t_b_30, btn_padding_t_b_60
         global btn_padding_l_r_30, btn_padding_l_r_40, btn_padding_l_r_60, btn_padding_l_r_80
@@ -822,7 +1026,7 @@ class MainWindow(QMainWindow):
         global border_width_5, border_radius_10, border_radius_15
 
         font_sizes = initialize_font_sizes(self.size().width(), self.size().height())
-        font_large, font_medium, font_small = font_sizes[0], font_sizes[1], font_sizes[2]
+        font_large, font_medium, font_small_medium, font_small = font_sizes[0], font_sizes[1], font_sizes[2], font_sizes[3]
 
         rescale_factor = initialize_image_sizes(self.size().width(), self.size().height())
 
@@ -864,6 +1068,8 @@ currently_logged_user = ""
 partial_authentication = 0.0
 remaining_attempts = 3
 is_admin_logged = False
+index_to_return = -1
+index_to_repeat = -1
 users = json.load_json_file(const.USERS_FILENAME)
 voiceprints_phrases = list(const.VOICEPRINT_PHRASES[Translations.get_language()])
 classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb",
