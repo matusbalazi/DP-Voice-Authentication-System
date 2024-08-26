@@ -44,6 +44,7 @@ index_auth_second_phase_frame = 9
 index_auth_third_phase_frame = 10
 index_not_internet_conn_frame = 11
 index_auth_unsuccess_frame = 12
+index_auth_success_frame = 13
 
 
 def initialize_font_sizes(window_width, window_height):
@@ -534,8 +535,63 @@ class SecondPhaseSuccess(Frame):
 
         self.switch_frames = switch_frames
 
-    def create_items(self):
+    @asyncSlot()
+    async def create_items(self):
         super().create_items()
+
+        label_verification_success = QLabel(Translations.get_translation("verification_success", True))
+        label_verification_success.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+        label_verification_success.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_verification_success.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #58a6d4; "
+            f"border-radius: {border_radius_15};")
+        self.grid_layout.addWidget(label_verification_success, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        await asyncio.sleep(2)
+
+        label_verification_success.setHidden(True)
+
+        third_phase_layout = QVBoxLayout()
+
+        label_third_phase = QLabel(Translations.get_translation("third_phase"))
+        label_third_phase.setFont(QFont(const.FONT_RALEWAY_BOLD, font_medium))
+        label_third_phase.setStyleSheet(f"padding: {lbl_padding_20}px; color: #58a6d4;")
+        label_third_phase.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        progress_bar = QProgressBar(self)
+        progress_bar.setRange(0, 100)
+        progress_bar.setTextVisible(False)
+        progress_bar.setValue(100)
+        progress_bar.setFixedSize(label_third_phase.width(), (2 * btn_padding_t_b_30))
+        progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        third_phase_layout.addWidget(label_third_phase)
+        third_phase_layout.addWidget(progress_bar)
+        self.grid_layout.addLayout(third_phase_layout, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        label_authenticate_user = QLabel(
+            "\n" + Translations.get_translation("come_closer_3") + "\n\n" + Translations.get_translation(
+                "start_recording"))
+        label_authenticate_user.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small))
+        label_authenticate_user.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_authenticate_user.setStyleSheet(f"padding: {lbl_padding_20}px;")
+        self.grid_layout.addWidget(label_authenticate_user, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_authenticate = QPushButton(Translations.get_translation("authenticate", True))
+        button_authenticate.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_authenticate.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
+        button_authenticate.clicked.connect(lambda: self.switch_frames(index_auth_third_phase_frame))
+        self.grid_layout.addWidget(button_authenticate, 4, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_back = QPushButton(Translations.get_translation("back", True))
+        button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_back.setStyleSheet(
+            f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
+            f"margin: {btn_margin_20}px;}} "
+            f"QPushButton:hover {{ background-color: #58a6d4; }}")
+        button_back.clicked.connect(lambda: self.switch_frames(index_first_phase_success_frame))
+        self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
 
 
 class AuthFirstPhaseFrame(Frame):
@@ -604,10 +660,9 @@ class AuthFirstPhaseFrame(Frame):
 
         await asyncio.sleep(2)
 
-        #if speaker_exists:
-        if const.IS_ADMIN:
+        if const.IS_ADMIN: # TODO: remove
+        # if speaker_exists:
             currently_logged_user = speaker_nickname
-            login_success = const.IS_ADMIN
 
             # if s_recognizer.user_registered_with_internet(users, currently_logged_user):
             #     speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + speaker_nickname + "/"
@@ -617,6 +672,8 @@ class AuthFirstPhaseFrame(Frame):
             #     partial_authentication = partial_authentication + score
             # else:
             #     login_success = speaker_exists
+
+            login_success = const.IS_ADMIN # TODO: remove
 
             if login_success:
                 msg_success = f"User {speaker_nickname} signed in successfully."
@@ -667,7 +724,7 @@ class AuthSecondPhaseFrame(Frame):
 
         self.random_word = s_recognizer.generate_random_word(const.VERIFICATION_WORDS[Translations.get_language()])
 
-        self.label_random_word = QLabel(self.random_word.upper())
+        self.label_random_word = QLabel("\n" + self.random_word.upper() + "\n")
         self.label_random_word.setFont(QFont(const.FONT_RALEWAY_BOLD, font_small))
         self.label_random_word.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_random_word.setStyleSheet(f"padding: {lbl_padding_20}px; word-spacing: {lbl_padding_10}px; font-style: italic;")
@@ -711,12 +768,16 @@ class AuthSecondPhaseFrame(Frame):
 
         await asyncio.sleep(2)
 
-        if spoken_verification_word_matches:
-            speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
-            verification_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
-                                                                              const.RECORDED_AUDIO_FILENAME,
-                                                                              auth_weight=20)
-            partial_authentication = partial_authentication + score
+        if const.IS_ADMIN: # TODO: remove
+        # if spoken_verification_word_matches:
+
+            # speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
+            # verification_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+            #                                                                   const.RECORDED_AUDIO_FILENAME,
+            #                                                                   auth_weight=20)
+            # partial_authentication = partial_authentication + score
+
+            verification_success = const.IS_ADMIN # TODO: remove
 
             if verification_success:
                 msg_success = f"Verification word {self.random_word} matched with spoken word {spoken_verification_word}. Speaker is registered user."
@@ -737,12 +798,128 @@ class AuthThirdPhaseFrame(Frame):
         super().__init__()
 
         self.switch_frames = switch_frames
+        self.internet_checked = False
 
     def create_items(self):
+        global index_to_return, index_to_repeat
         index_to_return = index_second_phase_success_frame
         index_to_repeat = index_auth_third_phase_frame
 
         super().create_items()
+
+        self.label_authenticate_user = QLabel(Translations.get_translation("recording"))
+        self.label_authenticate_user.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+        self.label_authenticate_user.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        self.label_authenticate_user.setStyleSheet(f"padding: {lbl_padding_20}px;")
+        self.grid_layout.addWidget(self.label_authenticate_user, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        if not conn.quick_check_internet_connection() and self.internet_checked is False:
+            asyncio.create_task(self.quick_check_internet_conn())
+            return
+
+        label_short_info = QLabel(Translations.get_translation("short_info_3"))
+        label_short_info.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+        label_short_info.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_short_info.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #f47e21; "
+            f"border-radius: {border_radius_15};")
+        self.grid_layout.addWidget(label_short_info, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        asyncio.create_task(self.verify_unique_phrase())
+
+    async def quick_check_internet_conn(self):
+        self.internet_checked = False
+        timeout = 5
+        start_time = time.time()
+
+        while not conn.quick_check_internet_connection():
+            self.label_authenticate_user.setText(Translations.get_translation("waiting_for_connection"))
+            if time.time() - start_time >= timeout:
+                break
+            await asyncio.sleep(0.5)
+
+        self.internet_checked = True
+        self.clear_items()
+        self.create_items()
+
+    async def verify_unique_phrase(self):
+        global currently_logged_user, partial_authentication
+        skipped_phases = False
+
+        await asyncio.sleep(0.5)
+
+        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+
+        if conn.quick_check_internet_connection():
+            unique_phrase = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                          Translations.get_language().lower())
+            unique_phrase = unique_phrase.lower()
+            unique_phrase_matches = s_recognizer.verify_unique_phrase(users, currently_logged_user, unique_phrase)
+        else:
+            unique_phrase = ""
+            unique_phrase_matches = True
+
+        self.label_authenticate_user.setText(Translations.get_translation("recording_ended"))
+
+        await asyncio.sleep(2)
+
+        if const.IS_ADMIN: # TODO: remove
+        #if unique_phrase_matches:
+            # if currently_logged_user == "":
+            #     currently_logged_user = v_recognizer.verify_all_speakers(classifier, const.SPEAKER_VOICEPRINTS_DIR,
+            #                                                              const.RECORDED_AUDIO_FILENAME)
+            #     skipped_phases = True
+            #
+            #     if unique_phrase != "":
+            #         if not s_recognizer.verify_unique_phrase(users, currently_logged_user, unique_phrase):
+            #             currently_logged_user = ""
+            #
+            #if currently_logged_user != "":
+            if const.IS_ADMIN:  # TODO: remove
+                speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
+
+            #     if not skipped_phases:
+            #         authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+            #                                                                             const.RECORDED_AUDIO_FILENAME,
+            #                                                                             auth_weight=70)
+            #     else:
+            #         authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+            #                                                                             const.RECORDED_AUDIO_FILENAME)
+            #
+            #     partial_authentication = partial_authentication + score
+            #
+            #     msg_success = f"Final result of partial authentication is {partial_authentication} %."
+            #     log.log_info(msg_success)
+
+                authentication_success = const.IS_ADMIN # TODO: remove
+                score = 0 # TODO: remove
+
+                if authentication_success:
+                    msg_success = f"Authentication with unique phrase was successful. User {currently_logged_user} opened the door."
+                    log.log_info(msg_success)
+
+                    #if partial_authentication >= const.PARTIAL_AUTHORIZATION_THRESHOLD:
+                    if const.IS_ADMIN:  # TODO: remove
+                        # if os.path.isfile(const.RECORDED_AUDIO_FILENAME):
+                        #     os.remove(const.RECORDED_AUDIO_FILENAME)
+                        self.switch_frames(index_auth_success_frame)
+                    else:
+                        msg_warning = f"Final result of partial authentication is under the threshold."
+                        log.log_warning(msg_warning)
+                        partial_authentication = partial_authentication - score
+                        self.switch_frames(index_auth_unsuccess_frame)
+                else:
+                    msg_warning = f"Speaker's voice characteristics don't match. Door can't be opened."
+                    log.log_warning(msg_warning)
+                    self.switch_frames(index_auth_unsuccess_frame)
+            else:
+                msg_warning = f"Speaker's voice characteristics don't correspond with his unique phrase."
+                log.log_warning(msg_warning)
+                self.switch_frames(index_auth_unsuccess_frame)
+        else:
+            msg_warning = f"Authentication with unique phrase wasn't successful. User {currently_logged_user} couldn't open the door."
+            log.log_warning(msg_warning)
+            self.switch_frames(index_auth_unsuccess_frame)
 
 
 class NotInternetConnFrame(Frame):
@@ -865,6 +1042,80 @@ class AuthUnsuccessFrame(Frame):
             self.switch_frames(index_intro_frame)
 
 
+class AuthSuccessFrame(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    @asyncSlot()
+    async def create_items(self):
+        global remaining_attempts, currently_logged_user, is_admin_logged
+        remaining_attempts = 3
+        is_admin_logged = True # TODO: remove
+
+        super().create_items()
+
+        label_authentication_success = QLabel(Translations.get_translation("authentication_success", True))
+        label_authentication_success.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+        label_authentication_success.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_authentication_success.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #58a6d4; "
+            f"border-radius: {border_radius_15};")
+        self.grid_layout.addWidget(label_authentication_success, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        await asyncio.sleep(2)
+
+        label_authentication_success.setHidden(True)
+
+        if is_admin_logged:
+            currently_logged_user = "admin"
+
+        label_logged_user = QLabel(Translations.get_translation('logged_user', True) + currently_logged_user)
+        label_logged_user.setFont(QFont(const.FONT_RALEWAY_BOLD, font_small))
+        label_logged_user.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        label_logged_user.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #58a6d4; "
+            f"border-radius: {border_radius_15}; word-spacing: {lbl_padding_10}px;")
+        self.grid_layout.addWidget(label_logged_user, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        success_layout = QVBoxLayout()
+
+        button_end_interaction = QPushButton(Translations.get_translation("end_interaction", True))
+        button_end_interaction.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_end_interaction.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
+        button_end_interaction.clicked.connect(lambda: self.switch_frames(index_intro_frame))
+
+        button_register_user = QPushButton(Translations.get_translation("register_user", True))
+        button_register_user.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_register_user.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
+        button_register_user.clicked.connect(lambda: self.switch_frames(index_intro_frame))
+
+        button_manage_users = QPushButton(Translations.get_translation("manage_users", True))
+        button_manage_users.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_manage_users.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
+        button_manage_users.clicked.connect(lambda: self.switch_frames(index_intro_frame))
+
+        max_width = max(round(button_end_interaction.width() / 2), round(button_register_user.width() / 2), round(button_manage_users.width() / 2))
+        button_end_interaction.setMinimumWidth(max_width)
+        button_register_user.setMinimumWidth(max_width)
+        button_manage_users.setMinimumWidth(max_width)
+
+        success_layout.addWidget(button_end_interaction)
+        success_layout.addWidget(button_register_user)
+        success_layout.addWidget(button_manage_users)
+
+        if const.IS_ADMIN and conn.quick_check_internet_connection():
+            button_manage_users.setHidden(False)
+        else:
+            button_manage_users.setHidden(True)
+
+        self.grid_layout.addLayout(success_layout, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -887,12 +1138,13 @@ class MainWindow(QMainWindow):
         self.sign_in_frame = SignInFrame(self.switch_frame)
         self.sign_up_frame = SignUpFrame(self.switch_frame)
         self.first_phase_success_frame = FirstPhaseSuccess(self.switch_frame)
-        self.second_phase_success_frame = FirstPhaseSuccess(self.switch_frame)
+        self.second_phase_success_frame = SecondPhaseSuccess(self.switch_frame)
         self.auth_first_phase_frame = AuthFirstPhaseFrame(self.switch_frame)
         self.auth_second_phase_frame = AuthSecondPhaseFrame(self.switch_frame)
         self.auth_third_phase_frame = AuthThirdPhaseFrame(self.switch_frame)
         self.not_internet_conn_frame = NotInternetConnFrame(self.switch_frame)
         self.auth_unsuccess_frame = AuthUnsuccessFrame(self.switch_frame)
+        self.auth_success_frame = AuthSuccessFrame(self.switch_frame)
 
         self.stacked_widget.addWidget(self.intro_frame)
         self.stacked_widget.addWidget(self.open_door_frame)
@@ -907,6 +1159,7 @@ class MainWindow(QMainWindow):
         self.stacked_widget.addWidget(self.auth_third_phase_frame)
         self.stacked_widget.addWidget(self.not_internet_conn_frame)
         self.stacked_widget.addWidget(self.auth_unsuccess_frame)
+        self.stacked_widget.addWidget(self.auth_success_frame)
 
         self.intro_frame.create_items()
         self.create_menu()
