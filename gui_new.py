@@ -2,6 +2,7 @@ import os
 import sys
 import asyncio
 import time
+import argparse
 
 from PyQt6.QtWidgets import (QApplication,
                              QGridLayout,
@@ -31,6 +32,7 @@ from speech_and_voice import speech_recognizer as s_recognizer
 from speech_and_voice import voice_recognizer as v_recognizer
 from translations import Translations
 
+
 index_intro_frame = 0
 index_open_door_frame = 1
 index_admin_frame = 2
@@ -45,6 +47,27 @@ index_auth_third_phase_frame = 10
 index_not_internet_conn_frame = 11
 index_auth_unsuccess_frame = 12
 index_auth_success_frame = 13
+index_register_frame = 14
+index_manage_users = 15
+
+
+def clear_global_variables():
+    global simple_mode, is_admin_logged, registration_with_internet, currently_logged_user, user_to_delete, \
+        new_user_nickname, new_user_unique_phrase, index_to_return, index_to_repeat, voiceprints_counter, \
+        recordings_counter, remaining_attempts, partial_authentication
+    simple_mode = False
+    is_admin_logged = False
+    registration_with_internet = True
+    currently_logged_user = ""
+    user_to_delete = ""
+    new_user_nickname = ""
+    new_user_unique_phrase = ""
+    index_to_return = -1
+    index_to_repeat = -1
+    voiceprints_counter = 0
+    recordings_counter = 0
+    remaining_attempts = 3
+    partial_authentication = 0.0
 
 
 def initialize_font_sizes(window_width, window_height):
@@ -288,22 +311,25 @@ class AdminFrame(Frame):
         button_back.clicked.connect(lambda: self.switch_frames(index_intro_frame))
         self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignLeft)
 
-        entry_password = QLineEdit()
-        entry_password.setEchoMode(QLineEdit.EchoMode.Password)
-        entry_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
-        entry_password.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        entry_password.setStyleSheet(
+        self.entry_password = QLineEdit()
+        self.entry_password.setEchoMode(QLineEdit.EchoMode.Password)
+        self.entry_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        self.entry_password.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.entry_password.setStyleSheet(
             f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
-        self.grid_layout.addWidget(entry_password, 4, 1, Qt.AlignmentFlag.AlignCenter)
+        self.grid_layout.addWidget(self.entry_password, 4, 1, Qt.AlignmentFlag.AlignCenter)
 
         button_password = QPushButton(Translations.get_translation("confirm", True))
         button_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
         button_password.setStyleSheet(
             f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_30}px;")
-        button_password.clicked.connect(lambda: self.verify_password(entry_password.text()))
+        button_password.clicked.connect(lambda: self.verify_password(self.entry_password.text()))
         self.grid_layout.addWidget(button_password, 4, 2, Qt.AlignmentFlag.AlignRight)
 
-    def verify_password(self, value):
+    @asyncSlot()
+    async def verify_password(self, value):
+        global is_admin_logged
+
         is_password_correct = string_hasher.check_string(value, credentials.admin_password,
                                                          credentials.admin_salt)
 
@@ -311,9 +337,17 @@ class AdminFrame(Frame):
             is_admin_logged = True
             msg_success = "Entered password was correct."
             log.log_info(msg_success)
+            self.switch_frames(index_auth_success_frame)
         else:
             msg_warning = "Entered password was incorrect."
             log.log_warning(msg_warning)
+            self.entry_password.setStyleSheet(
+                f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px; "
+                f"border: {border_width_5}px solid #f47e21;")
+            await asyncio.sleep(1)
+            self.entry_password.setStyleSheet(
+                f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px; "
+                f"border: {border_width_5}px solid #000000;")
 
 
 class AboutFrame(Frame):
@@ -351,31 +385,40 @@ class AboutFrame(Frame):
         button_back.clicked.connect(lambda: self.switch_frames(index_intro_frame))
         self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignLeft)
 
-        entry_password = QLineEdit()
-        entry_password.setEchoMode(QLineEdit.EchoMode.Password)
-        entry_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
-        entry_password.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        entry_password.setStyleSheet(
+        self.entry_password = QLineEdit()
+        self.entry_password.setEchoMode(QLineEdit.EchoMode.Password)
+        self.entry_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        self.entry_password.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.entry_password.setStyleSheet(
             f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
-        self.grid_layout.addWidget(entry_password, 4, 1, Qt.AlignmentFlag.AlignCenter)
+        self.grid_layout.addWidget(self.entry_password, 4, 1, Qt.AlignmentFlag.AlignCenter)
 
         button_password = QPushButton(Translations.get_translation("confirm", True))
         button_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
         button_password.setStyleSheet(
             f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_30}px;")
-        button_password.clicked.connect(lambda: self.verify_password(entry_password.text()))
+        button_password.clicked.connect(lambda: self.verify_password(self.entry_password.text()))
         self.grid_layout.addWidget(button_password, 4, 2, Qt.AlignmentFlag.AlignRight)
 
-    def verify_password(self, value):
+    @asyncSlot()
+    async def verify_password(self, value):
         is_password_correct = string_hasher.check_string(value, credentials.authentication_password,
                                                          credentials.authentication_salt)
 
-        if is_password_correct and conn.check_internet_connection():
+        if is_password_correct:
             msg_success = "Entered password was correct."
             log.log_info(msg_success)
+            self.switch_frames(index_second_phase_success_frame)
         else:
             msg_warning = "Entered password was incorrect."
             log.log_warning(msg_warning)
+            self.entry_password.setStyleSheet(
+                f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px; "
+                f"border: {border_width_5}px solid #f47e21;")
+            await asyncio.sleep(1)
+            self.entry_password.setStyleSheet(
+                f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px; "
+                f"border: {border_width_5}px solid #000000;")
 
 
 class SignInFrame(Frame):
@@ -386,6 +429,8 @@ class SignInFrame(Frame):
 
     def create_items(self):
         super().create_items()
+
+        global simple_mode
 
         first_phase_layout = QVBoxLayout()
 
@@ -398,6 +443,8 @@ class SignInFrame(Frame):
         progress_bar.setRange(0, 100)
         progress_bar.setTextVisible(False)
         progress_bar.setValue(round(100 / 3))
+        if simple_mode is True:
+            progress_bar.setValue(round(100 / 2))
         progress_bar.setFixedSize(label_first_phase.width(), (2 * btn_padding_t_b_30))
         progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -539,6 +586,8 @@ class SecondPhaseSuccess(Frame):
     async def create_items(self):
         super().create_items()
 
+        global simple_mode
+
         label_verification_success = QLabel(Translations.get_translation("verification_success", True))
         label_verification_success.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
         label_verification_success.setAlignment(Qt.AlignmentFlag.AlignJustify)
@@ -554,6 +603,8 @@ class SecondPhaseSuccess(Frame):
         third_phase_layout = QVBoxLayout()
 
         label_third_phase = QLabel(Translations.get_translation("third_phase"))
+        if simple_mode is True:
+            label_third_phase = QLabel(Translations.get_translation("second_phase"))
         label_third_phase.setFont(QFont(const.FONT_RALEWAY_BOLD, font_medium))
         label_third_phase.setStyleSheet(f"padding: {lbl_padding_20}px; color: #58a6d4;")
         label_third_phase.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -590,7 +641,10 @@ class SecondPhaseSuccess(Frame):
             f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
             f"margin: {btn_margin_20}px;}} "
             f"QPushButton:hover {{ background-color: #58a6d4; }}")
-        button_back.clicked.connect(lambda: self.switch_frames(index_first_phase_success_frame))
+        if simple_mode is False:
+            button_back.clicked.connect(lambda: self.switch_frames(index_first_phase_success_frame))
+        else:
+            button_back.clicked.connect(lambda: self.switch_frames(index_sign_in_frame))
         self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
 
 
@@ -644,7 +698,7 @@ class AuthFirstPhaseFrame(Frame):
             self.switch_frames(index_not_internet_conn_frame)
 
     async def verify_speaker_name(self):
-        global currently_logged_user, partial_authentication
+        global currently_logged_user, partial_authentication, simple_mode
 
         await asyncio.sleep(0.5)
         recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
@@ -678,7 +732,10 @@ class AuthFirstPhaseFrame(Frame):
             if login_success:
                 msg_success = f"User {speaker_nickname} signed in successfully."
                 log.log_info(msg_success)
-                self.switch_frames(index_first_phase_success_frame)
+                if simple_mode is False:
+                    self.switch_frames(index_first_phase_success_frame)
+                else:
+                    self.switch_frames(index_second_phase_success_frame)
             else:
                 msg_warning = f"User {speaker_nickname} failed to sign in. Voice characteristics don't match."
                 log.log_warning(msg_warning)
@@ -843,7 +900,7 @@ class AuthThirdPhaseFrame(Frame):
         self.create_items()
 
     async def verify_unique_phrase(self):
-        global currently_logged_user, partial_authentication
+        global currently_logged_user, partial_authentication, simple_mode
         skipped_phases = False
 
         await asyncio.sleep(0.5)
@@ -878,18 +935,23 @@ class AuthThirdPhaseFrame(Frame):
             if const.IS_ADMIN:  # TODO: remove
                 speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
 
-            #     if not skipped_phases:
-            #         authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
-            #                                                                             const.RECORDED_AUDIO_FILENAME,
-            #                                                                             auth_weight=70)
-            #     else:
-            #         authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
-            #                                                                             const.RECORDED_AUDIO_FILENAME)
-            #
-            #     partial_authentication = partial_authentication + score
-            #
-            #     msg_success = f"Final result of partial authentication is {partial_authentication} %."
-            #     log.log_info(msg_success)
+                # if not skipped_phases:
+                #     if not simple_mode:
+                #         authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                #                                                                             const.RECORDED_AUDIO_FILENAME,
+                #                                                                             auth_weight=70)
+                #     else:
+                #         authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                #                                                                             const.RECORDED_AUDIO_FILENAME,
+                #                                                                             auth_weight=90)
+                # else:
+                #     authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                #                                                                         const.RECORDED_AUDIO_FILENAME)
+                #
+                # partial_authentication = partial_authentication + score
+
+                msg_success = f"Final result of partial authentication is {partial_authentication} %."
+                log.log_info(msg_success)
 
                 authentication_success = const.IS_ADMIN # TODO: remove
                 score = 0 # TODO: remove
@@ -957,31 +1019,40 @@ class NotInternetConnFrame(Frame):
         button_back.clicked.connect(lambda: self.switch_frames(index_to_return))
         self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignLeft)
 
-        entry_password = QLineEdit()
-        entry_password.setEchoMode(QLineEdit.EchoMode.Password)
-        entry_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
-        entry_password.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        entry_password.setStyleSheet(
+        self.entry_password = QLineEdit()
+        self.entry_password.setEchoMode(QLineEdit.EchoMode.Password)
+        self.entry_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        self.entry_password.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.entry_password.setStyleSheet(
             f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
-        self.grid_layout.addWidget(entry_password, 4, 1, Qt.AlignmentFlag.AlignCenter)
+        self.grid_layout.addWidget(self.entry_password, 4, 1, Qt.AlignmentFlag.AlignCenter)
 
         button_password = QPushButton(Translations.get_translation("confirm", True))
         button_password.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
         button_password.setStyleSheet(
             f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_30}px;")
-        button_password.clicked.connect(lambda: self.verify_password(entry_password.text()))
+        button_password.clicked.connect(lambda: self.verify_password(self.entry_password.text()))
         self.grid_layout.addWidget(button_password, 4, 2, Qt.AlignmentFlag.AlignRight)
 
-    def verify_password(self, value):
+    @asyncSlot()
+    async def verify_password(self, value):
         is_password_correct = string_hasher.check_string(value, credentials.authentication_password,
                                                          credentials.authentication_salt)
 
-        if is_password_correct and conn.check_internet_connection():
+        if is_password_correct:
             msg_success = "Entered password was correct."
             log.log_info(msg_success)
+            self.switch_frames(index_second_phase_success_frame)
         else:
             msg_warning = "Entered password was incorrect."
             log.log_warning(msg_warning)
+            self.entry_password.setStyleSheet(
+                f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px; "
+                f"border: {border_width_5}px solid #f47e21;")
+            await asyncio.sleep(1)
+            self.entry_password.setStyleSheet(
+                f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px; "
+                f"border: {border_width_5}px solid #000000;")
 
 
 class AuthUnsuccessFrame(Frame):
@@ -1085,7 +1156,7 @@ class AuthSuccessFrame(Frame):
         button_end_interaction.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
         button_end_interaction.setStyleSheet(
             f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
-        button_end_interaction.clicked.connect(lambda: self.switch_frames(index_intro_frame))
+        button_end_interaction.clicked.connect(lambda: self.end_interaction())
 
         button_register_user = QPushButton(Translations.get_translation("register_user", True))
         button_register_user.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
@@ -1115,10 +1186,16 @@ class AuthSuccessFrame(Frame):
 
         self.grid_layout.addLayout(success_layout, 2, 1, Qt.AlignmentFlag.AlignCenter)
 
+    def end_interaction(self):
+        clear_global_variables()
+        self.switch_frames(index_intro_frame)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        global simple_mode
 
         self.showFullScreen()
 
@@ -1316,13 +1393,20 @@ class MainWindow(QMainWindow):
         border_radius_15 = initialize_paddings_margins(const.BORDER_RADIUS_15, self.size().width(),
                                                        self.size().height())
 
-
-currently_logged_user = ""
-partial_authentication = 0.0
-remaining_attempts = 3
+simple_mode = False
 is_admin_logged = False
+registration_with_internet = True
+currently_logged_user = ""
+user_to_delete = ""
+new_user_nickname = ""
+new_user_unique_phrase = ""
 index_to_return = -1
 index_to_repeat = -1
+voiceprints_counter = 0
+recordings_counter = 0
+remaining_attempts = 3
+partial_authentication = 0.0
+
 users = json.load_json_file(const.USERS_FILENAME)
 voiceprints_phrases = list(const.VOICEPRINT_PHRASES[Translations.get_language()])
 classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb",
@@ -1337,7 +1421,19 @@ if conn.check_internet_connection():
     if os.path.isfile(const.TMP_USERS_FILENAME):
         os.remove(const.TMP_USERS_FILENAME)
 
-if __name__ == "__main__":
+
+def main():
+    global simple_mode
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-s", "--simple", required=False,
+                    help="put True if launch simple mode")
+    args = vars(ap.parse_args())
+
+    if len(sys.argv) > 1:
+        if args["simple"] == "True":
+            simple_mode = bool(args["simple"])
+
     app = QApplication(sys.argv)
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
@@ -1347,3 +1443,7 @@ if __name__ == "__main__":
 
     with loop:
         loop.run_forever()
+
+
+if __name__ == "__main__":
+    main()
