@@ -5,6 +5,7 @@ import time
 import argparse
 
 from PyQt6.QtWidgets import (QApplication,
+                             QComboBox,
                              QGridLayout,
                              QHBoxLayout,
                              QLabel,
@@ -52,10 +53,11 @@ index_manage_users = 15
 
 
 def clear_global_variables():
-    global simple_mode, is_admin_logged, registration_with_internet, currently_logged_user, user_to_delete, \
+    global simple_mode, skip_auth_info, is_admin_logged, registration_with_internet, currently_logged_user, user_to_delete, \
         new_user_nickname, new_user_unique_phrase, index_to_return, index_to_repeat, voiceprints_counter, \
         recordings_counter, remaining_attempts, partial_authentication
     simple_mode = False
+    skip_auth_info = False
     is_admin_logged = False
     registration_with_internet = True
     currently_logged_user = ""
@@ -1121,23 +1123,26 @@ class AuthSuccessFrame(Frame):
 
     @asyncSlot()
     async def create_items(self):
-        global remaining_attempts, currently_logged_user, is_admin_logged
+        global remaining_attempts, currently_logged_user, skip_auth_info, is_admin_logged
         remaining_attempts = 3
         is_admin_logged = True # TODO: remove
 
         super().create_items()
 
-        label_authentication_success = QLabel(Translations.get_translation("authentication_success", True))
-        label_authentication_success.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
-        label_authentication_success.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        label_authentication_success.setStyleSheet(
-            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #58a6d4; "
-            f"border-radius: {border_radius_15};")
-        self.grid_layout.addWidget(label_authentication_success, 1, 1, Qt.AlignmentFlag.AlignCenter)
+        if not skip_auth_info:
+            label_authentication_success = QLabel(Translations.get_translation("authentication_success", True))
+            label_authentication_success.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+            label_authentication_success.setAlignment(Qt.AlignmentFlag.AlignJustify)
+            label_authentication_success.setStyleSheet(
+                f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #58a6d4; "
+                f"border-radius: {border_radius_15};")
+            self.grid_layout.addWidget(label_authentication_success, 1, 1, Qt.AlignmentFlag.AlignCenter)
 
-        await asyncio.sleep(2)
+            await asyncio.sleep(2)
 
-        label_authentication_success.setHidden(True)
+            label_authentication_success.setHidden(True)
+
+        skip_auth_info = True
 
         if is_admin_logged:
             currently_logged_user = "admin"
@@ -1162,13 +1167,13 @@ class AuthSuccessFrame(Frame):
         button_register_user.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
         button_register_user.setStyleSheet(
             f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
-        button_register_user.clicked.connect(lambda: self.switch_frames(index_intro_frame))
+        button_register_user.clicked.connect(lambda: self.switch_frames(index_register_frame))
 
         button_manage_users = QPushButton(Translations.get_translation("manage_users", True))
         button_manage_users.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
         button_manage_users.setStyleSheet(
             f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
-        button_manage_users.clicked.connect(lambda: self.switch_frames(index_intro_frame))
+        button_manage_users.clicked.connect(lambda: self.switch_frames(index_manage_users))
 
         max_width = max(round(button_end_interaction.width() / 2), round(button_register_user.width() / 2), round(button_manage_users.width() / 2))
         button_end_interaction.setMinimumWidth(max_width)
@@ -1189,6 +1194,102 @@ class AuthSuccessFrame(Frame):
     def end_interaction(self):
         clear_global_variables()
         self.switch_frames(index_intro_frame)
+
+
+class RegisterFrame(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    def create_items(self):
+        super().create_items()
+
+        button_back = QPushButton(Translations.get_translation("back", True))
+        button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_back.setStyleSheet(
+            f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
+            f"margin: {btn_margin_20}px;}} "
+            f"QPushButton:hover {{ background-color: #58a6d4; }}")
+        button_back.clicked.connect(lambda: self.switch_frames(index_auth_success_frame))
+        self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
+
+
+class ManageUsersFrame(Frame):
+    def __init__(self, switch_frames):
+        super().__init__()
+
+        self.switch_frames = switch_frames
+
+    @asyncSlot()
+    async def create_items(self):
+        global is_admin_logged
+
+        super().create_items()
+
+        if conn.quick_check_internet_connection():
+            users_to_show = users.copy()
+
+            if not is_admin_logged:
+                del users_to_show[currently_logged_user]
+
+            combobox_users = QComboBox()
+            combobox_users.addItems(list(users_to_show.keys()))
+            combobox_users.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+            combobox_users.setEditable(False)
+            combobox_users.setMinimumWidth(500)
+            self.grid_layout.addWidget(combobox_users, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+            button_delete_user = QPushButton(Translations.get_translation("delete", True))
+            button_delete_user.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+            button_delete_user.setStyleSheet(
+                f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
+            button_delete_user.clicked.connect(lambda: self.delete_user(combobox_users.currentText()))
+            self.grid_layout.addWidget(button_delete_user, 4, 1, Qt.AlignmentFlag.AlignCenter)
+
+            button_back = QPushButton(Translations.get_translation("back", True))
+            button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+            button_back.setStyleSheet(
+                f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
+                f"margin: {btn_margin_20}px;}} "
+                f"QPushButton:hover {{ background-color: #58a6d4; }}")
+            button_back.clicked.connect(lambda: self.switch_frames(index_auth_success_frame))
+            self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
+        else:
+            label_not_connection = QLabel(Translations.get_translation("internet", True))
+            label_not_connection.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+            label_not_connection.setAlignment(Qt.AlignmentFlag.AlignJustify)
+            label_not_connection.setStyleSheet(
+                f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #58a6d4; "
+                f"border-radius: {border_radius_15};")
+            self.grid_layout.addWidget(label_not_connection, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+            await asyncio.sleep(2)
+
+            self.switch_frames(index_auth_success_frame)
+
+    def delete_user(self, value):
+        global user_to_delete, users
+        user_to_delete = value
+
+        if conn.quick_check_internet_connection():
+            if user_to_delete in users.keys():
+                if json.remove_user_from_json_file(users, user_to_delete, const.USERS_FILENAME):
+                    db.delete_user_from_db(user_to_delete)
+                    manager.remove_dir_with_files(const.SPEAKER_RECORDINGS_DIR + user_to_delete + "/")
+                    manager.remove_dir_with_files(const.SPEAKER_VOICEPRINTS_DIR + user_to_delete + "/")
+                    msg_info = f"User {user_to_delete} deleted successfully from the app database."
+                    log.log_info(msg_info)
+                else:
+                    msg_warning = f"User {user_to_delete} not found in registered users."
+                    log.log_warning(msg_warning)
+        else:
+            msg_warning = f"User {user_to_delete} can't be deleted. Internet connection not available."
+            log.log_warning(msg_warning)
+
+        users = json.load_json_file(const.USERS_FILENAME)
+        user_to_delete = ""
+        self.switch_frames(index_manage_users)
 
 
 class MainWindow(QMainWindow):
@@ -1222,6 +1323,8 @@ class MainWindow(QMainWindow):
         self.not_internet_conn_frame = NotInternetConnFrame(self.switch_frame)
         self.auth_unsuccess_frame = AuthUnsuccessFrame(self.switch_frame)
         self.auth_success_frame = AuthSuccessFrame(self.switch_frame)
+        self.register_frame = RegisterFrame(self.switch_frame)
+        self.manage_users_frame = ManageUsersFrame(self.switch_frame)
 
         self.stacked_widget.addWidget(self.intro_frame)
         self.stacked_widget.addWidget(self.open_door_frame)
@@ -1237,6 +1340,8 @@ class MainWindow(QMainWindow):
         self.stacked_widget.addWidget(self.not_internet_conn_frame)
         self.stacked_widget.addWidget(self.auth_unsuccess_frame)
         self.stacked_widget.addWidget(self.auth_success_frame)
+        self.stacked_widget.addWidget(self.register_frame)
+        self.stacked_widget.addWidget(self.manage_users_frame)
 
         self.intro_frame.create_items()
         self.create_menu()
@@ -1247,18 +1352,22 @@ class MainWindow(QMainWindow):
         self.menu_bar.setFont(QFont(const.FONT_RHD_MEDIUM, font_small))
 
         intro_action = QAction(Translations.get_translation("intro"), self)
-        intro_action.triggered.connect(lambda: self.switch_frame(index_intro_frame))
+        intro_action.triggered.connect(lambda: self.change_frame(index_intro_frame))
 
         about_action = QAction(Translations.get_translation("about_project"), self)
-        about_action.triggered.connect(lambda: self.switch_frame(index_about_frame))
+        about_action.triggered.connect(lambda: self.change_frame(index_about_frame))
 
         admin_action = QAction(Translations.get_translation("admin"), self)
-        admin_action.triggered.connect(lambda: self.switch_frame(index_admin_frame))
+        admin_action.triggered.connect(lambda: self.change_frame(index_admin_frame))
 
         exit_action = QAction(Translations.get_translation("exit"), self)
         exit_action.triggered.connect(lambda: sys.exit())
 
         self.menu_bar.addActions([intro_action, about_action, admin_action, exit_action])
+
+    def change_frame(self, index):
+        clear_global_variables()
+        self.switch_frame(index)
 
     def update_menubar_items_translations(self):
         self.setWindowTitle(Translations.get_translation("system_authentication"))
@@ -1343,6 +1452,44 @@ class MainWindow(QMainWindow):
                 background-color: #58a6d4;
                 border-radius: {border_radius_10}px;
             }}
+            QComboBox {{
+                background-color: #58a6d4;
+                color: #000000;
+                border-radius: {border_radius_15}px;
+                border: {border_width_5}px solid #000000;
+                padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px;
+                margin: {btn_margin_0}px {btn_margin_0}px {btn_margin_20}px {btn_margin_0}px;
+            }}
+            QComboBox::drop-down {{
+                width: {btn_padding_l_r_80}px;
+                border-left: {border_width_5}px solid #000000;
+                border-top-right-radius: {border_radius_10}px;
+                border-bottom-right-radius: {border_radius_10}px;
+            }}
+            QComboBox::drop-down:hover {{
+                background-color: #f47e21;
+            }}
+            QComboBox::down-arrow {{
+                image: url(drop_down_arrow.png);
+                width: {btn_padding_l_r_80}px;
+                height: {btn_padding_l_r_60}px;
+            }}           
+            QListView {{
+                outline: none;
+                background-color: #58a6d4;
+                color: #000000;
+                border-radius: {border_radius_15}px;
+            }}
+            QListView::item {{  
+                background-color: #58a6d4;
+                color: #000000;
+                border-radius: {border_radius_15}px;
+                padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px;
+            }}
+            QListView::item:hover {{
+                background-color: #f47e21;
+                border: {border_width_5}px solid #000000;
+            }}
         """)
 
     def initialize_screen_resolution(self):
@@ -1394,6 +1541,7 @@ class MainWindow(QMainWindow):
                                                        self.size().height())
 
 simple_mode = False
+skip_auth_info = False
 is_admin_logged = False
 registration_with_internet = True
 currently_logged_user = ""
