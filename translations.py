@@ -64,6 +64,7 @@ class Translations:
 
             'registration_first_phase': "1. fáza registrácie",
             'register_come_closer_1': "• Pristúpte bližšie k mikrofónu zariadenia a zvoľte si svoje prihlasovacie\n  meno, ktoré budete používať pri autentifikácii.",
+            'new_register_come_closer_1': "• Pristúpte bližšie k mikrofónu zariadenia a zvoľte si svoje\n  prihlasovacie meno, ktoré budete používať pri autentifikácii.",
             'register_start_recording': "• Nahrávanie spustíte stlačením tlačidla Registrovať.",
             'registrate': "Registrovať",
 
@@ -71,6 +72,9 @@ class Translations:
             'nickname_exists_1': "• Zvolené prihlasovacie meno ",
             'nickname_exists_2': " už je zaregistrované.",
             'nickname_exists_3': "• Opakujte, prosím, proces s iným prihlasovacím menom.",
+            'new_nickname_exists_not_internet': "• Zvolené prihlasovacie meno",
+            "new_nickname_exists_1": "• Zvolené prihlasovacie meno\n  už je zaregistrované.",
+            'new_nickname_exists_2': "• Opakujte, prosím, proces s iným\n  prihlasovacím menom.",
             'repeat': "Opakovať",
 
             'registration_second_phase': "2. fáza registrácie",
