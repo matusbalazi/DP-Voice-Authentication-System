@@ -69,6 +69,7 @@ class Translations:
             'registrate': "Registrovať",
 
             'confirmation_nickname': "• Zvolili ste si prihlasovacie meno: ",
+            'new_confirmation_nickname': "• Zvolili ste si prihlasovacie meno",
             'nickname_exists_1': "• Zvolené prihlasovacie meno ",
             'nickname_exists_2': " už je zaregistrované.",
             'nickname_exists_3': "• Opakujte, prosím, proces s iným prihlasovacím menom.",

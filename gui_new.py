@@ -1261,9 +1261,80 @@ class RegFirstPhaseCompleted(Frame):
 
         self.switch_frames = switch_frames
 
-    @asyncSlot()
-    async def create_items(self):
-        super().create_items()
+    def create_items(self):
+        global new_user_nickname, voiceprints_counter, recordings_counter
+
+        number_of_voiceprints = const.NUMBER_OF_VOICEPRINTS
+
+        if not conn.quick_check_internet_connection():
+            number_of_voiceprints = number_of_voiceprints + 2
+
+        if voiceprints_counter == 0:
+            msg_info = f"New user nickname {new_user_nickname} registrated successfully."
+            log.log_info(msg_info)
+
+            # VOICE RECOGNITION
+            if not os.path.isdir(const.SPEAKER_RECORDINGS_DIR):
+                os.makedirs(const.SPEAKER_RECORDINGS_DIR, exist_ok=True)
+
+            new_user_dir = const.SPEAKER_RECORDINGS_DIR + new_user_nickname + "/"
+
+            if not os.path.isdir(new_user_dir):
+                os.makedirs(new_user_dir, exist_ok=True)
+
+            if conn.quick_check_internet_connection():
+                new_user_file = new_user_nickname + "_" + str(recordings_counter) + ".wav"
+                manager.move_and_rename_audio(const.RECORDED_AUDIO_FILENAME, new_user_file, new_user_dir)
+                recordings_counter += 1
+
+        if voiceprints_counter < number_of_voiceprints:
+            super().create_items()
+
+            second_phase_layout = QVBoxLayout()
+
+            label_second_phase = QLabel(Translations.get_translation("registration_second_phase"))
+            label_second_phase.setFont(QFont(const.FONT_RALEWAY_BOLD, font_medium))
+            label_second_phase.setStyleSheet(f"padding: {lbl_padding_20}px; color: #58a6d4;")
+            label_second_phase.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+            progress_bar = QProgressBar(self)
+            progress_bar.setRange(0, 100)
+            progress_bar.setTextVisible(False)
+            progress_bar.setValue(round(100 / ((2 + number_of_voiceprints) - (recordings_counter + 1))))
+            progress_bar.setFixedSize(label_second_phase.width(), (2 * btn_padding_t_b_30))
+            progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+            second_phase_layout.addWidget(label_second_phase)
+            second_phase_layout.addWidget(progress_bar)
+            self.grid_layout.addLayout(second_phase_layout, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+            label_register_user = QLabel("\n" + Translations.get_translation("register_come_closer_2") +
+                                         "\n\n" + Translations.get_translation("register_start_recording") +
+                                         "\n\n" + Translations.get_translation('recording_number') +
+                                         str(voiceprints_counter + 1) + ".")
+            label_register_user.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small))
+            label_register_user.setAlignment(Qt.AlignmentFlag.AlignJustify)
+            label_register_user.setStyleSheet(f"padding: {lbl_padding_20}px;")
+            self.grid_layout.addWidget(label_register_user, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+            button_registrate = QPushButton(Translations.get_translation("registrate", True))
+            button_registrate.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+            button_registrate.setStyleSheet(
+                f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
+            button_registrate.clicked.connect(lambda: self.switch_frames(index_reg_second_phase_frame))
+            self.grid_layout.addWidget(button_registrate, 4, 1, Qt.AlignmentFlag.AlignCenter)
+
+            button_back = QPushButton(Translations.get_translation("back", True))
+            button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+            button_back.setStyleSheet(
+                f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
+                f"margin: {btn_margin_20}px;}} "
+                f"QPushButton:hover {{ background-color: #58a6d4; }}")
+            button_back.clicked.connect(lambda: self.switch_frames(index_register_frame))
+            self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
+        else:
+            voiceprints_counter = 0
+            self.switch_frames(index_reg_second_phase_completed_frame)
 
 
 class RegSecondPhaseCompleted(Frame):
@@ -1284,7 +1355,7 @@ class RegFirstPhaseFrame(Frame):
         self.switch_frames = switch_frames
 
     def create_items(self):
-        global index_to_return, index_to_repeat, new_user_nickname, voiceprints_phrases, registration_with_internet
+        global index_to_return, index_to_repeat, voiceprints_phrases, registration_with_internet
         index_to_return = index_register_frame
         index_to_repeat = index_reg_first_phase_frame
 
@@ -1331,11 +1402,17 @@ class RegFirstPhaseFrame(Frame):
             self.switch_frames(index_reg_not_internet_conn_frame)
 
     async def verify_speaker_name(self):
+        global new_user_nickname
+
         await asyncio.sleep(0.5)
+
         recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+
         new_user_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
-                                                         Translations.get_language().lower())
+                                                          Translations.get_language().lower())
         new_user_nickname = new_user_nickname.lower()
+
+        new_user_nickname = "peto" # TODO: remove
 
         msg_info = f"Recognized new user nickname: {new_user_nickname}"
         log.log_info(msg_info)
@@ -1344,7 +1421,10 @@ class RegFirstPhaseFrame(Frame):
 
         await asyncio.sleep(2)
 
-        self.label_register_user.setText(Translations.get_translation("confirmation_nickname") + new_user_nickname)
+        self.label_register_user.setText(Translations.get_translation("new_confirmation_nickname") + "\n\n" +
+                                         new_user_nickname.upper())
+        self.label_register_user.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
         self.label_short_info.setHidden(True)
 
         button_repeat = QPushButton(Translations.get_translation("repeat", True))
@@ -1363,9 +1443,11 @@ class RegFirstPhaseFrame(Frame):
         button_confirm.clicked.connect(lambda: self.switch_frames(index_reg_first_phase_completed_frame))
         self.grid_layout.addWidget(button_confirm, 4, 2, Qt.AlignmentFlag.AlignRight)
 
-        if const.IS_ADMIN: # TODO: remove
-        # if new_user_nickname in users:
+        #if const.IS_ADMIN: # TODO: remove
+        if new_user_nickname in users:
             button_confirm.setEnabled(False)
+            button_confirm.setStyleSheet(f"QPushButton:disabled {{padding: {btn_padding_t_b_30}px {btn_padding_l_r_30}px;"
+                                         f"background-color: #58a6d4; border: {border_width_5}px solid #f47e21;}}")
             self.label_register_user.setText(new_user_nickname.upper() + "\n\n" +
                                              Translations.get_translation('new_nickname_exists_1') +
                                              "\n\n" + Translations.get_translation('new_nickname_exists_2'))
