@@ -1343,9 +1343,49 @@ class RegSecondPhaseCompleted(Frame):
 
         self.switch_frames = switch_frames
 
-    @asyncSlot()
-    async def create_items(self):
+    def create_items(self):
         super().create_items()
+
+        third_phase_layout = QVBoxLayout()
+
+        label_third_phase = QLabel(Translations.get_translation("registration_third_phase"))
+        label_third_phase.setFont(QFont(const.FONT_RALEWAY_BOLD, font_medium))
+        label_third_phase.setStyleSheet(f"padding: {lbl_padding_20}px; color: #58a6d4;")
+        label_third_phase.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        progress_bar = QProgressBar(self)
+        progress_bar.setRange(0, 100)
+        progress_bar.setTextVisible(False)
+        progress_bar.setValue(100)
+        progress_bar.setFixedSize(label_third_phase.width(), (2 * btn_padding_t_b_30))
+        progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        third_phase_layout.addWidget(label_third_phase)
+        third_phase_layout.addWidget(progress_bar)
+        self.grid_layout.addLayout(third_phase_layout, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        label_register_user = QLabel("\n" + Translations.get_translation("register_come_closer_3") +
+                                     "\n\n" + Translations.get_translation("register_start_recording"))
+        label_register_user.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small))
+        label_register_user.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_register_user.setStyleSheet(f"padding: {lbl_padding_20}px;")
+        self.grid_layout.addWidget(label_register_user, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_registrate = QPushButton(Translations.get_translation("registrate", True))
+        button_registrate.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_registrate.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px;")
+        button_registrate.clicked.connect(lambda: self.switch_frames(index_reg_third_phase_frame))
+        self.grid_layout.addWidget(button_registrate, 4, 1, Qt.AlignmentFlag.AlignCenter)
+
+        button_back = QPushButton(Translations.get_translation("back", True))
+        button_back.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_back.setStyleSheet(
+            f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
+            f"margin: {btn_margin_20}px;}} "
+            f"QPushButton:hover {{ background-color: #58a6d4; }}")
+        button_back.clicked.connect(lambda: self.switch_frames(index_reg_first_phase_completed_frame))
+        self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
 
 
 class RegFirstPhaseFrame(Frame):
@@ -1468,11 +1508,68 @@ class RegSecondPhaseFrame(Frame):
         self.switch_frames = switch_frames
 
     def create_items(self):
-        global index_to_return, index_to_repeat
+        global index_to_return, index_to_repeat, voiceprints_phrases
         index_to_return = index_reg_first_phase_completed_frame
         index_to_repeat = index_reg_second_phase_frame
 
         super().create_items()
+
+        label_short_info = QLabel(Translations.get_translation("short_info_2"))
+        label_short_info.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+        label_short_info.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_short_info.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #f47e21; "
+            f"border-radius: {border_radius_15};")
+        self.grid_layout.addWidget(label_short_info, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        labels_layout = QVBoxLayout()
+
+        self.label_register_user = QLabel(Translations.get_translation("recording"))
+        self.label_register_user.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+        self.label_register_user.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_register_user.setStyleSheet(f"padding: {lbl_padding_20}px;")
+
+        random_phrase = s_recognizer.generate_random_word(voiceprints_phrases)
+        voiceprints_phrases.remove(random_phrase)
+
+        self.label_random_phrase = QLabel("\n" + random_phrase + "\n")
+        self.label_random_phrase.setFont(QFont(const.FONT_RALEWAY_BOLD, font_small))
+        self.label_random_phrase.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_random_phrase.setStyleSheet(
+            f"padding: {lbl_padding_20}px; word-spacing: {lbl_padding_10}px; font-style: italic;")
+
+        labels_layout.addWidget(self.label_random_phrase)
+        labels_layout.addWidget(self.label_register_user)
+        self.grid_layout.addLayout(labels_layout, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        asyncio.create_task(self.record_spoken_phrase())
+
+    async def record_spoken_phrase(self):
+        global new_user_nickname, voiceprints_counter, recordings_counter
+
+        voiceprints_counter += 1
+
+        await asyncio.sleep(0.5)
+
+        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME, 6)
+        msg_info = f"Voiceprint recording no.{str(voiceprints_counter)} recorded successfully."
+        log.log_info(msg_info)
+
+        # VOICE RECOGNITION
+        new_user_dir = const.SPEAKER_RECORDINGS_DIR + new_user_nickname + "/"
+        new_user_file = new_user_nickname + "_" + str(recordings_counter) + ".wav"
+        manager.move_and_rename_audio(const.RECORDED_AUDIO_FILENAME, new_user_file, new_user_dir)
+        recordings_counter += 1
+
+        self.label_register_user.setText(Translations.get_translation("recording_ended"))
+        self.label_random_phrase.setHidden(True)
+
+        await asyncio.sleep(2)
+
+        msg_info = f"Voiceprint {voiceprints_counter} recorded successfully."
+        log.log_info(msg_info)
+
+        self.switch_frames(index_reg_first_phase_completed_frame)
 
 
 class RegThirdPhaseFrame(Frame):
@@ -1482,11 +1579,97 @@ class RegThirdPhaseFrame(Frame):
         self.switch_frames = switch_frames
 
     def create_items(self):
-        global index_to_return, index_to_repeat
+        global index_to_return, index_to_repeat, registration_with_internet
         index_to_return = index_reg_second_phase_completed_frame
         index_to_repeat = index_reg_third_phase_frame
 
         super().create_items()
+
+        if registration_with_internet and not conn.quick_check_internet_connection():
+            registration_with_internet = conn.check_internet_connection()
+
+        self.label_register_unique_phrase = QLabel(Translations.get_translation("recording"))
+        self.label_register_unique_phrase.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+        self.label_register_unique_phrase.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        self.label_register_unique_phrase.setStyleSheet(f"padding: {lbl_padding_20}px;")
+        self.grid_layout.addWidget(self.label_register_unique_phrase, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        if not conn.quick_check_internet_connection():
+            asyncio.create_task(self.quick_check_internet_conn())
+            return
+
+        self.label_short_info = QLabel(Translations.get_translation("short_info_3"))
+        self.label_short_info.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+        self.label_short_info.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        self.label_short_info.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #f47e21; "
+            f"border-radius: {border_radius_15};")
+        self.label_short_info.setHidden(False)
+        self.grid_layout.addWidget(self.label_short_info, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        asyncio.create_task(self.verify_speaker_unique_phrase())
+
+    async def quick_check_internet_conn(self):
+        timeout = 10
+        start_time = time.time()
+
+        while not conn.quick_check_internet_connection():
+            self.label_register_unique_phrase.setText(Translations.get_translation("waiting_for_connection"))
+            if time.time() - start_time >= timeout:
+                break
+            await asyncio.sleep(0.5)
+
+        if conn.quick_check_internet_connection():
+            self.clear_items()
+            self.create_items()
+        else:
+            self.switch_frames(index_reg_not_internet_conn_frame)
+
+    async def verify_speaker_unique_phrase(self):
+        global new_user_unique_phrase
+
+        await asyncio.sleep(0.5)
+
+        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+
+        new_user_unique_phrase = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                               Translations.get_language().lower())
+        new_user_unique_phrase = new_user_unique_phrase.lower()
+
+        new_user_unique_phrase = "sezam otvor sa" # TODO: remove
+
+        msg_info = f"Recognized new user unique phrase: {string_hasher.encode_string(new_user_unique_phrase)}"
+        log.log_info(msg_info)
+
+        self.label_register_unique_phrase.setText(Translations.get_translation("recording_ended"))
+
+        await asyncio.sleep(2)
+
+        self.label_register_unique_phrase.setText(Translations.get_translation("new_confirmation_phrase") +
+                                                  "\n\n" + new_user_unique_phrase.upper())
+        self.label_register_unique_phrase.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.label_short_info.setHidden(True)
+
+        button_repeat = QPushButton(Translations.get_translation("repeat", True))
+        button_repeat.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_repeat.setStyleSheet(
+            f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px; "
+            f"margin: {btn_margin_20}px;}} "
+            f"QPushButton:hover {{ background-color: #58a6d4; }}")
+        button_repeat.clicked.connect(lambda: self.repeat_registration())
+        self.grid_layout.addWidget(button_repeat, 4, 0, Qt.AlignmentFlag.AlignLeft)
+
+        button_confirm = QPushButton(Translations.get_translation("confirm", True))
+        button_confirm.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_confirm.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_30}px;")
+        button_confirm.clicked.connect(lambda: self.switch_frames(index_reg_success_frame))
+        self.grid_layout.addWidget(button_confirm, 4, 2, Qt.AlignmentFlag.AlignRight)
+
+    def repeat_registration(self):
+        self.clear_items()
+        self.create_items()
 
 
 class RegNotInternetConnFrame(Frame):
@@ -1578,7 +1761,7 @@ class RegNotInternetConnFrame(Frame):
                 self.clear_items()
                 await self.create_items()
             else:
-                self.switch_frames(index_reg_second_phase_frame)
+                self.switch_frames(index_reg_first_phase_completed_frame)
         elif index_to_return == index_reg_second_phase_completed_frame:
             new_user_unique_phrase = value.lower()
             self.switch_frames(index_reg_success_frame)

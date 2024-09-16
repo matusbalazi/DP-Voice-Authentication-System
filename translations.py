@@ -86,6 +86,7 @@ class Translations:
             'register_come_closer_3': "• Pristúpte bližšie k mikrofónu zariadenia a zvoľte si jedinečnú\n  frázu, ktorú budete používať pri autentifikácii.",
 
             'confirmation_phrase': "• Zvolili ste si jedinečnú frázu: ",
+            'new_confirmation_phrase': "• Zvolili ste si jedinečnú frázu",
 
             'registration_success': "Registrácia prebehla úspešne!",
             'registration_unsuccess': "Registrácia bola neúspešná!",
