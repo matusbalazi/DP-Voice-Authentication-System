@@ -1222,7 +1222,7 @@ class RegisterFrame(Frame):
         progress_bar = QProgressBar(self)
         progress_bar.setRange(0, 100)
         progress_bar.setTextVisible(False)
-        progress_bar.setValue(round(100 / (2 + const.NUMBER_OF_VOICEPRINTS)))
+        progress_bar.setValue(round((1 / (2 + const.NUMBER_OF_VOICEPRINTS)) * 100))
         progress_bar.setFixedSize(label_first_phase.width(), (2 * btn_padding_t_b_30))
         progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -1300,7 +1300,7 @@ class RegFirstPhaseCompleted(Frame):
             progress_bar = QProgressBar(self)
             progress_bar.setRange(0, 100)
             progress_bar.setTextVisible(False)
-            progress_bar.setValue(round(100 / ((2 + number_of_voiceprints) - (recordings_counter + 1))))
+            progress_bar.setValue(round(((recordings_counter + 1) / (2 + number_of_voiceprints)) * 100))
             progress_bar.setFixedSize(label_second_phase.width(), (2 * btn_padding_t_b_30))
             progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -1330,11 +1330,18 @@ class RegFirstPhaseCompleted(Frame):
                 f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
                 f"margin: {btn_margin_20}px;}} "
                 f"QPushButton:hover {{ background-color: #58a6d4; }}")
-            button_back.clicked.connect(lambda: self.switch_frames(index_register_frame))
+            button_back.clicked.connect(lambda: self.turn_back())
             self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
         else:
             voiceprints_counter = 0
             self.switch_frames(index_reg_second_phase_completed_frame)
+
+    def turn_back(self):
+        global new_user_nickname, voiceprints_counter, recordings_counter
+        new_user_nickname = ""
+        voiceprints_counter = 0
+        recordings_counter = 0
+        self.switch_frames(index_register_frame)
 
 
 class RegSecondPhaseCompleted(Frame):
@@ -1384,8 +1391,15 @@ class RegSecondPhaseCompleted(Frame):
             f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; "
             f"margin: {btn_margin_20}px;}} "
             f"QPushButton:hover {{ background-color: #58a6d4; }}")
-        button_back.clicked.connect(lambda: self.switch_frames(index_reg_first_phase_completed_frame))
+        button_back.clicked.connect(lambda: self.turn_back())
         self.grid_layout.addWidget(button_back, 4, 0, Qt.AlignmentFlag.AlignCenter)
+
+    def turn_back(self):
+        global new_user_nickname, voiceprints_counter, recordings_counter
+        new_user_nickname = ""
+        voiceprints_counter = 0
+        recordings_counter = 0
+        self.switch_frames(index_reg_first_phase_completed_frame)
 
 
 class RegFirstPhaseFrame(Frame):
@@ -1452,8 +1466,6 @@ class RegFirstPhaseFrame(Frame):
                                                           Translations.get_language().lower())
         new_user_nickname = new_user_nickname.lower()
 
-        new_user_nickname = "peto" # TODO: remove
-
         msg_info = f"Recognized new user nickname: {new_user_nickname}"
         log.log_info(msg_info)
 
@@ -1468,7 +1480,7 @@ class RegFirstPhaseFrame(Frame):
         self.label_short_info.setHidden(True)
 
         button_repeat = QPushButton(Translations.get_translation("repeat", True))
-        button_repeat.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_repeat.setFont(QFont(const.FONT_RHD_BOLD, font_small_medium))
         button_repeat.setStyleSheet(
             f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px; "
             f"margin: {btn_margin_20}px;}} "
@@ -1636,8 +1648,6 @@ class RegThirdPhaseFrame(Frame):
                                                                Translations.get_language().lower())
         new_user_unique_phrase = new_user_unique_phrase.lower()
 
-        new_user_unique_phrase = "sezam otvor sa" # TODO: remove
-
         msg_info = f"Recognized new user unique phrase: {string_hasher.encode_string(new_user_unique_phrase)}"
         log.log_info(msg_info)
 
@@ -1652,7 +1662,7 @@ class RegThirdPhaseFrame(Frame):
         self.label_short_info.setHidden(True)
 
         button_repeat = QPushButton(Translations.get_translation("repeat", True))
-        button_repeat.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+        button_repeat.setFont(QFont(const.FONT_RHD_BOLD, font_small_medium))
         button_repeat.setStyleSheet(
             f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px; "
             f"margin: {btn_margin_20}px;}} "
@@ -1773,8 +1783,75 @@ class RegSuccessFrame(Frame):
 
         self.switch_frames = switch_frames
 
-    def create_items(self):
+    @asyncSlot()
+    async def create_items(self):
+        global new_user_nickname, new_user_unique_phrase, users, recordings_counter, registration_with_internet
+
         super().create_items()
+
+        msg_info = f"New unique phrase {string_hasher.encode_string(new_user_unique_phrase)} registered successfully."
+        log.log_info(msg_info)
+
+        new_user_dir = const.SPEAKER_RECORDINGS_DIR + new_user_nickname + "/"
+
+        if conn.quick_check_internet_connection():
+            # VOICE RECOGNITION
+            new_user_file = new_user_nickname + "_" + str(recordings_counter) + ".wav"
+            manager.move_and_rename_audio(const.RECORDED_AUDIO_FILENAME, new_user_file, new_user_dir)
+
+        recordings_counter = 0
+
+        label_registration_success = QLabel(Translations.get_translation("registration_success", True))
+        label_registration_success.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+        label_registration_success.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_registration_success.setStyleSheet(
+            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; background-color: #58a6d4; "
+            f"border-radius: {border_radius_15};")
+        self.grid_layout.addWidget(label_registration_success, 1, 1, Qt.AlignmentFlag.AlignCenter)
+
+        label_processing = QLabel(Translations.get_translation("processing_voiceprints"))
+        label_processing.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
+        label_processing.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        label_processing.setStyleSheet(f"padding: {lbl_padding_20}px;")
+        self.grid_layout.addWidget(label_processing, 2, 1, Qt.AlignmentFlag.AlignCenter)
+
+        await asyncio.sleep(2)
+
+        user_values = string_hasher.encode_string(new_user_unique_phrase) + (registration_with_internet,)
+
+        if json.add_user_to_json_file(users, new_user_nickname,
+                                      user_values,
+                                      const.USERS_FILENAME):
+
+            if not os.path.isdir(const.SPEAKER_VOICEPRINTS_DIR):
+                os.makedirs(const.SPEAKER_VOICEPRINTS_DIR, exist_ok=True)
+
+            output_dir = const.SPEAKER_VOICEPRINTS_DIR + new_user_nickname + "/"
+
+            if not os.path.isdir(output_dir):
+                os.makedirs(output_dir, exist_ok=True)
+
+            v_recognizer.create_voiceprints(classifier, new_user_dir, output_dir, const.NUMBER_OF_VOICEPRINTS + 2)
+
+            if conn.check_internet_connection():
+                db.insert_user_to_db(new_user_nickname)
+
+            msg_info = f"New user {new_user_nickname} registered successfully."
+            log.log_info(msg_info)
+            manager.remove_dir_with_files(new_user_dir)
+            if os.path.isfile(const.RECORDED_AUDIO_FILENAME):
+                os.remove(const.RECORDED_AUDIO_FILENAME)
+        else:
+            msg_warning = f"New user {new_user_nickname} couldn't be registered."
+            log.log_warning(msg_warning)
+
+        users = json.load_json_file(const.USERS_FILENAME)
+
+        self.end_interaction()
+
+    def end_interaction(self):
+        clear_global_variables()
+        self.switch_frames(index_intro_frame)
 
 
 class ManageUsersFrame(Frame):
@@ -1800,6 +1877,8 @@ class ManageUsersFrame(Frame):
             combobox_users.setFont(QFont(const.FONT_RALEWAY_MEDIUM, font_small_medium))
             combobox_users.setEditable(False)
             combobox_users.setMinimumWidth(500)
+            combobox_users.setMaxVisibleItems(3)
+            combobox_users.view().setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
             self.grid_layout.addWidget(combobox_users, 1, 1, Qt.AlignmentFlag.AlignCenter)
 
             button_delete_user = QPushButton(Translations.get_translation("delete", True))
@@ -1965,7 +2044,6 @@ class MainWindow(QMainWindow):
 
     def switch_frame(self, index):
         self.stacked_widget.currentWidget().clear_items()
-        self.stacked_widget.currentWidget().destroy()
         self.stacked_widget.setCurrentIndex(index)
         self.stacked_widget.currentWidget().create_items()
 
@@ -2035,6 +2113,7 @@ class MainWindow(QMainWindow):
                 border: {border_width_5}px solid #000000;
                 padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px;
                 margin: {btn_margin_0}px {btn_margin_0}px {btn_margin_20}px {btn_margin_0}px;
+                combobox-popup: 0;
             }}
             QComboBox::drop-down {{
                 width: {btn_padding_l_r_80}px;
@@ -2049,7 +2128,48 @@ class MainWindow(QMainWindow):
                 image: url(drop_down_arrow.png);
                 width: {btn_padding_l_r_80}px;
                 height: {btn_padding_l_r_60}px;
-            }}           
+            }}
+            QScrollBar:vertical {{
+                border: none;
+                background: none;
+                border-radius: {border_radius_15}px;
+                width: {btn_padding_l_r_80}px;
+            }}
+            QScrollBar::handle:vertical {{
+                background-color: #f47e21;
+                border-radius: {border_radius_15}px;
+                border: {border_width_5}px solid #000000;
+                min-height: {btn_padding_t_b_30}px;
+            }}
+            QScrollBar::add-line:vertical {{
+                background: none;
+                height: {btn_padding_t_b_30}px;
+                subcontrol-position: bottom;
+                subcontrol-origin: margin;
+            }}
+            QScrollBar::sub-line:vertical {{
+                background: none;
+                height: {btn_padding_t_b_30}px;
+                subcontrol-position: top left;
+                subcontrol-origin: margin;
+                position: absolute;
+            }}    
+            QScrollBar:up-arrow:vertical {{
+                width: {btn_padding_t_b_30}px;
+                height: {btn_padding_t_b_30}px;
+                background: none;
+                image: url('drop_up_arrow.png');
+            }}
+            QScrollBar::down-arrow:vertical {{
+                width: {btn_padding_t_b_30}px;
+                height: {btn_padding_t_b_30}px;
+                background: none;
+                image: url('drop_down_arrow.png');
+            }}
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
+                background: none;
+                background-color: #58a6d4;
+            }}
             QListView {{
                 outline: none;
                 background-color: #58a6d4;
@@ -2115,6 +2235,7 @@ class MainWindow(QMainWindow):
                                                        self.size().height())
         border_radius_15 = initialize_paddings_margins(const.BORDER_RADIUS_15, self.size().width(),
                                                        self.size().height())
+
 
 simple_mode = False
 skip_auth_info = False
