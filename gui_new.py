@@ -17,7 +17,7 @@ from PyQt6.QtWidgets import (QApplication,
                              QVBoxLayout,
                              QWidget)
 from PyQt6.QtGui import QFont, QAction, QPixmap
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt
 from qasync import QEventLoop, asyncSlot
 from speechbrain.pretrained import EncoderClassifier
 
@@ -34,29 +34,29 @@ from speech_and_voice import voice_recognizer as v_recognizer
 from translations import Translations
 
 
-index_intro_frame = 0
-index_open_door_frame = 1
-index_admin_frame = 2
-index_about_frame = 3
-index_sign_in_frame = 4
-index_sign_up_frame = 5
-index_first_phase_success_frame = 6
-index_second_phase_success_frame = 7
-index_auth_first_phase_frame = 8
-index_auth_second_phase_frame = 9
-index_auth_third_phase_frame = 10
-index_not_internet_conn_frame = 11
-index_auth_unsuccess_frame = 12
-index_auth_success_frame = 13
-index_register_frame = 14
-index_reg_first_phase_completed_frame = 15
-index_reg_second_phase_completed_frame = 16
-index_reg_first_phase_frame = 17
-index_reg_second_phase_frame = 18
-index_reg_third_phase_frame = 19
-index_reg_not_internet_conn_frame = 20
-index_reg_success_frame = 21
-index_manage_users = 22
+index_intro_frame = const.INDEX_INTRO_FRAME
+index_open_door_frame = const.INDEX_OPEN_DOOR_FRAME
+index_admin_frame = const.INDEX_ADMIN_FRAME
+index_about_frame = const.INDEX_ABOUT_FRAME
+index_sign_in_frame = const.INDEX_SIGN_IN_FRAME
+index_sign_up_frame = const.INDEX_SIGN_UP_FRAME
+index_first_phase_success_frame = const.INDEX_FIRST_PHASE_SUCCESS_FRAME
+index_second_phase_success_frame = const.INDEX_SECOND_PHASE_SUCCESS_FRAME
+index_auth_first_phase_frame = const.INDEX_AUTH_FIRST_PHASE_FRAME
+index_auth_second_phase_frame = const.INDEX_AUTH_SECOND_PHASE_FRAME
+index_auth_third_phase_frame = const.INDEX_AUTH_THIRD_PHASE_FRAME
+index_not_internet_conn_frame = const.INDEX_NOT_INTERNET_CONN_FRAME
+index_auth_unsuccess_frame = const.INDEX_AUTH_UNSUCCESS_FRAME
+index_auth_success_frame = const.INDEX_AUTH_SUCCESS_FRAME
+index_register_frame = const.INDEX_REGISTER_FRAME
+index_reg_first_phase_completed_frame = const.INDEX_REG_FIRST_PHASE_COMPLETED_FRAME
+index_reg_second_phase_completed_frame = const.INDEX_REG_SECOND_PHASE_COMPLETED_FRAME
+index_reg_first_phase_frame = const.INDEX_REG_FIRST_PHASE_FRAME
+index_reg_second_phase_frame = const.INDEX_REG_SECOND_PHASE_FRAME
+index_reg_third_phase_frame = const.INDEX_REG_THIRD_PHASE_FRAME
+index_reg_not_internet_conn_frame = const.INDEX_REG_NOT_INTERNET_CONN_FRAME
+index_reg_success_frame = const.INDEX_REG_SUCCESS_FRAME
+index_manage_users = const.INDEX_MANAGE_USERS
 
 
 def clear_global_variables():
@@ -194,13 +194,15 @@ class IntroFrame(Frame):
     def __init__(self, switch_frames, update_menubar_items_translations):
         super().__init__()
 
-        is_admin_logged = False
-
         self.switch_frames = switch_frames
         self.update_menubar_items_translations = update_menubar_items_translations
 
     def create_items(self):
+        global is_admin_logged
+
         super().create_items()
+
+        is_admin_logged = False
 
         self.button_open_door = QPushButton(Translations.get_translation("open_door", True))
         self.button_open_door.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
@@ -723,20 +725,17 @@ class AuthFirstPhaseFrame(Frame):
 
         await asyncio.sleep(2)
 
-        if const.IS_ADMIN: # TODO: remove
-        # if speaker_exists:
+        if speaker_exists:
             currently_logged_user = speaker_nickname
 
-            # if s_recognizer.user_registered_with_internet(users, currently_logged_user):
-            #     speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + speaker_nickname + "/"
-            #     login_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
-            #                                                                const.RECORDED_AUDIO_FILENAME,
-            #                                                                auth_weight=10)
-            #     partial_authentication = partial_authentication + score
-            # else:
-            #     login_success = speaker_exists
-
-            login_success = const.IS_ADMIN # TODO: remove
+            if s_recognizer.user_registered_with_internet(users, currently_logged_user):
+                speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + speaker_nickname + "/"
+                login_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                           const.RECORDED_AUDIO_FILENAME,
+                                                                           auth_weight=10)
+                partial_authentication = partial_authentication + score
+            else:
+                login_success = speaker_exists
 
             if login_success:
                 msg_success = f"User {speaker_nickname} signed in successfully."
@@ -834,16 +833,13 @@ class AuthSecondPhaseFrame(Frame):
 
         await asyncio.sleep(2)
 
-        if const.IS_ADMIN: # TODO: remove
-        # if spoken_verification_word_matches:
+        if spoken_verification_word_matches:
 
-            # speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
-            # verification_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
-            #                                                                   const.RECORDED_AUDIO_FILENAME,
-            #                                                                   auth_weight=20)
-            # partial_authentication = partial_authentication + score
-
-            verification_success = const.IS_ADMIN # TODO: remove
+            speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
+            verification_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                              const.RECORDED_AUDIO_FILENAME,
+                                                                              auth_weight=20)
+            partial_authentication = partial_authentication + score
 
             if verification_success:
                 msg_success = f"Verification word {self.random_word} matched with spoken word {spoken_verification_word}. Speaker is registered user."
@@ -929,50 +925,44 @@ class AuthThirdPhaseFrame(Frame):
 
         await asyncio.sleep(2)
 
-        if const.IS_ADMIN: # TODO: remove
-        #if unique_phrase_matches:
-            # if currently_logged_user == "":
-            #     currently_logged_user = v_recognizer.verify_all_speakers(classifier, const.SPEAKER_VOICEPRINTS_DIR,
-            #                                                              const.RECORDED_AUDIO_FILENAME)
-            #     skipped_phases = True
-            #
-            #     if unique_phrase != "":
-            #         if not s_recognizer.verify_unique_phrase(users, currently_logged_user, unique_phrase):
-            #             currently_logged_user = ""
-            #
-            #if currently_logged_user != "":
-            if const.IS_ADMIN:  # TODO: remove
+        if unique_phrase_matches:
+            if currently_logged_user == "":
+                currently_logged_user = v_recognizer.verify_all_speakers(classifier, const.SPEAKER_VOICEPRINTS_DIR,
+                                                                         const.RECORDED_AUDIO_FILENAME)
+                skipped_phases = True
+
+                if unique_phrase != "":
+                    if not s_recognizer.verify_unique_phrase(users, currently_logged_user, unique_phrase):
+                        currently_logged_user = ""
+
+            if currently_logged_user != "":
                 speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
 
-                # if not skipped_phases:
-                #     if not simple_mode:
-                #         authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
-                #                                                                             const.RECORDED_AUDIO_FILENAME,
-                #                                                                             auth_weight=70)
-                #     else:
-                #         authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
-                #                                                                             const.RECORDED_AUDIO_FILENAME,
-                #                                                                             auth_weight=90)
-                # else:
-                #     authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
-                #                                                                         const.RECORDED_AUDIO_FILENAME)
-                #
-                # partial_authentication = partial_authentication + score
+                if not skipped_phases:
+                    if not simple_mode:
+                        authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                                            const.RECORDED_AUDIO_FILENAME,
+                                                                                            auth_weight=70)
+                    else:
+                        authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                                            const.RECORDED_AUDIO_FILENAME,
+                                                                                            auth_weight=90)
+                else:
+                    authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                                        const.RECORDED_AUDIO_FILENAME)
+
+                partial_authentication = partial_authentication + score
 
                 msg_success = f"Final result of partial authentication is {partial_authentication} %."
                 log.log_info(msg_success)
-
-                authentication_success = const.IS_ADMIN # TODO: remove
-                score = 0 # TODO: remove
 
                 if authentication_success:
                     msg_success = f"Authentication with unique phrase was successful. User {currently_logged_user} opened the door."
                     log.log_info(msg_success)
 
-                    #if partial_authentication >= const.PARTIAL_AUTHORIZATION_THRESHOLD:
-                    if const.IS_ADMIN:  # TODO: remove
-                        # if os.path.isfile(const.RECORDED_AUDIO_FILENAME):
-                        #     os.remove(const.RECORDED_AUDIO_FILENAME)
+                    if partial_authentication >= const.PARTIAL_AUTHORIZATION_THRESHOLD:
+                        if os.path.isfile(const.RECORDED_AUDIO_FILENAME):
+                            os.remove(const.RECORDED_AUDIO_FILENAME)
                         self.switch_frames(index_auth_success_frame)
                     else:
                         msg_warning = f"Final result of partial authentication is under the threshold."
@@ -1132,7 +1122,6 @@ class AuthSuccessFrame(Frame):
     async def create_items(self):
         global remaining_attempts, currently_logged_user, skip_auth_info, is_admin_logged
         remaining_attempts = 3
-        is_admin_logged = True # TODO: remove
 
         super().create_items()
 
@@ -1191,6 +1180,8 @@ class AuthSuccessFrame(Frame):
         success_layout.addWidget(button_register_user)
         success_layout.addWidget(button_manage_users)
 
+        # If there will be requirement to access users management only by admin then just update this condition
+        # change const.IS_ADMIN to is_admin_logged
         if const.IS_ADMIN and conn.quick_check_internet_connection():
             button_manage_users.setHidden(False)
         else:
@@ -1495,7 +1486,6 @@ class RegFirstPhaseFrame(Frame):
         button_confirm.clicked.connect(lambda: self.switch_frames(index_reg_first_phase_completed_frame))
         self.grid_layout.addWidget(button_confirm, 4, 2, Qt.AlignmentFlag.AlignRight)
 
-        #if const.IS_ADMIN: # TODO: remove
         if new_user_nickname in users:
             button_confirm.setEnabled(False)
             button_confirm.setStyleSheet(f"QPushButton:disabled {{padding: {btn_padding_t_b_30}px {btn_padding_l_r_30}px;"
@@ -2030,17 +2020,6 @@ class MainWindow(QMainWindow):
         self.menu_bar.actions()[1].setText(Translations.get_translation("about_project"))
         self.menu_bar.actions()[2].setText(Translations.get_translation("admin"))
         self.menu_bar.actions()[3].setText(Translations.get_translation("exit"))
-
-    """
-        indexes:
-            0 - intro_frame
-            1 - open_door_frame
-            2 - admin_frame
-            3 - about_frame
-            4 - sign_in_frame
-            5 - sign_up_frame
-            6 - auth_first_phase_frame
-    """
 
     def switch_frame(self, index):
         self.stacked_widget.currentWidget().clear_items()
