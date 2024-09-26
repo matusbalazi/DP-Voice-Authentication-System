@@ -12,3 +12,6 @@ speechbrain==0.5.16
 SpeechRecognition==3.10.1
 PyQt6==6.7.0
 qasync==0.27.1
+ffmpeg==1.4
+soundfile==0.12.1
+PySoundFile==0.9.0.post1
