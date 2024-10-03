@@ -19,7 +19,7 @@ from PyQt6.QtWidgets import (QApplication,
 from PyQt6.QtGui import QFont, QAction, QPixmap
 from PyQt6.QtCore import Qt
 from qasync import QEventLoop, asyncSlot
-from speechbrain.pretrained import EncoderClassifier
+from speechbrain.inference import EncoderClassifier
 
 from authentication import credentials, string_hasher
 from database import json_file_builder as json
