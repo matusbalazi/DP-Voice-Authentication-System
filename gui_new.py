@@ -719,45 +719,50 @@ class AuthFirstPhaseFrame(Frame):
         global currently_logged_user, partial_authentication, simple_mode
 
         await asyncio.sleep(0.5)
-        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
-        speaker_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
-                                                         Translations.get_language().lower())
-        speaker_nickname = speaker_nickname.lower()
-        speaker_exists = s_recognizer.verify_speaker_nickname(users.keys(), speaker_nickname)
 
-        msg_info = f"Recognized speaker nickname: {speaker_nickname}"
-        log.log_info(msg_info)
+        if recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME):
+            speaker_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                             Translations.get_language().lower())
+            speaker_nickname = speaker_nickname.lower()
+            speaker_exists = s_recognizer.verify_speaker_nickname(users.keys(), speaker_nickname)
 
-        self.label_authenticate_user.setText(Translations.get_translation("recording_ended"))
+            msg_info = f"Recognized speaker nickname: {speaker_nickname}"
+            log.log_info(msg_info)
 
-        await asyncio.sleep(2)
+            self.label_authenticate_user.setText(Translations.get_translation("recording_ended"))
 
-        if speaker_exists:
-            currently_logged_user = speaker_nickname
+            await asyncio.sleep(2)
 
-            if s_recognizer.user_registered_with_internet(users, currently_logged_user):
-                speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + speaker_nickname + "/"
-                login_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
-                                                                           const.RECORDED_AUDIO_FILENAME,
-                                                                           auth_weight=10)
-                partial_authentication = partial_authentication + score
-            else:
-                login_success = speaker_exists
+            if speaker_exists:
+                currently_logged_user = speaker_nickname
 
-            if login_success:
-                msg_success = f"User {speaker_nickname} signed in successfully."
-                log.log_info(msg_success)
-                if simple_mode is False:
-                    self.switch_frames(index_first_phase_success_frame)
+                if s_recognizer.user_registered_with_internet(users, currently_logged_user):
+                    speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + speaker_nickname + "/"
+                    login_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                               const.RECORDED_AUDIO_FILENAME,
+                                                                               auth_weight=10)
+                    partial_authentication = partial_authentication + score
                 else:
-                    self.switch_frames(index_second_phase_success_frame)
+                    login_success = speaker_exists
+
+                if login_success:
+                    msg_success = f"User {speaker_nickname} signed in successfully."
+                    log.log_info(msg_success)
+                    if simple_mode is False:
+                        self.switch_frames(index_first_phase_success_frame)
+                    else:
+                        self.switch_frames(index_second_phase_success_frame)
+                else:
+                    msg_warning = f"User {speaker_nickname} failed to sign in. Voice characteristics don't match."
+                    log.log_warning(msg_warning)
+                    self.switch_frames(index_auth_unsuccess_frame)
             else:
-                msg_warning = f"User {speaker_nickname} failed to sign in. Voice characteristics don't match."
+                msg_warning = f"Speaker {speaker_nickname} does not exist."
                 log.log_warning(msg_warning)
                 self.switch_frames(index_auth_unsuccess_frame)
         else:
-            msg_warning = f"Speaker {speaker_nickname} does not exist. "
-            log.log_warning(msg_warning)
+            msg_error = f"Recording was not created. Please check your microphone settings."
+            log.log_warning(msg_error)
             self.switch_frames(index_auth_unsuccess_frame)
 
 
@@ -827,38 +832,43 @@ class AuthSecondPhaseFrame(Frame):
         global partial_authentication
 
         await asyncio.sleep(0.5)
-        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
-        spoken_verification_word = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
-                                                                 Translations.get_language().lower())
-        spoken_verification_word_matches = s_recognizer.verify_verification_word(spoken_verification_word, self.random_word)
 
-        msg_info = f"Recognized verification word: {spoken_verification_word}"
-        log.log_info(msg_info)
+        if recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME):
+            spoken_verification_word = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                                     Translations.get_language().lower())
+            spoken_verification_word_matches = s_recognizer.verify_verification_word(spoken_verification_word, self.random_word)
 
-        self.label_authenticate_user.setText(Translations.get_translation("recording_ended"))
-        self.label_random_word.setHidden(True)
+            msg_info = f"Recognized verification word: {spoken_verification_word}"
+            log.log_info(msg_info)
 
-        await asyncio.sleep(2)
+            self.label_authenticate_user.setText(Translations.get_translation("recording_ended"))
+            self.label_random_word.setHidden(True)
 
-        if spoken_verification_word_matches:
+            await asyncio.sleep(2)
 
-            speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
-            verification_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
-                                                                              const.RECORDED_AUDIO_FILENAME,
-                                                                              auth_weight=20)
-            partial_authentication = partial_authentication + score
+            if spoken_verification_word_matches:
 
-            if verification_success:
-                msg_success = f"Verification word {self.random_word} matched with spoken word {spoken_verification_word}. Speaker is registered user."
-                log.log_info(msg_success)
-                self.switch_frames(index_second_phase_success_frame)
+                speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
+                verification_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                                  const.RECORDED_AUDIO_FILENAME,
+                                                                                  auth_weight=20)
+                partial_authentication = partial_authentication + score
+
+                if verification_success:
+                    msg_success = f"Verification word {self.random_word} matched with spoken word {spoken_verification_word}. Speaker is registered user."
+                    log.log_info(msg_success)
+                    self.switch_frames(index_second_phase_success_frame)
+                else:
+                    msg_warning = f"Speaker's voice characteristics don't match."
+                    log.log_warning(msg_warning)
+                    self.switch_frames(index_auth_unsuccess_frame)
             else:
-                msg_warning = f"Speaker's voice characteristics don't match."
+                msg_warning = f"Verification word {self.random_word} didn't match with spoken word {spoken_verification_word}."
                 log.log_warning(msg_warning)
                 self.switch_frames(index_auth_unsuccess_frame)
         else:
-            msg_warning = f"Verification word {self.random_word} didn't match with spoken word {spoken_verification_word}."
-            log.log_warning(msg_warning)
+            msg_error = f"Recording was not created. Please check your microphone settings."
+            log.log_warning(msg_error)
             self.switch_frames(index_auth_unsuccess_frame)
 
 
@@ -917,76 +927,79 @@ class AuthThirdPhaseFrame(Frame):
 
         await asyncio.sleep(0.5)
 
-        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+        if recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME):
+            if conn.quick_check_internet_connection():
+                unique_phrase = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                              Translations.get_language().lower())
+                unique_phrase = unique_phrase.lower()
+                unique_phrase_matches = s_recognizer.verify_unique_phrase(users, currently_logged_user, unique_phrase)
+            else:
+                unique_phrase = ""
+                unique_phrase_matches = True
 
-        if conn.quick_check_internet_connection():
-            unique_phrase = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
-                                                          Translations.get_language().lower())
-            unique_phrase = unique_phrase.lower()
-            unique_phrase_matches = s_recognizer.verify_unique_phrase(users, currently_logged_user, unique_phrase)
-        else:
-            unique_phrase = ""
-            unique_phrase_matches = True
+            self.label_authenticate_user.setText(Translations.get_translation("recording_ended"))
 
-        self.label_authenticate_user.setText(Translations.get_translation("recording_ended"))
+            await asyncio.sleep(2)
 
-        await asyncio.sleep(2)
+            if unique_phrase_matches:
+                if currently_logged_user == "":
+                    currently_logged_user = v_recognizer.verify_all_speakers(classifier, const.SPEAKER_VOICEPRINTS_DIR,
+                                                                             const.RECORDED_AUDIO_FILENAME)
+                    skipped_phases = True
 
-        if unique_phrase_matches:
-            if currently_logged_user == "":
-                currently_logged_user = v_recognizer.verify_all_speakers(classifier, const.SPEAKER_VOICEPRINTS_DIR,
-                                                                         const.RECORDED_AUDIO_FILENAME)
-                skipped_phases = True
+                    if unique_phrase != "":
+                        if not s_recognizer.verify_unique_phrase(users, currently_logged_user, unique_phrase):
+                            currently_logged_user = ""
 
-                if unique_phrase != "":
-                    if not s_recognizer.verify_unique_phrase(users, currently_logged_user, unique_phrase):
-                        currently_logged_user = ""
+                if currently_logged_user != "":
+                    speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
 
-            if currently_logged_user != "":
-                speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
-
-                if not skipped_phases:
-                    if not simple_mode:
-                        authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
-                                                                                            const.RECORDED_AUDIO_FILENAME,
-                                                                                            auth_weight=70)
+                    if not skipped_phases:
+                        if not simple_mode:
+                            authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                                                const.RECORDED_AUDIO_FILENAME,
+                                                                                                auth_weight=70)
+                        else:
+                            authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                                                const.RECORDED_AUDIO_FILENAME,
+                                                                                                auth_weight=90)
                     else:
                         authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
-                                                                                            const.RECORDED_AUDIO_FILENAME,
-                                                                                            auth_weight=90)
-                else:
-                    authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
-                                                                                        const.RECORDED_AUDIO_FILENAME)
+                                                                                            const.RECORDED_AUDIO_FILENAME)
 
-                partial_authentication = partial_authentication + score
+                    partial_authentication = partial_authentication + score
 
-                msg_success = f"Final result of partial authentication is {partial_authentication} %."
-                log.log_info(msg_success)
-
-                if authentication_success:
-                    msg_success = f"Authentication with unique phrase was successful. User {currently_logged_user} opened the door."
+                    msg_success = f"Final result of partial authentication is {partial_authentication} %."
                     log.log_info(msg_success)
 
-                    if partial_authentication >= const.PARTIAL_AUTHORIZATION_THRESHOLD:
-                        if os.path.isfile(const.RECORDED_AUDIO_FILENAME):
-                            os.remove(const.RECORDED_AUDIO_FILENAME)
-                        self.switch_frames(index_auth_success_frame)
+                    if authentication_success:
+                        msg_success = f"Authentication with unique phrase was successful. User {currently_logged_user} opened the door."
+                        log.log_info(msg_success)
+
+                        if partial_authentication >= const.PARTIAL_AUTHORIZATION_THRESHOLD:
+                            if os.path.isfile(const.RECORDED_AUDIO_FILENAME):
+                                os.remove(const.RECORDED_AUDIO_FILENAME)
+                            self.switch_frames(index_auth_success_frame)
+                        else:
+                            msg_warning = f"Final result of partial authentication is under the threshold."
+                            log.log_warning(msg_warning)
+                            partial_authentication = partial_authentication - score
+                            self.switch_frames(index_auth_unsuccess_frame)
                     else:
-                        msg_warning = f"Final result of partial authentication is under the threshold."
+                        msg_warning = f"Speaker's voice characteristics don't match. Door can't be opened."
                         log.log_warning(msg_warning)
-                        partial_authentication = partial_authentication - score
                         self.switch_frames(index_auth_unsuccess_frame)
                 else:
-                    msg_warning = f"Speaker's voice characteristics don't match. Door can't be opened."
+                    msg_warning = f"Speaker's voice characteristics don't correspond with his unique phrase."
                     log.log_warning(msg_warning)
                     self.switch_frames(index_auth_unsuccess_frame)
             else:
-                msg_warning = f"Speaker's voice characteristics don't correspond with his unique phrase."
+                msg_warning = f"Authentication with unique phrase wasn't successful. User {currently_logged_user} couldn't open the door."
                 log.log_warning(msg_warning)
                 self.switch_frames(index_auth_unsuccess_frame)
         else:
-            msg_warning = f"Authentication with unique phrase wasn't successful. User {currently_logged_user} couldn't open the door."
-            log.log_warning(msg_warning)
+            msg_error = f"Recording was not created. Please check your microphone settings."
+            log.log_warning(msg_error)
             self.switch_frames(index_auth_unsuccess_frame)
 
 
@@ -1458,52 +1471,55 @@ class RegFirstPhaseFrame(Frame):
 
         await asyncio.sleep(0.5)
 
-        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+        if recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME):
+            new_user_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                              Translations.get_language().lower())
+            new_user_nickname = new_user_nickname.lower()
 
-        new_user_nickname = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
-                                                          Translations.get_language().lower())
-        new_user_nickname = new_user_nickname.lower()
+            msg_info = f"Recognized new user nickname: {new_user_nickname}"
+            log.log_info(msg_info)
 
-        msg_info = f"Recognized new user nickname: {new_user_nickname}"
-        log.log_info(msg_info)
+            self.label_register_user.setText(Translations.get_translation("recording_ended"))
 
-        self.label_register_user.setText(Translations.get_translation("recording_ended"))
+            await asyncio.sleep(2)
 
-        await asyncio.sleep(2)
-
-        self.label_register_user.setText(Translations.get_translation("new_confirmation_nickname") + "\n\n" +
-                                         new_user_nickname.upper())
-        self.label_register_user.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.label_short_info.setHidden(True)
-
-        button_repeat = QPushButton(Translations.get_translation("repeat", True))
-        button_repeat.setFont(QFont(const.FONT_RHD_BOLD, font_small_medium))
-        button_repeat.setStyleSheet(
-            f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px; "
-            f"margin: {btn_margin_20}px;}} "
-            f"QPushButton:hover {{ background-color: #58a6d4; }}")
-        button_repeat.clicked.connect(lambda: self.repeat_registration())
-        self.grid_layout.addWidget(button_repeat, 4, 0, Qt.AlignmentFlag.AlignLeft)
-
-        button_confirm = QPushButton(Translations.get_translation("confirm", True))
-        button_confirm.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
-        button_confirm.setStyleSheet(
-            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_30}px;")
-        button_confirm.clicked.connect(lambda: self.switch_frames(index_reg_first_phase_completed_frame))
-        self.grid_layout.addWidget(button_confirm, 4, 2, Qt.AlignmentFlag.AlignRight)
-
-        if new_user_nickname in users:
-            button_confirm.setEnabled(False)
-            button_confirm.setStyleSheet(f"QPushButton:disabled {{padding: {btn_padding_t_b_30}px {btn_padding_l_r_30}px;"
-                                         f"background-color: #58a6d4; border: {border_width_5}px solid #f47e21;}}")
-            self.label_register_user.setText(new_user_nickname.upper() + "\n\n" +
-                                             Translations.get_translation('new_nickname_exists_1') +
-                                             "\n\n" + Translations.get_translation('new_nickname_exists_2'))
-            self.label_register_user.setStyleSheet(f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px; "
-                                                   f"background-color: #58a6d4; border-radius: {border_radius_15};"
-                                                   f"border: {border_width_5}px solid #f47e21;")
+            self.label_register_user.setText(Translations.get_translation("new_confirmation_nickname") + "\n\n" +
+                                             new_user_nickname.upper())
             self.label_register_user.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+            self.label_short_info.setHidden(True)
+
+            button_repeat = QPushButton(Translations.get_translation("repeat", True))
+            button_repeat.setFont(QFont(const.FONT_RHD_BOLD, font_small_medium))
+            button_repeat.setStyleSheet(
+                f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px; "
+                f"margin: {btn_margin_20}px;}} "
+                f"QPushButton:hover {{ background-color: #58a6d4; }}")
+            button_repeat.clicked.connect(lambda: self.repeat_registration())
+            self.grid_layout.addWidget(button_repeat, 4, 0, Qt.AlignmentFlag.AlignLeft)
+
+            button_confirm = QPushButton(Translations.get_translation("confirm", True))
+            button_confirm.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+            button_confirm.setStyleSheet(
+                f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_30}px;")
+            button_confirm.clicked.connect(lambda: self.switch_frames(index_reg_first_phase_completed_frame))
+            self.grid_layout.addWidget(button_confirm, 4, 2, Qt.AlignmentFlag.AlignRight)
+
+            if new_user_nickname in users:
+                button_confirm.setEnabled(False)
+                button_confirm.setStyleSheet(f"QPushButton:disabled {{padding: {btn_padding_t_b_30}px {btn_padding_l_r_30}px;"
+                                             f"background-color: #58a6d4; border: {border_width_5}px solid #f47e21;}}")
+                self.label_register_user.setText(new_user_nickname.upper() + "\n\n" +
+                                                 Translations.get_translation('new_nickname_exists_1') +
+                                                 "\n\n" + Translations.get_translation('new_nickname_exists_2'))
+                self.label_register_user.setStyleSheet(f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px; "
+                                                       f"background-color: #58a6d4; border-radius: {border_radius_15};"
+                                                       f"border: {border_width_5}px solid #f47e21;")
+                self.label_register_user.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        else:
+            msg_error = f"Recording was not created. Please check your microphone settings."
+            log.log_warning(msg_error)
+            self.repeat_registration()
 
     def repeat_registration(self):
         self.clear_items()
@@ -1560,25 +1576,29 @@ class RegSecondPhaseFrame(Frame):
 
         await asyncio.sleep(0.5)
 
-        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME, 6)
-        msg_info = f"Voiceprint recording no.{str(voiceprints_counter)} recorded successfully."
-        log.log_info(msg_info)
+        if recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME, 6):
+            msg_info = f"Voiceprint recording no.{str(voiceprints_counter)} recorded successfully."
+            log.log_info(msg_info)
 
-        # VOICE RECOGNITION
-        new_user_dir = const.SPEAKER_RECORDINGS_DIR + new_user_nickname + "/"
-        new_user_file = new_user_nickname + "_" + str(recordings_counter) + ".wav"
-        manager.move_and_rename_audio(const.RECORDED_AUDIO_FILENAME, new_user_file, new_user_dir)
-        recordings_counter += 1
+            # VOICE RECOGNITION
+            new_user_dir = const.SPEAKER_RECORDINGS_DIR + new_user_nickname + "/"
+            new_user_file = new_user_nickname + "_" + str(recordings_counter) + ".wav"
+            manager.move_and_rename_audio(const.RECORDED_AUDIO_FILENAME, new_user_file, new_user_dir)
+            recordings_counter += 1
 
-        self.label_register_user.setText(Translations.get_translation("recording_ended"))
-        self.label_random_phrase.setHidden(True)
+            self.label_register_user.setText(Translations.get_translation("recording_ended"))
+            self.label_random_phrase.setHidden(True)
 
-        await asyncio.sleep(2)
+            await asyncio.sleep(2)
 
-        msg_info = f"Voiceprint {voiceprints_counter} recorded successfully."
-        log.log_info(msg_info)
+            msg_info = f"Voiceprint {voiceprints_counter} recorded successfully."
+            log.log_info(msg_info)
 
-        self.switch_frames(index_reg_first_phase_completed_frame)
+            self.switch_frames(index_reg_first_phase_completed_frame)
+        else:
+            msg_error = f"Recording was not created. Please check your microphone settings."
+            log.log_warning(msg_error)
+            self.switch_frames(index_reg_first_phase_completed_frame)
 
 
 class RegThirdPhaseFrame(Frame):
@@ -1639,40 +1659,43 @@ class RegThirdPhaseFrame(Frame):
 
         await asyncio.sleep(0.5)
 
-        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+        if recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME):
+            new_user_unique_phrase = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                                   Translations.get_language().lower())
+            new_user_unique_phrase = new_user_unique_phrase.lower()
 
-        new_user_unique_phrase = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
-                                                               Translations.get_language().lower())
-        new_user_unique_phrase = new_user_unique_phrase.lower()
+            msg_info = f"Recognized new user unique phrase: {string_hasher.encode_string(new_user_unique_phrase)}"
+            log.log_info(msg_info)
 
-        msg_info = f"Recognized new user unique phrase: {string_hasher.encode_string(new_user_unique_phrase)}"
-        log.log_info(msg_info)
+            self.label_register_unique_phrase.setText(Translations.get_translation("recording_ended"))
 
-        self.label_register_unique_phrase.setText(Translations.get_translation("recording_ended"))
+            await asyncio.sleep(2)
 
-        await asyncio.sleep(2)
+            self.label_register_unique_phrase.setText(Translations.get_translation("new_confirmation_phrase") +
+                                                      "\n\n" + new_user_unique_phrase.upper())
+            self.label_register_unique_phrase.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.label_register_unique_phrase.setText(Translations.get_translation("new_confirmation_phrase") +
-                                                  "\n\n" + new_user_unique_phrase.upper())
-        self.label_register_unique_phrase.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.label_short_info.setHidden(True)
 
-        self.label_short_info.setHidden(True)
+            button_repeat = QPushButton(Translations.get_translation("repeat", True))
+            button_repeat.setFont(QFont(const.FONT_RHD_BOLD, font_small_medium))
+            button_repeat.setStyleSheet(
+                f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px; "
+                f"margin: {btn_margin_20}px;}} "
+                f"QPushButton:hover {{ background-color: #58a6d4; }}")
+            button_repeat.clicked.connect(lambda: self.repeat_registration())
+            self.grid_layout.addWidget(button_repeat, 4, 0, Qt.AlignmentFlag.AlignLeft)
 
-        button_repeat = QPushButton(Translations.get_translation("repeat", True))
-        button_repeat.setFont(QFont(const.FONT_RHD_BOLD, font_small_medium))
-        button_repeat.setStyleSheet(
-            f"QPushButton {{background-color: #a2d5ec; padding: {btn_padding_t_b_30}px {btn_padding_l_r_60}px; "
-            f"margin: {btn_margin_20}px;}} "
-            f"QPushButton:hover {{ background-color: #58a6d4; }}")
-        button_repeat.clicked.connect(lambda: self.repeat_registration())
-        self.grid_layout.addWidget(button_repeat, 4, 0, Qt.AlignmentFlag.AlignLeft)
-
-        button_confirm = QPushButton(Translations.get_translation("confirm", True))
-        button_confirm.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
-        button_confirm.setStyleSheet(
-            f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_30}px;")
-        button_confirm.clicked.connect(lambda: self.switch_frames(index_reg_success_frame))
-        self.grid_layout.addWidget(button_confirm, 4, 2, Qt.AlignmentFlag.AlignRight)
+            button_confirm = QPushButton(Translations.get_translation("confirm", True))
+            button_confirm.setFont(QFont(const.FONT_RHD_BOLD, font_medium))
+            button_confirm.setStyleSheet(
+                f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_30}px;")
+            button_confirm.clicked.connect(lambda: self.switch_frames(index_reg_success_frame))
+            self.grid_layout.addWidget(button_confirm, 4, 2, Qt.AlignmentFlag.AlignRight)
+        else:
+            msg_error = f"Recording was not created. Please check your microphone settings."
+            log.log_warning(msg_error)
+            self.repeat_registration()
 
     def repeat_registration(self):
         self.clear_items()
