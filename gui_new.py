@@ -1519,7 +1519,7 @@ class RegFirstPhaseFrame(Frame):
         else:
             msg_error = f"Recording was not created. Please check your microphone settings."
             log.log_warning(msg_error)
-            self.repeat_registration()
+            self.switch_frames(index_register_frame)
 
     def repeat_registration(self):
         self.clear_items()
@@ -1695,7 +1695,7 @@ class RegThirdPhaseFrame(Frame):
         else:
             msg_error = f"Recording was not created. Please check your microphone settings."
             log.log_warning(msg_error)
-            self.repeat_registration()
+            self.switch_frames(index_reg_second_phase_completed_frame)
 
     def repeat_registration(self):
         self.clear_items()
