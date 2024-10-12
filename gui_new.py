@@ -92,6 +92,11 @@ def initialize_font_sizes(window_width, window_height):
         fonts[1] = round(const.FONT_MEDIUM / 1.5)
         fonts[2] = round(const.FONT_SMALL_MEDIUM / 1.5)
         fonts[3] = round(const.FONT_SMALL / 1.5)
+    elif window_width == 960 and window_height == 540:
+        fonts[0] = round(const.FONT_LARGE / 2.1)
+        fonts[1] = round(const.FONT_MEDIUM / 2.1)
+        fonts[2] = round(const.FONT_SMALL_MEDIUM / 2.1)
+        fonts[3] = round(const.FONT_SMALL / 2.1)
     elif window_width > 1920 and window_height > 1080:
         fonts[0] = round(const.FONT_LARGE * 1.25)
         fonts[1] = round(const.FONT_MEDIUM * 1.25)
@@ -128,6 +133,8 @@ def initialize_paddings_margins(pixels, window_width, window_height):
         resized_pixels = pixels
     elif window_width == 1280 and window_height == 720:
         resized_pixels = round(pixels / 1.5)
+    elif window_width == 960 and window_height == 540:
+        resized_pixels = round(pixels / 2.1)
     elif window_width > 1920 and window_height > 1080:
         resized_pixels = round(pixels * 1.25)
     else:
@@ -2177,43 +2184,30 @@ class MainWindow(QMainWindow):
         global img_margin_30, img_margin_40
         global border_width_5, border_radius_10, border_radius_15
 
-        font_sizes = initialize_font_sizes(self.size().width(), self.size().height())
+        window_width = QApplication.primaryScreen().size().width()
+        window_height = QApplication.primaryScreen().size().height()
+
+        font_sizes = initialize_font_sizes(window_width, window_height)
         font_large, font_medium, font_small_medium, font_small = font_sizes[0], font_sizes[1], font_sizes[2], font_sizes[3]
 
-        rescale_factor = initialize_image_sizes(self.size().width(), self.size().height())
+        rescale_factor = initialize_image_sizes(window_width, window_height)
 
-        btn_padding_t_b_20 = initialize_paddings_margins(const.BTN_PADDING_T_B_20, self.size().width(),
-                                                         self.size().height())
-        btn_padding_t_b_30 = initialize_paddings_margins(const.BTN_PADDING_T_B_30, self.size().width(),
-                                                         self.size().height())
-        btn_padding_t_b_60 = initialize_paddings_margins(const.BTN_PADDING_T_B_60, self.size().width(),
-                                                         self.size().height())
-        btn_padding_l_r_30 = initialize_paddings_margins(const.BTN_PADDING_L_R_30, self.size().width(),
-                                                         self.size().height())
-        btn_padding_l_r_40 = initialize_paddings_margins(const.BTN_PADDING_L_R_40, self.size().width(),
-                                                         self.size().height())
-        btn_padding_l_r_60 = initialize_paddings_margins(const.BTN_PADDING_L_R_60, self.size().width(),
-                                                         self.size().height())
-        btn_padding_l_r_80 = initialize_paddings_margins(const.BTN_PADDING_L_R_80, self.size().width(),
-                                                         self.size().height())
-        btn_margin_0 = initialize_paddings_margins(const.BTN_MARGIN_0, self.size().width(),
-                                                   self.size().height())
-        btn_margin_20 = initialize_paddings_margins(const.BTN_MARGIN_20, self.size().width(),
-                                                    self.size().height())
-        lbl_padding_10 = initialize_paddings_margins(const.LBL_PADDING_10, self.size().width(),
-                                                     self.size().height())
-        lbl_padding_20 = initialize_paddings_margins(const.LBL_PADDING_20, self.size().width(),
-                                                     self.size().height())
-        img_margin_30 = initialize_paddings_margins(const.IMG_MARGIN_30, self.size().width(),
-                                                    self.size().height())
-        img_margin_40 = initialize_paddings_margins(const.IMG_MARGIN_40, self.size().width(),
-                                                    self.size().height())
-        border_width_5 = initialize_paddings_margins(const.BORDER_WIDTH_5, self.size().width(),
-                                                     self.size().height())
-        border_radius_10 = initialize_paddings_margins(const.BORDER_RADIUS_10, self.size().width(),
-                                                       self.size().height())
-        border_radius_15 = initialize_paddings_margins(const.BORDER_RADIUS_15, self.size().width(),
-                                                       self.size().height())
+        btn_padding_t_b_20 = initialize_paddings_margins(const.BTN_PADDING_T_B_20, window_width, window_height)
+        btn_padding_t_b_30 = initialize_paddings_margins(const.BTN_PADDING_T_B_30, window_width, window_height)
+        btn_padding_t_b_60 = initialize_paddings_margins(const.BTN_PADDING_T_B_60, window_width, window_height)
+        btn_padding_l_r_30 = initialize_paddings_margins(const.BTN_PADDING_L_R_30, window_width, window_height)
+        btn_padding_l_r_40 = initialize_paddings_margins(const.BTN_PADDING_L_R_40, window_width, window_height)
+        btn_padding_l_r_60 = initialize_paddings_margins(const.BTN_PADDING_L_R_60, window_width, window_height)
+        btn_padding_l_r_80 = initialize_paddings_margins(const.BTN_PADDING_L_R_80, window_width, window_height)
+        btn_margin_0 = initialize_paddings_margins(const.BTN_MARGIN_0, window_width, window_height)
+        btn_margin_20 = initialize_paddings_margins(const.BTN_MARGIN_20, window_width, window_height)
+        lbl_padding_10 = initialize_paddings_margins(const.LBL_PADDING_10, window_width, window_height)
+        lbl_padding_20 = initialize_paddings_margins(const.LBL_PADDING_20, window_width, window_height)
+        img_margin_30 = initialize_paddings_margins(const.IMG_MARGIN_30, window_width, window_height)
+        img_margin_40 = initialize_paddings_margins(const.IMG_MARGIN_40, window_width, window_height)
+        border_width_5 = initialize_paddings_margins(const.BORDER_WIDTH_5, window_width, window_height)
+        border_radius_10 = initialize_paddings_margins(const.BORDER_RADIUS_10, window_width, window_height)
+        border_radius_15 = initialize_paddings_margins(const.BORDER_RADIUS_15, window_width, window_height)
 
 
 simple_mode = False
