@@ -96,10 +96,10 @@ def initialize_font_sizes(window_width, window_height):
         fonts[2] = const.FONT_SMALL_MEDIUM
         fonts[3] = const.FONT_SMALL
     elif window_width == 1280 and window_height == 720:
-        fonts[0] = round(const.FONT_LARGE / 1.5)
-        fonts[1] = round(const.FONT_MEDIUM / 1.5)
-        fonts[2] = round(const.FONT_SMALL_MEDIUM / 1.5)
-        fonts[3] = round(const.FONT_SMALL / 1.5)
+        fonts[0] = round(const.FONT_LARGE / 1.6)
+        fonts[1] = round(const.FONT_MEDIUM / 1.6)
+        fonts[2] = round(const.FONT_SMALL_MEDIUM / 1.6)
+        fonts[3] = round(const.FONT_SMALL / 1.6)
     elif window_width == 960 and window_height == 540:
         fonts[0] = round(const.FONT_LARGE / 2.1)
         fonts[1] = round(const.FONT_MEDIUM / 2.1)
@@ -140,7 +140,7 @@ def initialize_paddings_margins(pixels, window_width, window_height):
     if window_width == 1920 and window_height == 1080:
         resized_pixels = pixels
     elif window_width == 1280 and window_height == 720:
-        resized_pixels = round(pixels / 1.5)
+        resized_pixels = round(pixels / 1.6)
     elif window_width == 960 and window_height == 540:
         resized_pixels = round(pixels / 2.1)
     elif window_width > 1920 and window_height > 1080:
