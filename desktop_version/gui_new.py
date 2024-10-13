@@ -3,7 +3,7 @@ import sys
 import asyncio
 import time
 import argparse
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 
 from PyQt6.QtWidgets import (QApplication,
                              QComboBox,
@@ -59,12 +59,12 @@ index_reg_not_internet_conn_frame = const.INDEX_REG_NOT_INTERNET_CONN_FRAME
 index_reg_success_frame = const.INDEX_REG_SUCCESS_FRAME
 index_manage_users = const.INDEX_MANAGE_USERS
 
-relayPin = const.RELAY_PIN
-buzzerPin = const.BUZZER_PIN
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(relayPin, GPIO.OUT)
-GPIO.setup(buzzerPin, GPIO.OUT)
+# relayPin = const.RELAY_PIN
+# buzzerPin = const.BUZZER_PIN
+# GPIO.setwarnings(False)
+# GPIO.setmode(GPIO.BCM)
+# GPIO.setup(relayPin, GPIO.OUT)
+# GPIO.setup(buzzerPin, GPIO.OUT)
 
 
 def clear_global_variables():
@@ -253,7 +253,7 @@ class IntroFrame(Frame):
 
         image_label = QLabel()
         self.grid_layout.addWidget(image_label, 4, 1, Qt.AlignmentFlag.AlignCenter)
-        image_pixmap = QPixmap("images/VAS - logo.png")
+        image_pixmap = QPixmap("../images/VAS - logo.png")
         scaled_pixmap = image_pixmap.scaled(round(image_pixmap.width() / rescale_factor),
                                             round(image_pixmap.height() / rescale_factor))
         image_label.setPixmap(scaled_pixmap)
@@ -1162,13 +1162,13 @@ class AuthSuccessFrame(Frame):
                 f"border-radius: {border_radius_15};")
             self.grid_layout.addWidget(label_authentication_success, 1, 1, Qt.AlignmentFlag.AlignCenter)
 
-            GPIO.output(relayPin, True)
-            GPIO.output(buzzerPin, GPIO.HIGH)
+            # GPIO.output(relayPin, True)
+            # GPIO.output(buzzerPin, GPIO.HIGH)
 
             await asyncio.sleep(5)
 
-            GPIO.output(relayPin, False)
-            GPIO.output(buzzerPin, GPIO.LOW)
+            # GPIO.output(relayPin, False)
+            # GPIO.output(buzzerPin, GPIO.LOW)
 
             label_authentication_success.setHidden(True)
 
@@ -2148,7 +2148,7 @@ class MainWindow(QMainWindow):
                 background-color: #f47e21;
             }}
             QComboBox::down-arrow {{
-                image: url(images/drop_down_arrow.png);
+                image: url(../images/drop_down_arrow.png);
                 width: {btn_padding_l_r_80}px;
                 height: {btn_padding_l_r_60}px;
             }}
@@ -2181,13 +2181,13 @@ class MainWindow(QMainWindow):
                 width: {btn_padding_t_b_30}px;
                 height: {btn_padding_t_b_30}px;
                 background: none;
-                image: url('images/drop_up_arrow.png');
+                image: url('../images/drop_up_arrow.png');
             }}
             QScrollBar::down-arrow:vertical {{
                 width: {btn_padding_t_b_30}px;
                 height: {btn_padding_t_b_30}px;
                 background: none;
-                image: url('images/drop_down_arrow.png');
+                image: url('../images/drop_down_arrow.png');
             }}
             QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
                 background: none;

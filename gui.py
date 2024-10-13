@@ -2,8 +2,9 @@ import os
 import time
 import customtkinter as ctk
 import tkinter as tk
+import RPi.GPIO as GPIO
 
-from speechbrain.pretrained import EncoderClassifier
+from speechbrain.inference import EncoderClassifier
 from translations import Translations
 
 from authentication import credentials, string_hasher
@@ -28,6 +29,13 @@ recordings_counter = 0
 registration_with_internet = True
 is_admin_logged = False
 partial_authentication = 0.0
+
+relayPin = const.RELAY_PIN
+buzzerPin = const.BUZZER_PIN
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(relayPin, GPIO.OUT)
+GPIO.setup(buzzerPin, GPIO.OUT)
 
 ctk.set_ctk_parent_class(tk.Tk)
 ctk.set_appearance_mode("dark")
@@ -780,7 +788,13 @@ def frame_authentication_success_callback():
 
     window.update()
 
-    time.sleep(1.5)
+    GPIO.output(relayPin, True)
+    GPIO.output(buzzerPin, GPIO.HIGH)
+
+    time.sleep(5)
+
+    GPIO.output(relayPin, False)
+    GPIO.output(buzzerPin, GPIO.LOW)
 
     label_authentication_success.destroy()
 

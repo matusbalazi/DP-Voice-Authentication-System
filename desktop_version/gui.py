@@ -2,7 +2,7 @@ import os
 import time
 import customtkinter as ctk
 import tkinter as tk
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 
 from speechbrain.inference import EncoderClassifier
 from translations import Translations
@@ -30,12 +30,12 @@ registration_with_internet = True
 is_admin_logged = False
 partial_authentication = 0.0
 
-relayPin = const.RELAY_PIN
-buzzerPin = const.BUZZER_PIN
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(relayPin, GPIO.OUT)
-GPIO.setup(buzzerPin, GPIO.OUT)
+# relayPin = const.RELAY_PIN
+# buzzerPin = const.BUZZER_PIN
+# GPIO.setwarnings(False)
+# GPIO.setmode(GPIO.BCM)
+# GPIO.setup(relayPin, GPIO.OUT)
+# GPIO.setup(buzzerPin, GPIO.OUT)
 
 ctk.set_ctk_parent_class(tk.Tk)
 ctk.set_appearance_mode("dark")
@@ -288,7 +288,7 @@ def button_password_callback(value, phase):
 
             button_open_door_callback()
             frame_open_door.lower()
-            frame_authentication_phase_2_callback()
+            frame_authentication_phase_3_callback()
 
         if phase == "admin":
             is_admin_logged = True
@@ -323,7 +323,7 @@ def button_sign_in_callback():
 
         progress_bar_authentication = ctk.CTkProgressBar(master=frame_authentication_phase_1)
         progress_bar_authentication.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
-        progress_bar_authentication.set(1 / 2)
+        progress_bar_authentication.set(1 / 3)
 
         label_authenticate_user = ctk.CTkLabel(master=frame_authentication_phase_1,
                                                text=Translations.get_translation(
@@ -476,7 +476,7 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
 
 # create AUTHENTICATION PHASE 2 FRAME widgets
 def frame_authentication_phase_2_callback():
-    frame_authentication_phase_2.lower()
+    frame_authentication_phase_1.lower()
     frame_authentication_phase_2.lift()
     clear_frames(authentication_frames)
 
@@ -505,11 +505,11 @@ def frame_authentication_phase_2_callback():
 
     progress_bar_authentication = ctk.CTkProgressBar(master=frame_authentication_phase_2)
     progress_bar_authentication.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
-    progress_bar_authentication.set(2 / 2)
+    progress_bar_authentication.set(2 / 3)
 
     label_authenticate_user = ctk.CTkLabel(master=frame_authentication_phase_2,
                                            text=Translations.get_translation(
-                                               'come_closer_3') + "\n\n" + Translations.get_translation(
+                                               'come_closer_2') + "\n\n" + Translations.get_translation(
                                                'start_recording'),
                                            font=(font_roboto, font_38), justify=ctk.LEFT)
     label_authenticate_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
@@ -538,17 +538,154 @@ def frame_authentication_phase_2_callback():
 
 def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_user, button_back, button_authenticate,
                                          progress_bar_authentication):
+    global partial_authentication
+    label_second_phase.destroy()
+    button_back.destroy()
+    button_authenticate.destroy()
+    progress_bar_authentication.destroy()
+
+    internet_available = True
+    timeout = 10
+    start_time = time.time()
+    while not conn.check_internet_connection():
+        label_authenticate_user.configure(text=Translations.get_translation('waiting_for_connection'))
+        window.update()
+        if time.time() - start_time >= timeout:
+            frame_not_internet_connection_callback()
+            internet_available = False
+            break
+
+    if internet_available:
+        random_word = s_recognizer.generate_random_word(const.VERIFICATION_WORDS[Translations.get_language()])
+
+        label_random_word = ctk.CTkLabel(master=frame_authentication_phase_2,
+                                         text=random_word.upper(),
+                                         font=(font_roboto, font_48, font_bold), text_color=("light green"),
+                                         justify=ctk.CENTER)
+        label_random_word.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+
+        label_authenticate_user.configure(text=Translations.get_translation('recording'),
+                                          font=(font_roboto, font_38, font_bold), justify=ctk.CENTER)
+        label_short_info = ctk.CTkLabel(master=frame_authentication_phase_2,
+                                        text=Translations.get_translation(
+                                            'short_info_2'),
+                                        font=(font_roboto, font_38, font_bold), corner_radius=20, fg_color="#696969",
+                                        justify=ctk.CENTER)
+        label_short_info.grid(row=2, column=4, pady=10, padx=10, sticky="nsew")
+        window.update()
+
+        # SPEECH RECOGNITION
+        recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME)
+        spoken_verification_word = s_recognizer.recognize_speech(const.RECORDED_AUDIO_FILENAME,
+                                                                 Translations.get_language().lower())
+        spoken_verification_word_matches = s_recognizer.verify_verification_word(spoken_verification_word, random_word)
+
+        msg_info = f"Recognized verification word: {spoken_verification_word}"
+        log.log_info(msg_info)
+
+        label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
+        label_random_word.destroy()
+        window.update()
+
+        time.sleep(1.5)
+
+        if spoken_verification_word_matches:
+            speaker_dir = const.SPEAKER_VOICEPRINTS_DIR + currently_logged_user + "/"
+            # verification_success = v_recognizer.verify_speaker(classifier, speaker_dir, const.RECORDED_AUDIO_FILENAME)
+            verification_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
+                                                                              const.RECORDED_AUDIO_FILENAME,
+                                                                              auth_weight=20)
+            partial_authentication = partial_authentication + score
+
+            if verification_success:
+                msg_success = f"Verification word {random_word} matched with spoken word {spoken_verification_word}. Speaker is registered user."
+                log.log_info(msg_success)
+                frame_authentication_phase_3_callback()
+            else:
+                msg_warning = f"Speaker's voice characteristics don't match."
+                log.log_warning(msg_warning)
+                frame_authentication_unsuccess_callback(2)
+        else:
+            msg_warning = f"Verification word {random_word} didn't match with spoken word {spoken_verification_word}."
+            log.log_warning(msg_warning)
+            frame_authentication_unsuccess_callback(2)
+
+
+# create AUTHENTICATION PHASE 3 FRAME widgets
+def frame_authentication_phase_3_callback():
+    frame_authentication_phase_2.lower()
+    frame_authentication_phase_3.lift()
+    clear_frames(authentication_frames)
+
+    label_main_title = ctk.CTkLabel(master=frame_authentication_phase_3,
+                                    text=Translations.get_translation('system_authentication'),
+                                    font=(font_roboto, font_48, font_bold), justify=ctk.CENTER)
+    label_main_title.grid(row=1, column=4, pady=10, padx=10, sticky="nsew")
+
+    label_verification_success = ctk.CTkLabel(master=frame_authentication_phase_3,
+                                              text=Translations.get_translation('verification_success'),
+                                              font=(font_roboto, font_38, font_bold), text_color=("light green"),
+                                              justify=ctk.CENTER)
+    label_verification_success.grid(row=2, column=4, pady=10, padx=10, sticky="nsew")
+
+    window.update()
+
+    time.sleep(1.5)
+
+    label_verification_success.destroy()
+
+    label_third_phase = ctk.CTkLabel(master=frame_authentication_phase_3,
+                                     text=Translations.get_translation('third_phase'),
+                                     font=(font_roboto, font_38, font_bold), text_color=("light green"),
+                                     justify=ctk.CENTER)
+    label_third_phase.grid(row=2, column=4, pady=10, padx=10, sticky="nsew")
+
+    progress_bar_authentication = ctk.CTkProgressBar(master=frame_authentication_phase_3)
+    progress_bar_authentication.grid(row=3, column=4, pady=10, padx=10, sticky="nsew")
+    progress_bar_authentication.set(3 / 3)
+
+    label_authenticate_user = ctk.CTkLabel(master=frame_authentication_phase_3,
+                                           text=Translations.get_translation(
+                                               'come_closer_3') + "\n\n" + Translations.get_translation(
+                                               'start_recording'),
+                                           font=(font_roboto, font_38), justify=ctk.LEFT)
+    label_authenticate_user.grid(row=4, column=4, pady=10, padx=10, sticky="nsew")
+
+    button_back = ctk.CTkButton(master=frame_authentication_phase_3, text=Translations.get_translation('back'),
+                                font=(font_roboto, font_38, font_bold),
+                                command=lambda: button_back_callback(frame_authentication_phase_3, frame_open_door),
+                                width=width_275,
+                                height=height_70)
+    button_back.grid(row=7, column=7, pady=10, padx=10, sticky="nsew")
+
+    button_authenticate = ctk.CTkButton(master=frame_authentication_phase_3,
+                                        text=Translations.get_translation('authenticate'),
+                                        font=(font_roboto, font_38, font_bold),
+                                        command=lambda: button_authenticate_phase_3_callback(label_third_phase,
+                                                                                             label_authenticate_user,
+                                                                                             button_back,
+                                                                                             button_authenticate,
+                                                                                             progress_bar_authentication),
+                                        width=width_275,
+                                        height=height_70)
+    button_authenticate.grid(row=7, column=1, pady=10, padx=10, sticky="nsew")
+
+    window.update()
+
+
+def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_user, button_back, button_authenticate,
+                                         progress_bar_authentication):
     global currently_logged_user, partial_authentication
     skipped_phases = False
 
-    label_second_phase.destroy()
+    label_third_phase.destroy()
     button_back.destroy()
     button_authenticate.destroy()
     progress_bar_authentication.destroy()
 
     label_authenticate_user.configure(text=Translations.get_translation('recording'),
                                       font=(font_roboto, font_38, font_bold), justify=ctk.CENTER)
-    label_short_info = ctk.CTkLabel(master=frame_authentication_phase_2,
+    label_short_info = ctk.CTkLabel(master=frame_authentication_phase_3,
                                     text=Translations.get_translation(
                                         'short_info_3'),
                                     font=(font_roboto, font_38, font_bold), corner_radius=20, fg_color="#696969",
@@ -590,7 +727,7 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
             if not skipped_phases:
                 authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
                                                                                     const.RECORDED_AUDIO_FILENAME,
-                                                                                    auth_weight=90)
+                                                                                    auth_weight=70)
             else:
                 authentication_success, score = v_recognizer.verify_speaker_concept(classifier, speaker_dir,
                                                                                     const.RECORDED_AUDIO_FILENAME)
@@ -612,19 +749,19 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
                     msg_warning = f"Final result of partial authentication is under the threshold."
                     log.log_warning(msg_warning)
                     partial_authentication = partial_authentication - score
-                    frame_authentication_unsuccess_callback(2)
+                    frame_authentication_unsuccess_callback(3)
             else:
                 msg_warning = f"Speaker's voice characteristics don't match. Door can't be opened."
                 log.log_warning(msg_warning)
-                frame_authentication_unsuccess_callback(2)
+                frame_authentication_unsuccess_callback(3)
         else:
             msg_warning = f"Speaker's voice characteristics don't correspond with his unique phrase."
             log.log_warning(msg_warning)
-            frame_authentication_unsuccess_callback(2)
+            frame_authentication_unsuccess_callback(3)
     else:
         msg_warning = f"Authentication with unique phrase wasn't successful. User {currently_logged_user} couldn't open the door."
         log.log_warning(msg_warning)
-        frame_authentication_unsuccess_callback(2)
+        frame_authentication_unsuccess_callback(3)
 
 
 # create AUTHENTICATION SUCCESS FRAME widgets
@@ -635,7 +772,7 @@ def frame_authentication_success_callback():
     is_internet_connection = conn.check_internet_connection()
 
     clear_frame(frame_authentication_success)
-    frame_authentication_phase_2.lower()
+    frame_authentication_phase_3.lower()
     frame_authentication_success.lift()
 
     label_main_title = ctk.CTkLabel(master=frame_authentication_success,
@@ -651,13 +788,13 @@ def frame_authentication_success_callback():
 
     window.update()
 
-    GPIO.output(relayPin, True)
-    GPIO.output(buzzerPin, GPIO.HIGH)
+    # GPIO.output(relayPin, True)
+    # GPIO.output(buzzerPin, GPIO.HIGH)
 
     time.sleep(5)
 
-    GPIO.output(relayPin, False)
-    GPIO.output(buzzerPin, GPIO.LOW)
+    # GPIO.output(relayPin, False)
+    # GPIO.output(buzzerPin, GPIO.LOW)
 
     label_authentication_success.destroy()
 
@@ -710,6 +847,8 @@ def frame_authentication_unsuccess_callback(phase):
         frame_authentication_phase_1.lower()
     elif phase == 2:
         frame_authentication_phase_2.lower()
+    elif phase == 3:
+        frame_authentication_phase_3.lower()
     else:
         pass
 
@@ -755,6 +894,8 @@ def button_authenticate_again_callback(phase):
         button_sign_in_callback()
     elif phase == 2:
         frame_authentication_phase_2_callback()
+    elif phase == 3:
+        frame_authentication_phase_3_callback()
     else:
         pass
 
@@ -1270,8 +1411,15 @@ def button_confirm_phase_3_callback(label_register_user, button_repeat, button_c
     if json.add_user_to_json_file(users, new_user_nickname,
                                   user_values,
                                   const.USERS_FILENAME):
+
+        if not os.path.isdir(const.SPEAKER_VOICEPRINTS_DIR):
+            os.mkdir(const.SPEAKER_VOICEPRINTS_DIR)
+
         output_dir = const.SPEAKER_VOICEPRINTS_DIR + new_user_nickname + "/"
-        os.mkdir(output_dir)
+
+        if not os.path.isdir(output_dir):
+            os.mkdir(output_dir)
+
         v_recognizer.create_voiceprints(classifier, new_user_dir, output_dir, const.NUMBER_OF_VOICEPRINTS + 2)
 
         if conn.check_internet_connection():
@@ -1411,6 +1559,11 @@ frame_authentication_phase_2 = create_frame()
 frame_authentication_phase_2.lower()
 authentication_frames.append(frame_authentication_phase_2)
 
+# create AUTHENTICATION PHASE 3 FRAME
+frame_authentication_phase_3 = create_frame()
+frame_authentication_phase_3.lower()
+authentication_frames.append(frame_authentication_phase_3)
+
 # create AUTHENTICATION SUCCESS FRAME
 frame_authentication_success = create_frame()
 frame_authentication_success.lower()
@@ -1496,7 +1649,7 @@ classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-vox
 if conn.check_internet_connection():
     records = db.get_all_users_from_db()
     db_users = json.load_json_file(const.TMP_USERS_FILENAME)
-    if users != db_users:
+    if users != db_users or list(users.keys()) != list(manager.get_subdirectory_names(const.SPEAKER_VOICEPRINTS_DIR)):
         db.sync_with_local()
     if os.path.isfile(const.TMP_USERS_FILENAME):
         os.remove(const.TMP_USERS_FILENAME)
