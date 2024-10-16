@@ -1,0 +1,29 @@
+### Ensure that the server starts every time the operating system is started ###
+sudo systemctl start mariadb.service
+
+### If this command is still present in the mariadb-service package, then configure the server using it ###
+sudo mysql_secure_installation
+
+### Start MariaDB command prompt ###
+sudo mariadb
+
+### Create database ###
+CREATE DATABASE IF NOT EXISTS voice_authentication_system;
+
+### Change current location ###
+USE voice_authentication_system;
+
+### Create table inside the database ###
+CREATE TABLE IF NOT EXISTS users (
+user_id INT AUTO_INCREMENT PRIMARY KEY,
+login_name VARCHAR(50) NOT NULL,
+unique_phrase_hash VARCHAR(100) NOT NULL,
+unique_phrase_salt VARCHAR(100) NOT NULL,
+registration_w_internet BOOLEAN NOT NULL,
+voiceprint_1 BLOB, voiceprint_2 BLOB, voiceprint_3 BLOB, voiceprint_4 BLOB,
+voiceprint_5 BLOB, voiceprint_6 BLOB, voiceprint_7 BLOB, voiceprint_8 BLOB,
+voiceprint_9 BLOB, voiceprint_10 BLOB, voiceprint_11 BLOB, voiceprint_12 BLOB
+);
+
+### Grant privileges for user root ###
+GRANT ALL PRIVILEGES ON *.* TO 'root'@localhost IDENTIFIED BY 'root';
