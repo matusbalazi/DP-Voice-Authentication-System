@@ -1,0 +1,19 @@
+### Start PulseAudio ###
+pulseaudio --start
+
+### Start PavuControl ###
+pavucontrol
+
+### Information about connected microphones ###
+arecord -l
+(notice the card number which is displayed for your microphone)
+
+### Open alsa.conf file in text editor ###
+sudo nano /usr/share/alsa/alsa.conf
+(find "defaults.pcm.card #number#" and replace the #number# with the card number of your microphone)
+
+### Test microphone if it is recording correctly ###
+arecord --format=S16_LE --duration=5 --rate=16000 --file-type=wav out.wav
+
+### Check microphone settings ###
+go to Settings -> Sound -> check if set microphone is the correct microphone

@@ -1,0 +1,16 @@
+### Create system folders for the new fonts ###
+sudo mkdir /usr/share/fonts/truetype/Raleway
+sudo mkdir /usr/share/fonts/truetype/RedHatDisplay
+
+### Go to Raleway font folder which was downloaded from DP-Voice-Authentication-System git repository ###
+sudo cp * /usr/share/fonts/truetype/Raleway
+
+### Go to RedHatDisplay font folder which was downloaded from DP-Voice-Authentication-System git repository ###
+sudo cp * /usr/share/fonts/truetype/RedHatDisplay
+
+### Update the font cache ###
+sudo fc-cache -f -v
+
+### Verify installed fonts ###
+fc-list | grep "Raleway"
+fc-list | grep "Red Hat Display"
