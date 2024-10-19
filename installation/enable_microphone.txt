@@ -1,7 +1,7 @@
 ### Start PulseAudio ###
 pulseaudio --start
 
-### Start PavuControl ###
+### Start PavuControl (close after start) ###
 pavucontrol
 
 ### Information about connected microphones ###
