@@ -2281,7 +2281,7 @@ def main():
     global simple_mode
 
     ap = argparse.ArgumentParser()
-    ap.add_argument("-s", "--simple", required=False,
+    ap.add_argument("-m", "--mode", required=False,
                     help="put True if launch simple mode")
     args = vars(ap.parse_args())
 
