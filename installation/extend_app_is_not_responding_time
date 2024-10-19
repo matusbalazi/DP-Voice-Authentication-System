@@ -1,2 +1,0 @@
-### Extend application is not responding time to one minute ###
-gsettings set org.gnome.mutter check-alive-timeout 60000
