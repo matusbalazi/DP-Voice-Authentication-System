@@ -59,6 +59,11 @@ Content:
     <pre><code>sudo chmod +x ./install_requirements</code></pre>
     <li>run installation:</li>
     <pre><code>./install_requirements</code></pre>
+    <li>additionally install speechbrain again:</li>
+    <pre><code>sudo pip install speechbrain --break-system-packages</code></pre>
+    <p align="justify">
+        <i>only speechbrain package must be installed this way to be accessible by the application</i>
+    </p>
 </ol>
 <p align="justify">
     <i><b>NOTE:</b></i>&nbsp; after installation if there is an error with cryptography package just ignore that error
@@ -115,7 +120,7 @@ Content:
         <i>find <b>defaults.pcm.card #number#</b> and replace the <b>#number#</b> with the card number of your connected microphone</i>
     </p>
     <li>test microphone if it is recording correctly:</li>
-    <pre><code>arecord --format=S16_LE --duration=5 --rate=16000 --file-type=wav out.wav</code></pre>
+    <pre><code>sudo arecord --format=S16_LE --duration=5 --rate=16000 --file-type=wav out.wav</code></pre>
     <li>check microphone settings:</li>
     <p align="justify">
         <i>go to Settings -> Sound -> check if set microphone is the correct microphone</i>
