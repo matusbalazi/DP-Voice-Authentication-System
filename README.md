@@ -171,9 +171,9 @@ To run the new version of application:
     <li>start application in full mode</li>
     <pre><code>sudo python3 gui_new.py</code></pre>
     <li>start application in simple mode</li>
-    <pre><code>sudo python3 gui_new.py -s</code></pre>
+    <pre><code>sudo python3 gui_new.py -m simple</code></pre>
     <p align="justify">
         <i>or</i>
     </p>
-    <pre><code>sudo python3 gui_new.py --simple</code></pre>
+    <pre><code>sudo python3 gui_new.py --mode simple</code></pre>
 </ol>
