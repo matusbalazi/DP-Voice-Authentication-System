@@ -11,7 +11,16 @@ BUZZER_PIN = 27
 RECORDED_AUDIO_FILENAME = "recorded_audio.wav"
 USERS_FILENAME = "users.json"
 TMP_USERS_FILENAME = "tmp_users.json"
-LOGS_FILENAME = "app_logs.txt"
+CONNECTION_LOGS_FILENAME = "logs/VAS_connection_logs.txt"
+DATABASE_LOGS_FILENAME = "logs/VAS_database_logs.txt"
+ENCODING_LOGS_FILENAME = "logs/VAS_encoding_logs.txt"
+FILE_MANAGER_LOGS_FILENAME = "logs/VAS_file_manager_logs.txt"
+MAIN_APP_LOGS_FILENAME = "logs/VAS_main_app_logs.txt"
+SPEECH_RECOGNIZER_LOGS_FILENAME = "logs/VAS_speech_recognizer_logs.txt"
+USERS_LOGS_FILENAME = "logs/VAS_users_logs.txt"
+VOICE_RECOGNIZER_LOGS_FILENAME = "logs/VAS_voice_recognizer_logs.txt"
+VOICE_RECORDER_LOGS_FILENAME = "logs/VAS_voice_recorder_logs.txt"
+
 SPEAKER_RECORDINGS_DIR = "speech_and_voice/speaker_recognition/speaker_recordings/"
 SPEAKER_VOICEPRINTS_DIR = "speech_and_voice/speaker_recognition/speaker_voiceprints/"
 

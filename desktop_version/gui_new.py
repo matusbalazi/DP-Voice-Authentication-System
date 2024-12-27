@@ -66,6 +66,8 @@ index_manage_users = const.INDEX_MANAGE_USERS
 # GPIO.setup(relayPin, GPIO.OUT)
 # GPIO.setup(buzzerPin, GPIO.OUT)
 
+logger = log.Logger(const.MAIN_APP_LOGS_FILENAME)
+
 
 def clear_global_variables():
     global simple_mode, skip_auth_info, is_admin_logged, registration_with_internet, currently_logged_user, user_to_delete, \
@@ -362,11 +364,11 @@ class AdminFrame(Frame):
         if is_password_correct:
             is_admin_logged = True
             msg_success = "Entered password was correct."
-            log.log_info(msg_success)
+            logger.log_info(msg_success)
             self.switch_frames(index_auth_success_frame)
         else:
             msg_warning = "Entered password was incorrect."
-            log.log_warning(msg_warning)
+            logger.log_warning(msg_warning)
             self.entry_password.setStyleSheet(
                 f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px; "
                 f"border: {border_width_5}px solid #f47e21;")
@@ -433,11 +435,11 @@ class AboutFrame(Frame):
 
         if is_password_correct:
             msg_success = "Entered password was correct."
-            log.log_info(msg_success)
+            logger.log_info(msg_success)
             self.switch_frames(index_second_phase_success_frame)
         else:
             msg_warning = "Entered password was incorrect."
-            log.log_warning(msg_warning)
+            logger.log_warning(msg_warning)
             self.entry_password.setStyleSheet(
                 f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px; "
                 f"border: {border_width_5}px solid #f47e21;")
@@ -735,7 +737,7 @@ class AuthFirstPhaseFrame(Frame):
             speaker_exists = s_recognizer.verify_speaker_nickname(users.keys(), speaker_nickname)
 
             msg_info = f"Recognized speaker nickname: {speaker_nickname}"
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
 
             self.label_authenticate_user.setText(Translations.get_translation("recording_ended"))
 
@@ -755,22 +757,22 @@ class AuthFirstPhaseFrame(Frame):
 
                 if login_success:
                     msg_success = f"User {speaker_nickname} signed in successfully."
-                    log.log_info(msg_success)
+                    logger.log_info(msg_success)
                     if simple_mode is False:
                         self.switch_frames(index_first_phase_success_frame)
                     else:
                         self.switch_frames(index_second_phase_success_frame)
                 else:
                     msg_warning = f"User {speaker_nickname} failed to sign in. Voice characteristics don't match."
-                    log.log_warning(msg_warning)
+                    logger.log_warning(msg_warning)
                     self.switch_frames(index_auth_unsuccess_frame)
             else:
                 msg_warning = f"Speaker {speaker_nickname} does not exist."
-                log.log_warning(msg_warning)
+                logger.log_warning(msg_warning)
                 self.switch_frames(index_auth_unsuccess_frame)
         else:
             msg_error = f"Recording was not created. Please check your microphone settings."
-            log.log_warning(msg_error)
+            logger.log_warning(msg_error)
             self.switch_frames(index_auth_unsuccess_frame)
 
 
@@ -847,7 +849,7 @@ class AuthSecondPhaseFrame(Frame):
             spoken_verification_word_matches = s_recognizer.verify_verification_word(spoken_verification_word, self.random_word)
 
             msg_info = f"Recognized verification word: {spoken_verification_word}"
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
 
             self.label_authenticate_user.setText(Translations.get_translation("recording_ended"))
             self.label_random_word.setHidden(True)
@@ -864,19 +866,19 @@ class AuthSecondPhaseFrame(Frame):
 
                 if verification_success:
                     msg_success = f"Verification word {self.random_word} matched with spoken word {spoken_verification_word}. Speaker is registered user."
-                    log.log_info(msg_success)
+                    logger.log_info(msg_success)
                     self.switch_frames(index_second_phase_success_frame)
                 else:
                     msg_warning = f"Speaker's voice characteristics don't match."
-                    log.log_warning(msg_warning)
+                    logger.log_warning(msg_warning)
                     self.switch_frames(index_auth_unsuccess_frame)
             else:
                 msg_warning = f"Verification word {self.random_word} didn't match with spoken word {spoken_verification_word}."
-                log.log_warning(msg_warning)
+                logger.log_warning(msg_warning)
                 self.switch_frames(index_auth_unsuccess_frame)
         else:
             msg_error = f"Recording was not created. Please check your microphone settings."
-            log.log_warning(msg_error)
+            logger.log_warning(msg_error)
             self.switch_frames(index_auth_unsuccess_frame)
 
 
@@ -978,11 +980,11 @@ class AuthThirdPhaseFrame(Frame):
                     partial_authentication = partial_authentication + score
 
                     msg_success = f"Final result of partial authentication is {partial_authentication} %."
-                    log.log_info(msg_success)
+                    logger.log_info(msg_success)
 
                     if authentication_success:
                         msg_success = f"Authentication with unique phrase was successful. User {currently_logged_user} opened the door."
-                        log.log_info(msg_success)
+                        logger.log_info(msg_success)
 
                         if partial_authentication >= const.PARTIAL_AUTHORIZATION_THRESHOLD:
                             if os.path.isfile(const.RECORDED_AUDIO_FILENAME):
@@ -990,24 +992,24 @@ class AuthThirdPhaseFrame(Frame):
                             self.switch_frames(index_auth_success_frame)
                         else:
                             msg_warning = f"Final result of partial authentication is under the threshold."
-                            log.log_warning(msg_warning)
+                            logger.log_warning(msg_warning)
                             partial_authentication = partial_authentication - score
                             self.switch_frames(index_auth_unsuccess_frame)
                     else:
                         msg_warning = f"Speaker's voice characteristics don't match. Door can't be opened."
-                        log.log_warning(msg_warning)
+                        logger.log_warning(msg_warning)
                         self.switch_frames(index_auth_unsuccess_frame)
                 else:
                     msg_warning = f"Speaker's voice characteristics don't correspond with his unique phrase."
-                    log.log_warning(msg_warning)
+                    logger.log_warning(msg_warning)
                     self.switch_frames(index_auth_unsuccess_frame)
             else:
                 msg_warning = f"Authentication with unique phrase wasn't successful. User {currently_logged_user} couldn't open the door."
-                log.log_warning(msg_warning)
+                logger.log_warning(msg_warning)
                 self.switch_frames(index_auth_unsuccess_frame)
         else:
             msg_error = f"Recording was not created. Please check your microphone settings."
-            log.log_warning(msg_error)
+            logger.log_warning(msg_error)
             self.switch_frames(index_auth_unsuccess_frame)
 
 
@@ -1068,11 +1070,11 @@ class NotInternetConnFrame(Frame):
 
         if is_password_correct:
             msg_success = "Entered password was correct."
-            log.log_info(msg_success)
+            logger.log_info(msg_success)
             self.switch_frames(index_second_phase_success_frame)
         else:
             msg_warning = "Entered password was incorrect."
-            log.log_warning(msg_warning)
+            logger.log_warning(msg_warning)
             self.entry_password.setStyleSheet(
                 f"padding: {btn_padding_t_b_30}px {btn_padding_l_r_80}px; margin: {btn_margin_20}px; "
                 f"border: {border_width_5}px solid #f47e21;")
@@ -1133,7 +1135,7 @@ class AuthUnsuccessFrame(Frame):
         remaining_attempts -= 1
 
         msg_warning = f"Error during authentication process. Remaining attempts: {remaining_attempts}"
-        log.log_warning(msg_warning)
+        logger.log_warning(msg_warning)
 
         if remaining_attempts == 0:
             remaining_attempts = 3
@@ -1296,7 +1298,7 @@ class RegFirstPhaseCompleted(Frame):
 
         if voiceprints_counter == 0:
             msg_info = f"New user nickname {new_user_nickname} registrated successfully."
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
 
             # VOICE RECOGNITION
             if not os.path.isdir(const.SPEAKER_RECORDINGS_DIR):
@@ -1491,7 +1493,7 @@ class RegFirstPhaseFrame(Frame):
             new_user_nickname = new_user_nickname.lower()
 
             msg_info = f"Recognized new user nickname: {new_user_nickname}"
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
 
             self.label_register_user.setText(Translations.get_translation("recording_ended"))
 
@@ -1532,7 +1534,7 @@ class RegFirstPhaseFrame(Frame):
                 self.label_register_user.setAlignment(Qt.AlignmentFlag.AlignCenter)
         else:
             msg_error = f"Recording was not created. Please check your microphone settings."
-            log.log_warning(msg_error)
+            logger.log_warning(msg_error)
             self.switch_frames(index_register_frame)
 
     def repeat_registration(self):
@@ -1592,7 +1594,7 @@ class RegSecondPhaseFrame(Frame):
 
         if recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME, 6):
             msg_info = f"Voiceprint recording no.{str(voiceprints_counter)} recorded successfully."
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
 
             # VOICE RECOGNITION
             new_user_dir = const.SPEAKER_RECORDINGS_DIR + new_user_nickname + "/"
@@ -1606,12 +1608,12 @@ class RegSecondPhaseFrame(Frame):
             await asyncio.sleep(2)
 
             msg_info = f"Voiceprint {voiceprints_counter} recorded successfully."
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
 
             self.switch_frames(index_reg_first_phase_completed_frame)
         else:
             msg_error = f"Recording was not created. Please check your microphone settings."
-            log.log_warning(msg_error)
+            logger.log_warning(msg_error)
             self.switch_frames(index_reg_first_phase_completed_frame)
 
 
@@ -1679,7 +1681,7 @@ class RegThirdPhaseFrame(Frame):
             new_user_unique_phrase = new_user_unique_phrase.lower()
 
             msg_info = f"Recognized new user unique phrase: {string_hasher.encode_string(new_user_unique_phrase)}"
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
 
             self.label_register_unique_phrase.setText(Translations.get_translation("recording_ended"))
 
@@ -1708,7 +1710,7 @@ class RegThirdPhaseFrame(Frame):
             self.grid_layout.addWidget(button_confirm, 4, 2, Qt.AlignmentFlag.AlignRight)
         else:
             msg_error = f"Recording was not created. Please check your microphone settings."
-            log.log_warning(msg_error)
+            logger.log_warning(msg_error)
             self.switch_frames(index_reg_second_phase_completed_frame)
 
     def repeat_registration(self):
@@ -1824,7 +1826,7 @@ class RegSuccessFrame(Frame):
         super().create_items()
 
         msg_info = f"New unique phrase {string_hasher.encode_string(new_user_unique_phrase)} registered successfully."
-        log.log_info(msg_info)
+        logger.log_info(msg_info)
 
         new_user_dir = const.SPEAKER_RECORDINGS_DIR + new_user_nickname + "/"
 
@@ -1871,13 +1873,13 @@ class RegSuccessFrame(Frame):
                 db.insert_user_to_db(new_user_nickname)
 
             msg_info = f"New user {new_user_nickname} registered successfully."
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
             manager.remove_dir_with_files(new_user_dir)
             if os.path.isfile(const.RECORDED_AUDIO_FILENAME):
                 os.remove(const.RECORDED_AUDIO_FILENAME)
         else:
             msg_warning = f"New user {new_user_nickname} couldn't be registered."
-            log.log_warning(msg_warning)
+            logger.log_warning(msg_warning)
 
         users = json.load_json_file(const.USERS_FILENAME)
 
@@ -1954,13 +1956,13 @@ class ManageUsersFrame(Frame):
                     manager.remove_dir_with_files(const.SPEAKER_RECORDINGS_DIR + user_to_delete + "/")
                     manager.remove_dir_with_files(const.SPEAKER_VOICEPRINTS_DIR + user_to_delete + "/")
                     msg_info = f"User {user_to_delete} deleted successfully from the app database."
-                    log.log_info(msg_info)
+                    logger.log_info(msg_info)
                 else:
                     msg_warning = f"User {user_to_delete} not found in registered users."
-                    log.log_warning(msg_warning)
+                    logger.log_warning(msg_warning)
         else:
             msg_warning = f"User {user_to_delete} can't be deleted. Internet connection not available."
-            log.log_warning(msg_warning)
+            logger.log_warning(msg_warning)
 
         users = json.load_json_file(const.USERS_FILENAME)
         user_to_delete = ""

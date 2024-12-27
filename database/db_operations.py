@@ -1,8 +1,10 @@
 import os
 from database import connection_controller as conn
 from database import json_file_builder as json
-from general import log_file_builder as log
 from general import constants as const
+from general import log_file_builder as log
+
+logger = log.Logger(const.DATABASE_LOGS_FILENAME)
 
 
 def find_user(users, login_name):
@@ -49,12 +51,11 @@ def sync_with_local():
                         with open(voiceprint_path, "wb") as file:
                             file.write(voiceprint_data)
                         msg_info = f"Voiceprint {i} saved successfully to {voiceprint_path}."
-                        log.log_info(msg_info)
-
+                        logger.log_info(msg_info)
 
     except Exception as e:
         msg_error = f"Error during sync with database: {e}"
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
     finally:
         cursor.close()
         db_connection.close()
@@ -99,16 +100,16 @@ def insert_user_to_db(login_name):
             cursor.execute(sql_query, data)
             db_connection.commit()
             msg_info = f"User {login_name} inserted successfully into database."
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
         except Exception as e:
             msg_error = f"Error inserting user {login_name} into database: {e}"
-            log.log_error(msg_error)
+            logger.log_error(msg_error)
         finally:
             cursor.close()
             db_connection.close()
     else:
         msg_warning = f"User {login_name} can't be inserted to database."
-        log.log_warning(msg_warning)
+        logger.log_warning(msg_warning)
 
 
 def delete_user_from_db(login_name):
@@ -125,13 +126,13 @@ def delete_user_from_db(login_name):
 
         if deleted_rows > 0:
             msg_info = f"User {login_name} successfully deleted from database."
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
         else:
             msg_info = f"No records found for user {login_name} in the database."
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
     except Exception as e:
         msg_error = f"Error deleting user {login_name} from database: {e}"
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
     finally:
         cursor.close()
         db_connection.close()
@@ -153,20 +154,20 @@ def select_user_from_db(login_name):
 
             if records:
                 msg_info = f"User {login_name} successfully found in the database."
-                log.log_info(msg_info)
+                logger.log_info(msg_info)
             else:
                 msg_warning = f"No records were found for the user {login_name} in the database."
-                log.log_warning(msg_warning)
+                logger.log_warning(msg_warning)
         except Exception as e:
             msg_error = f"Error selecting user {login_name} from database: {e}"
-            log.log_error(msg_error)
+            logger.log_error(msg_error)
         finally:
             cursor.close()
             db_connection.close()
             return records
     else:
         msg_warning = f"User {login_name} can't be selected from database."
-        log.log_warning(msg_warning)
+        logger.log_warning(msg_warning)
 
 
 def get_all_users_from_db():
@@ -188,17 +189,11 @@ def get_all_users_from_db():
                                            const.TMP_USERS_FILENAME)
         else:
             msg_warning = f"No records were found in the database."
-            log.log_warning(msg_warning)
+            logger.log_warning(msg_warning)
     except Exception as e:
         msg_error = f"Error selecting all records from database: {e}"
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
     finally:
         cursor.close()
         db_connection.close()
         return records
-
-# insert_user_to_db("jozef")
-# delete_user_from_db("jozef")
-# print(select_user_from_db("jano"))
-# sync_with_local()
-# print(get_all_users_from_db())

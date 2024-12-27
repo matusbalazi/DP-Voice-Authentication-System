@@ -5,7 +5,10 @@ import pandas as pd
 import numpy as np
 import torchaudio
 import torchaudio.transforms
+from general import constants as const
 from general import log_file_builder as log
+
+logger = log.Logger(const.VOICE_RECOGNIZER_LOGS_FILENAME)
 
 
 def open_and_resample_audio_signal(filename, resample_rate=16000):
@@ -13,13 +16,13 @@ def open_and_resample_audio_signal(filename, resample_rate=16000):
 
     if not os.path.isfile(filename):
         msg_error = f"Error: File {filename} does not exist."
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
         return None
 
     _, ext = os.path.splitext(filename)
     if ext.lower() not in allowed_ext:
         msg_error = f"Error: Unsupported file format {ext.lower()} for resampling audio signal."
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
         return None
 
     try:
@@ -29,14 +32,14 @@ def open_and_resample_audio_signal(filename, resample_rate=16000):
         return resampled_signal
     except Exception as e:
         msg_error = f"Error opening/resampling audio: {e}"
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
         return None
 
 
 def create_voiceprints(classifier, input_dir, output_dir, num_recordings=10):
     if not os.path.isdir(input_dir):
         msg_error = f"Error: Input directory {input_dir} not found."
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
         return
 
     file_ext = "*.wav"
@@ -46,7 +49,7 @@ def create_voiceprints(classifier, input_dir, output_dir, num_recordings=10):
 
         if speaker_audio_signal is not None:
             msg_info = f"Creating voiceprint from audio file {filename}."
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
             voiceprint = classifier.encode_batch(speaker_audio_signal)
             output_voiceprint_file = os.path.join(output_dir, os.path.splitext(os.path.basename(filename))[0] + ".pt")
             try:
@@ -54,7 +57,7 @@ def create_voiceprints(classifier, input_dir, output_dir, num_recordings=10):
                 count += 1
             except Exception as e:
                 msg_error = f"Error saving voiceprint for {filename} to {output_voiceprint_file}: {e}"
-                log.log_error(msg_error)
+                logger.log_error(msg_error)
 
         if count == num_recordings:
             break
@@ -65,7 +68,7 @@ def verify_all_speakers(classifier, input_dir, speaker_audio_path, threshold=0.6
 
     if not os.path.isdir(input_dir):
         msg_error = f"Error: Input directory {input_dir} not found."
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
         return speaker_nickname
 
     device = torch.device("cpu")
@@ -91,13 +94,13 @@ def verify_all_speakers(classifier, input_dir, speaker_audio_path, threshold=0.6
 
         if (df["score"] == 0).all():
             msg_warning = "Speaker is not an eligible person."
-            log.log_warning(msg_warning)
+            logger.log_warning(msg_warning)
             speaker_nickname = ""
         else:
             target = df.loc[df.score == df.score.max()]
             target = target["speaker"].values[0]
             msg_info = f"This is authorized speaker {target}."
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
             speaker_nickname = target
 
         return speaker_nickname
@@ -108,7 +111,7 @@ def verify_speaker(classifier, input_dir, speaker_audio_path, threshold=0.6) -> 
 
     if not os.path.isdir(input_dir):
         msg_error = f"Error: Input directory {input_dir} not found."
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
         return success
 
     device = torch.device("cpu")
@@ -129,11 +132,11 @@ def verify_speaker(classifier, input_dir, speaker_audio_path, threshold=0.6) -> 
 
         if score == 0:
             msg_warning = "Speaker is not an eligible person."
-            log.log_warning(msg_warning)
+            logger.log_warning(msg_warning)
         else:
             success = True
             msg_info = f"This is an authorized speaker with a score of {score}."
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
 
     return success
 
@@ -145,7 +148,7 @@ def verify_speaker_concept(classifier, input_dir, speaker_audio_path, threshold=
 
     if not os.path.isdir(input_dir):
         msg_error = f"Error: Input directory {input_dir} not found."
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
         return success, partial_authorization
 
     device = torch.device("cpu")
@@ -167,7 +170,7 @@ def verify_speaker_concept(classifier, input_dir, speaker_audio_path, threshold=
 
         if score == 0:
             msg_warning = "Speaker is not an eligible person."
-            log.log_warning(msg_warning)
+            logger.log_warning(msg_warning)
         else:
             success = True
 
@@ -177,23 +180,7 @@ def verify_speaker_concept(classifier, input_dir, speaker_audio_path, threshold=
                 partial_authorization = max(results) * auth_weight
 
             msg_info = f"This is an authorized speaker with a score of {score}."
-            log.log_info(msg_info)
+            logger.log_info(msg_info)
 
     return success, partial_authorization
 
-# input_dir = "speaker_recognition/speaker_recordings/"
-# output_dir = "speaker_recognition/speaker_voiceprints/"
-
-# for i in range(3):
-#    print("Recording " + str(i+1))
-#    file_path = input_dir + "Matus/Matus" "_" + str(i+1) + ".wav"
-#    vr.record_and_save_audio(file_path)
-
-# classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb", savedir=r"pretrained_models/spkrec-ecapa-voxceleb", run_opts={"device":"cpu"})
-# create_voiceprints(classifier, input_dir, output_dir)
-
-# print("Recording")
-# audio_file = vr.record_and_save_audio("Matus.wav")
-
-# result = verify_speaker(classifier, output_dir, "Matus.wav")
-# print(result)

@@ -1,6 +1,9 @@
 import hashlib
 import os
+from general import constants as const
 from general import log_file_builder as log
+
+logger = log.Logger(const.ENCODING_LOGS_FILENAME)
 
 
 def encode_string(string, salt=None):
@@ -14,7 +17,7 @@ def encode_string(string, salt=None):
     sha256.update(string.encode('utf-8'))
     encoded_string = sha256.hexdigest()
     msg_info = f"String encoded successfully. Encoded string: {encoded_string}. Salt: {salt.hex()}"
-    log.log_info(msg_info)
+    logger.log_info(msg_info)
     return encoded_string, salt.hex()
 
 
@@ -25,9 +28,9 @@ def check_string(input_string, encoded_string, salt) -> bool:
 
     if sha256.hexdigest() == encoded_string:
         msg_info = "Compared strings are equal."
-        log.log_info(msg_info)
+        logger.log_info(msg_info)
         return True
     else:
         msg_warning = "Compared strings aren't equal."
-        log.log_info(msg_warning)
+        logger.log_info(msg_warning)
         return False

@@ -37,6 +37,8 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(relayPin, GPIO.OUT)
 GPIO.setup(buzzerPin, GPIO.OUT)
 
+logger = log.Logger(const.MAIN_APP_LOGS_FILENAME)
+
 ctk.set_ctk_parent_class(tk.Tk)
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("green")
@@ -296,10 +298,10 @@ def button_password_callback(value, phase):
             frame_authentication_success_callback()
 
         msg_success = "Entered password was correct."
-        log.log_info(msg_success)
+        logger.log_info(msg_success)
     else:
         msg_warning = "Entered password was incorrect."
-        log.log_warning(msg_warning)
+        logger.log_warning(msg_warning)
 
 
 # create AUTHENTICATION PHASE 1 FRAME widgets -> after click on SIGN IN button
@@ -440,7 +442,7 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
         speaker_exists = s_recognizer.verify_speaker_nickname(users.keys(), speaker_nickname)
 
         msg_info = f"Recognized speaker nickname: {speaker_nickname}"
-        log.log_info(msg_info)
+        logger.log_info(msg_info)
 
         label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
         window.update()
@@ -462,15 +464,15 @@ def button_authenticate_phase_1_callback(label_first_phase, label_authenticate_u
 
             if login_success:
                 msg_success = f"User {speaker_nickname} signed in successfully."
-                log.log_info(msg_success)
+                logger.log_info(msg_success)
                 frame_authentication_phase_2_callback()
             else:
                 msg_warning = f"User {speaker_nickname} failed to sign in. Voice characteristics don't match."
-                log.log_warning(msg_warning)
+                logger.log_warning(msg_warning)
                 frame_authentication_unsuccess_callback(1)
         else:
             msg_warning = f"Speaker {speaker_nickname} does not exist. "
-            log.log_warning(msg_warning)
+            logger.log_warning(msg_warning)
             frame_authentication_unsuccess_callback(1)
 
 
@@ -581,7 +583,7 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
         spoken_verification_word_matches = s_recognizer.verify_verification_word(spoken_verification_word, random_word)
 
         msg_info = f"Recognized verification word: {spoken_verification_word}"
-        log.log_info(msg_info)
+        logger.log_info(msg_info)
 
         label_authenticate_user.configure(text=Translations.get_translation('recording_ended'))
         label_random_word.destroy()
@@ -599,15 +601,15 @@ def button_authenticate_phase_2_callback(label_second_phase, label_authenticate_
 
             if verification_success:
                 msg_success = f"Verification word {random_word} matched with spoken word {spoken_verification_word}. Speaker is registered user."
-                log.log_info(msg_success)
+                logger.log_info(msg_success)
                 frame_authentication_phase_3_callback()
             else:
                 msg_warning = f"Speaker's voice characteristics don't match."
-                log.log_warning(msg_warning)
+                logger.log_warning(msg_warning)
                 frame_authentication_unsuccess_callback(2)
         else:
             msg_warning = f"Verification word {random_word} didn't match with spoken word {spoken_verification_word}."
-            log.log_warning(msg_warning)
+            logger.log_warning(msg_warning)
             frame_authentication_unsuccess_callback(2)
 
 
@@ -735,11 +737,11 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
             partial_authentication = partial_authentication + score
 
             msg_success = f"Final result of partial authentication is {partial_authentication} %."
-            log.log_info(msg_success)
+            logger.log_info(msg_success)
 
             if authentication_success:
                 msg_success = f"Authentication with unique phrase was successful. User {currently_logged_user} opened the door."
-                log.log_info(msg_success)
+                logger.log_info(msg_success)
 
                 if partial_authentication >= const.PARTIAL_AUTHORIZATION_THRESHOLD:
                     if os.path.isfile(const.RECORDED_AUDIO_FILENAME):
@@ -747,20 +749,20 @@ def button_authenticate_phase_3_callback(label_third_phase, label_authenticate_u
                     frame_authentication_success_callback()
                 else:
                     msg_warning = f"Final result of partial authentication is under the threshold."
-                    log.log_warning(msg_warning)
+                    logger.log_warning(msg_warning)
                     partial_authentication = partial_authentication - score
                     frame_authentication_unsuccess_callback(3)
             else:
                 msg_warning = f"Speaker's voice characteristics don't match. Door can't be opened."
-                log.log_warning(msg_warning)
+                logger.log_warning(msg_warning)
                 frame_authentication_unsuccess_callback(3)
         else:
             msg_warning = f"Speaker's voice characteristics don't correspond with his unique phrase."
-            log.log_warning(msg_warning)
+            logger.log_warning(msg_warning)
             frame_authentication_unsuccess_callback(3)
     else:
         msg_warning = f"Authentication with unique phrase wasn't successful. User {currently_logged_user} couldn't open the door."
-        log.log_warning(msg_warning)
+        logger.log_warning(msg_warning)
         frame_authentication_unsuccess_callback(3)
 
 
@@ -841,7 +843,7 @@ def frame_authentication_unsuccess_callback(phase):
     remaining_attempts -= 1
 
     msg_warning = f"Error during authentication process. Remaining attempts: {remaining_attempts}"
-    log.log_warning(msg_warning)
+    logger.log_warning(msg_warning)
 
     if phase == 1:
         frame_authentication_phase_1.lower()
@@ -1003,7 +1005,7 @@ def button_registrate_phase_1_callback(label_first_phase, label_register_user, b
         new_user_nickname = new_user_nickname.lower()
 
         msg_info = f"Recognized new user nickname: {new_user_nickname}"
-        log.log_info(msg_info)
+        logger.log_info(msg_info)
 
         label_register_user.configure(text=Translations.get_translation('recording_ended'))
         label_short_info.destroy()
@@ -1126,7 +1128,7 @@ def button_confirm_phase_1_callback():
 
     if voiceprints_counter == 0:
         msg_info = f"New user nickname {new_user_nickname} registrated successfully."
-        log.log_info(msg_info)
+        logger.log_info(msg_info)
 
         # VOICE RECOGNITION
         if not os.path.isdir(const.SPEAKER_RECORDINGS_DIR):
@@ -1227,7 +1229,7 @@ def button_registrate_phase_2_callback(label_second_phase, label_register_user, 
 
     recorder.record_and_save_audio(const.RECORDED_AUDIO_FILENAME, 6)
     msg_info = f"Voiceprint recording no.{str(voiceprints_counter)} recorded successfully."
-    log.log_info(msg_info)
+    logger.log_info(msg_info)
 
     # VOICE RECOGNITION
     new_user_dir = const.SPEAKER_RECORDINGS_DIR + new_user_nickname + "/"
@@ -1244,7 +1246,7 @@ def button_registrate_phase_2_callback(label_second_phase, label_register_user, 
     window.update()
 
     msg_info = f"Voiceprint {voiceprints_counter} recorded successfully."
-    log.log_info(msg_info)
+    logger.log_info(msg_info)
 
     button_confirm_phase_1_callback()
 
@@ -1344,7 +1346,7 @@ def button_registrate_phase_3_callback(label_third_phase, label_register_user, b
         new_user_unique_phrase = new_user_unique_phrase.lower()
 
         msg_info = f"Recognized new user unique phrase: {string_hasher.encode_string(new_user_unique_phrase)}"
-        log.log_info(msg_info)
+        logger.log_info(msg_info)
 
         label_register_user.configure(text=Translations.get_translation('recording_ended'))
         label_short_info.destroy()
@@ -1371,7 +1373,7 @@ def button_repeat_phase_3_callback():
 def button_confirm_phase_3_callback(label_register_user, button_repeat, button_confirm):
     global new_user_nickname, new_user_unique_phrase, users, recordings_counter, is_internet_connection, registration_with_internet
     msg_info = f"New unique phrase {string_hasher.encode_string(new_user_unique_phrase)} registered successfully."
-    log.log_info(msg_info)
+    logger.log_info(msg_info)
 
     new_user_dir = const.SPEAKER_RECORDINGS_DIR + new_user_nickname + "/"
 
@@ -1426,13 +1428,13 @@ def button_confirm_phase_3_callback(label_register_user, button_repeat, button_c
             db.insert_user_to_db(new_user_nickname)
 
         msg_info = f"New user {new_user_nickname} registered successfully."
-        log.log_info(msg_info)
+        logger.log_info(msg_info)
         manager.remove_dir_with_files(new_user_dir)
         if os.path.isfile(const.RECORDED_AUDIO_FILENAME):
             os.remove(const.RECORDED_AUDIO_FILENAME)
     else:
         msg_warning = f"New user {new_user_nickname} couldn't be registered."
-        log.log_warning(msg_warning)
+        logger.log_warning(msg_warning)
 
     users = json.load_json_file(const.USERS_FILENAME)
     new_user_nickname = ""
@@ -1517,13 +1519,13 @@ def button_delete_user_callback():
                 manager.remove_dir_with_files(const.SPEAKER_RECORDINGS_DIR + user_to_delete + "/")
                 manager.remove_dir_with_files(const.SPEAKER_VOICEPRINTS_DIR + user_to_delete + "/")
                 msg_info = f"User {user_to_delete} deleted successfully from the app database."
-                log.log_info(msg_info)
+                logger.log_info(msg_info)
             else:
                 msg_warning = f"User {user_to_delete} not found in registered users."
-                log.log_warning(msg_warning)
+                logger.log_warning(msg_warning)
     else:
         msg_warning = f"User {user_to_delete} can't be deleted. Internet connection not available."
-        log.log_warning(msg_warning)
+        logger.log_warning(msg_warning)
 
     users = json.load_json_file(const.USERS_FILENAME)
     user_to_delete = ""

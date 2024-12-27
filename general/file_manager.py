@@ -1,5 +1,8 @@
 import os
+from general import constants as const
 from general import log_file_builder as log
+
+logger = log.Logger(const.FILE_MANAGER_LOGS_FILENAME)
 
 
 def move_and_rename_audio(original_filename, new_filename, destination_dir) -> bool:
@@ -8,17 +11,17 @@ def move_and_rename_audio(original_filename, new_filename, destination_dir) -> b
         new_file_path = os.path.join(destination_dir, new_filename)
         os.rename(original_file_path, new_file_path)
         msg_info = f"Audio {original_file_path} was succesfully moved and renamed to {new_file_path}."
-        log.log_info(msg_info)
+        logger.log_info(msg_info)
         return True
 
     except FileNotFoundError:
         msg_error = "Original or destination file path does not exist."
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
         return False
 
     except Exception as e:
         msg_error = f"Moving or renaming audio {original_filename} failed. An error occurred: {str(e)}"
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
         return False
 
 

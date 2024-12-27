@@ -1,7 +1,10 @@
 import random
 import speech_recognition as sr
-from general import log_file_builder as log
 from authentication import string_hasher
+from general import constants as const
+from general import log_file_builder as log
+
+logger = log.Logger(const.SPEECH_RECOGNIZER_LOGS_FILENAME)
 
 
 def recognize_speech(audio_file, current_language) -> str:
@@ -17,29 +20,29 @@ def recognize_speech(audio_file, current_language) -> str:
             return str(recognized_speech)
         except sr.UnknownValueError:
             msg_error = "Could not understand audio."
-            log.log_error(msg_error)
+            logger.log_error(msg_error)
             return ""
         except sr.RequestError as e:
             msg_error = f"Could not request results from Google Speech Recognition service; {str(e)}"
-            log.log_error(msg_error)
+            logger.log_error(msg_error)
             return ""
 
 
 def verify_speaker_nickname(speakers, recognized_speaker_nickname) -> bool:
     if recognized_speaker_nickname.lower() in speakers:
-        log.log_info("Speaker verified!")
+        logger.log_info("Speaker verified!")
         return True
     else:
-        log.log_warning("Speaker not verified!")
+        logger.log_warning("Speaker not verified!")
         return False
 
 
 def verify_verification_word(recognized_verification_word, random_verification_word) -> bool:
     if recognized_verification_word.lower() == random_verification_word.lower():
-        log.log_info("Verification word verified!")
+        logger.log_info("Verification word verified!")
         return True
     else:
-        log.log_warning("Verification word not verified!")
+        logger.log_warning("Verification word not verified!")
         return False
 
 
@@ -59,10 +62,10 @@ def verify_unique_phrase(speakers, logged_user, recognized_unique_phrase) -> boo
                 break
 
     if success:
-        log.log_info("Unique phrase verified!")
+        logger.log_info("Unique phrase verified!")
         return True
     else:
-        log.log_warning("Unique phrase not verified!")
+        logger.log_warning("Unique phrase not verified!")
         return False
 
 

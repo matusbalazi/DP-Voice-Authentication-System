@@ -1,7 +1,10 @@
-from general import log_file_builder as log
 import sounddevice as sd
 from scipy.io.wavfile import write
 import numpy as np
+from general import constants as const
+from general import log_file_builder as log
+
+logger = log.Logger(const.VOICE_RECORDER_LOGS_FILENAME)
 
 
 def record_and_save_audio(file_path, duration=5, sample_rate=44100, volume=1.0) -> bool:
@@ -16,10 +19,10 @@ def record_and_save_audio(file_path, duration=5, sample_rate=44100, volume=1.0) 
         write(file_path, sample_rate, scaled_audio_data)
 
         msg_info = f"Audio {file_path} recorded and saved successfully."
-        log.log_info(msg_info)
+        logger.log_info(msg_info)
         return True
 
     except Exception as e:
         msg_error = f"Recording or saving audio {file_path} failed. An error occurred: {str(e)}"
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
         return False
