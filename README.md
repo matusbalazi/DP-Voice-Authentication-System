@@ -35,13 +35,13 @@ Content:
     <li>clone repository:</li>
     <pre><code>sudo git clone https://github.com/matusbalazi/DP-Voice-Authentication-System.git</code></pre>
     <li>change location:</li>
-    <pre><code>cd /DP-Voice-Authentication-System</code></pre>
+    <pre><code>cd DP-Voice-Authentication-System/</code></pre>
 </ol>
 
 ### 2. Installation of system packages
 <ol type="a">
     <li>change location:</li>
-    <pre><code>cd /DP-Voice-Authentication-System/installation</code></pre>
+    <pre><code>cd DP-Voice-Authentication-System/installation/</code></pre>
     <li>make installation file executable:</li>
     <pre><code>sudo chmod +x ./install_system_packages</code></pre>
     <li>run installation:</li>
@@ -54,7 +54,7 @@ Content:
 ### 3. Installation of required packages (requirements.txt)
 <ol type="a">
     <li>change location if needed:</li>
-    <pre><code>cd /DP-Voice-Authentication-System/installation</code></pre>
+    <pre><code>cd DP-Voice-Authentication-System/installation/</code></pre>
     <li>make installation file executable:</li>
     <pre><code>sudo chmod +x ./install_requirements</code></pre>
     <li>run installation:</li>
@@ -133,11 +133,11 @@ Content:
     <pre><code>sudo mkdir /usr/share/fonts/truetype/Raleway</code></pre>
     <pre><code>sudo mkdir /usr/share/fonts/truetype/RedHatDisplay</code></pre>
     <li>change location:</li>
-    <pre><code>cd /DP-Voice-Authentication-System/fonts/Raleway</code></pre>
+    <pre><code>cd DP-Voice-Authentication-System/fonts/Raleway/</code></pre>
     <li>copy all .ttf files to your system:</li>
     <pre><code>sudo cp * /usr/share/fonts/truetype/Raleway</code></pre>
     <li>change location:</li>
-    <pre><code>cd /DP-Voice-Authentication-System/fonts/RedHatDisplay</code></pre>
+    <pre><code>cd DP-Voice-Authentication-System/fonts/RedHatDisplay/</code></pre>
     <li>copy all .ttf files to your system:</li>
     <pre><code>sudo cp * /usr/share/fonts/truetype/RedHatDisplay</code></pre>
     <li>update the font cache:</li>
@@ -167,13 +167,13 @@ To run the new version of application:
 <ol type="a">
     <li>open the terminal</li>
     <li>change location:</li>
-    <pre><code>cd /DP-Voice-Authentication-System</code></pre>
+    <pre><code>cd DP-Voice-Authentication-System/</code></pre>
     <li>start application in full mode</li>
     <pre><code>sudo python3 gui_new.py</code></pre>
     <li>start application in simple mode</li>
-    <pre><code>sudo python3 gui_new.py -m simple</code></pre>
+    <pre><code>sudo python3 gui_new.py -s True</code></pre>
     <p align="justify">
         <i>or</i>
     </p>
-    <pre><code>sudo python3 gui_new.py --mode simple</code></pre>
+    <pre><code>sudo python3 gui_new.py --simple True</code></pre>
 </ol>
