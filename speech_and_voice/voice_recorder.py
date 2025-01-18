@@ -7,9 +7,23 @@ from general import log_file_builder as log
 logger = log.Logger(const.VOICE_RECORDER_LOGS_FILENAME)
 
 
+def get_input_channels() -> int:
+    try:
+        input_device = sd.query_devices(sd.default.device[0], "input")
+        channels = input_device.get("max_input_channels", 1)
+        logger.log_info(
+            f"Detected {channels} channels of default microphone, changing to {min(channels, 2)} input channels.")
+        return min(channels, 2)
+    except Exception as e:
+        logger.log_error(f"Failed to determine input channels: {e}")
+        logger.log_info("Changing to default mono channel microphone.")
+        return 1
+
+
 def record_and_save_audio(file_path, duration=5, sample_rate=44100, volume=1.0) -> bool:
     try:
-        audio_data = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=2, dtype="int16")
+        audio_data = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=get_input_channels(),
+                            dtype="int16")
         sd.wait()
 
         audio_data = (volume * audio_data).astype("int16")
