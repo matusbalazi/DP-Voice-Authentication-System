@@ -37,22 +37,22 @@ def remove_dir_with_files(dir):
 
         os.rmdir(dir)
         msg_info = f"Directory {dir} and all its contents removed successfully."
-        log.log_info(msg_info)
+        logger.log_info(msg_info)
         return True
 
     except FileNotFoundError:
         msg_error = f"Directory {dir} does not exist."
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
         return False
 
     except PermissionError:
         msg_error = f"You do not have permission to remove the directory {dir}."
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
         return False
 
     except Exception as e:
         msg_error = f"Removing the directory {dir} failed. An error occurred: {str(e)}"
-        log.log_error(msg_error)
+        logger.log_error(msg_error)
         return False
 
 
